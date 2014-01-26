@@ -1,26 +1,28 @@
-title:            HPSTR Theme
+﻿encoding:         UTF-8
+title:            轻薄
 description:      A responsive Jekyll theme with modern tendencies from designer Michael Rose.
-disqus_shortname: hpstrtheme
+disqus_shortname: qingbob
 #Comment out url when working locally to resolve base urls correctly
-url:              http://mmistakes.github.io/hpstr-jekyll-theme
+url:              http://127.0.0.1:4000
 
 # Owner/author information
 owner:
-  name:           Michael Rose
+  name:           光毅
   avatar:         avatar.jpg
-  bio:            "Just another boring, tattooed, time traveling designer hailing from Buffalo New York."
-  email:          michael@mademistakes.com
+  bio:            "爱奇艺前端工程师，现居住在北京"
+  email:          juststayinvegas@gmail.com
   # Social networking links used in footer. Update and remove as you like.
-  twitter:        mmistakes
+  twitter:        
   facebook:       
-  github:         mmistakes
+  github:         hh54188
+  weibo:          qinbob
   stackexchange:  
   linkedin:       
   instagram:        
   flickr:         
   tumblr:         
   # For Google Authorship https://plus.google.com/authorship
-  google_plus:    http://plus.google.com/118238196859537351707
+  google_plus:    
 
 # Background image to be tiled on all pages
 background: ps_neutral.png
@@ -29,7 +31,7 @@ background: ps_neutral.png
 background: ps_neutral.png
 
 # Analytics and webmaster tools stuff goes here
-google_analytics:   UA-2011187-5
+google_analytics:   UA-38061225-1
 google_verify:      
 # https://ssl.bing.com/webmaster/configure/verify/ownership Option 2 content= goes here
 bing_verify:         
@@ -37,14 +39,13 @@ bing_verify:
 # Links to include in top navigation
 # For external links add external: true
 links:
-  - title: Theme Setup
-    url: /theme-setup
-  - title: External Link
-    url: http://mademistakes.com
-    external: true
+  - title: 开源项目
+    url: /opensource
+  - title: 订阅
+    url: /feed.xml
 
 # http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-timezone:    America/New_York
+timezone:    Asia/Shanghai
 future:      true
 pygments:    true
 markdown:    kramdown
