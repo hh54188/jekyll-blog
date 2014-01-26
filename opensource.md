@@ -1,6 +1,6 @@
 ---
 layout: page
-permalink: /theme-setup/
+permalink: /opensource/
 title: Theme Setup
 description: "Instructions on how to install and customize the modern Jekyll theme HPSTR."
 tags: [Jekyll, theme, install, setup]

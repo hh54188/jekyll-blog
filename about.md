@@ -28,6 +28,6 @@ They say three times the charm, so here is another free responsive Jekyll theme 
 * Stylesheets for Pygments and Coderay [syntax highlighting]({{ site.url }}/code-highlighting-post/) to make your code examples look snazzy
 * [Grunt](http://gruntjs.com) build script for easy theme development
 
-<div markdown="0"><a href="{{ site.url }}/theme-setup" class="btn btn-info">Install the Theme</a></div>
+<div markdown="0"><a href="{{ site.url }}/opensource" class="btn btn-info">Install the Theme</a></div>
 
 [^1]: Example: *domain.com/category-name/post-title*
