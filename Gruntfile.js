@@ -97,7 +97,8 @@ module.exports = function(grunt) {
     'clean',
     'recess',
     'uglify',
-    'imagemin',
+    // 在windows下的gurnt中无法安装这个组件
+    // 'imagemin',
     'svgmin'
   ]);
   grunt.registerTask('dev', [
