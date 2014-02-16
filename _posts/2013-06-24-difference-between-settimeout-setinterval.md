@@ -1,0 +1,317 @@
+---
+layout: post
+title: 你真的了解setTimeout和setInterval吗？
+description: "Just about everything you'll need to style in the theme: headings, paragraphs, blockquotes, tables, code blocks, and more."
+modified: 2013-06-24
+tags: [javascript, front-end]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
+
+setTimeout和setInterval的基本用法我们一带而过：
+
+1. 指定延迟后调用函数，
+2. 以指定周期调用函数
+
+让我们想象一个意外情况，比如说下面的setInterval
+
+{% highlight javascript %}
+setInterval(function () {
+    func(i++);
+}, 100)
+{% endhighlight %}
+
+我们每100毫秒调用一次func函数，如果func的执行时间少于100毫秒的话，在遇到下一个100毫秒前就能够执行完：
+
+![1](../images/difference_between_settimeout_setinterval/interval1.png);
+
+但如果func的执行时间大于100毫秒，该触发下一个func函数时之前的还没有执行完怎么办？答案如下图所示，那么第二个func会在队列（这里的队列是指event loop）中等待，直到第一个函数执行完
+
+![3](../images/difference_between_settimeout_setinterval/interval3.png);
+
+
+如果第一个函数的执行时间特别长，在执行的过程中本应触发了许多个func怎么办，那么所有这些应该触发的函数都会进入队列吗？
+
+不，只要发现队列中有一个被执行的函数存在，那么其他的统统忽略。如下图，在第300毫秒和400毫秒处的回调都被抛弃，一旦第一个函数执行完后，接着执行队列中的第二个，即使这个函数已经“过时”很久了。
+
+![4](../images/difference_between_settimeout_setinterval/interval4.png);
+
+
+还有一点，虽然你在setInterval的里指定的周期是100毫秒，但它并不能保证两个函数之间调用的间隔一定是一百毫秒。在上面的情况中，如果队列中的第二个函数时在第450毫秒处结束的话，在第500毫秒时，它会继续执行下一轮func，也就是说这之间的间隔只有50毫秒，而非周期100毫秒
+
+那如果我想保证每次执行的间隔应该怎么办？用setTimeout，比如下面的代码：
+
+{% highlight javascript %}
+  var i = 1
+  var timer = setTimeout(function() { 
+    alert(i++) 
+    timer = setTimeout(arguments.callee, 2000)
+  }, 2000)
+{% endhighlight %}
+
+上面的函数每2秒钟递归调用自己一次，你可以在某一次alert的时候等待任意长的时间（不按“确定”按钮），接下来无论你什么时候点击“确定”， 下一次执行一定离这次确定相差2秒钟的
+
+下面上下两段代码虽然看上去功能一致，但实际并非如此，原因就是我上面所说
+
+{% highlight javascript %}
+setTimeout(function repeatMe() {     
+  /* Some long block of code... */   
+  setTimeout(repeatMe, 10);          
+}, 10);
+
+setInterval(function() {             
+  /* Some long block of code... */   
+}, 10);                              
+{% endhighlight %}
+
+## setTimeout除了做定时器外还能干什么用？
+
+非常多，比如说：在处理DOM点击事件的时候通常会产生冒泡，正常情况下首先触发的是子元素的handler，再触发父元素的handler，如果我想让父元素的handler先于子元素的handler执行应该怎么办？那就用setTimeout延迟子元素handler若干个毫秒执行吧。问题是这个“若干个”毫秒应该是多少？可以是0
+
+你可能会疑惑如果是0的话那不是立即执行了吗？不，看下面一道题目
+
+{% highlight javascript %}
+(function () {
+    setTimeout(function () {
+        alert(2);
+    }, 0);
+
+    alert(1);
+})()                      
+{% endhighlight %}
+
+先弹出的应该是1，而不是你以为“立即执行”的2。
+
+setTimeout，setInterval都存在一个最小延迟的问题，虽然你给的delay值为0，但是浏览器执行的是自己的最小值。HTML5标准是4ms，但并不意味着所有浏览器都会遵循这个标准，包括手机浏览器在内，这个最小值既有可能小于4ms也有可能大于4ms。在标准中，如果在setTimeout中嵌套一个setTimeout, 那么嵌套的setTimeout的最小延迟为10ms。
+
+## 聊聊setTimeout和线程的一些关系
+
+现在我有一个非常耗时的操作（如下面的代码，在table中插入2000行），我想计算这个操作所耗的时间应该怎么办？你觉得下面这个用new Date来计算的方法怎么样：
+
+{% highlight javascript %}
+var t1 = +new Date();
+
+var tbody = document.getElementsByTagName("tbody")[0];
+for (var i = 0; i < 20000; i++) {
+    var tr = document.createElement("tr");
+    for (var t = 0; t < 6; t++) {
+        var td = document.createElement("td");
+        td.appendChild(document.createTextNode(i + "," + t));
+        tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+}
+
+var t2 = +new Date();
+console.log(t2 - t1);     
+{% endhighlight %}
+
+如果你尝试运行起来就会发现问题，在这2000行还没有渲染出来的时候，控制台就已经打印出来了时间，这两个时间差并非误差所致（可能这个操作需要5秒，甚至10秒以上），但是打印出来的时间只有1秒左右，这是为什么？
+
+因为Javascript是单线程的(这里不谈web worker),也就是说浏览器无论什么时候都只有一个JS线程在运行JS程序。或许是因为单线程的缘故，也同时因为大部分触发的事件是异步的，JS采用一种队列(event loop)的机制来处理各个事件，比如用户的点击，ajax异步请求,所有的事件都被放入一个队列中，然后先进先出，逐个执行。这也就解释了开头setInterval的那种情况。
+
+另一方面，浏览器还有一个GUI渲染线程，当需要重绘页面时渲染页面。但问题是GUI渲染线程与JS引擎是互斥的，当JS引擎执行时GUI线程会被挂起，GUI更新会被保存在一个队列中等到JS引擎空闲时立即被执行。
+
+所以,在脚本中执行对界面进行更新操作,如添加结点,删除结点或改变结点的外观等更新并不会立即体现出来,这些操作将保存在一个队列中,待JavaScript引擎空闲时才有机会渲染出来.
+
+所以，上面的那个例子中算出的时间只是javascript执行的时间，在这之后，GUI线程才开始渲染，而此时计时已经结束了。那么如何你能计算出正确时间呢？在结尾添加一个setTimeout
+
+{% highlight javascript %}
+var t1 = +new Date();
+
+var tbody = document.getElementsByTagName("tbody")[0];
+for (var i = 0; i < 20000; i++) {
+    var tr = document.createElement("tr");
+    for (var t = 0; t < 6; t++) {
+        var td = document.createElement("td");
+        td.appendChild(document.createTextNode(i + "," + t));
+        tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+}
+
+setTimeout(function () {
+    var t2 = +new Date();
+    console.log(t2 - t1);   
+}, 0)
+{% endhighlight %}
+
+这样能让操纵DOM的代码执行完后不至于立即执行t2 - t1，而在中间空隙的时间恰好允许浏览器执行GUI线程。渲染完之后，才计算出时间。
+
+下面这个例子也是同样的道理，可以如何改进才能看到颜色的改变呢?留作作业吧:
+
+{% highlight javascript %}
+function run() {
+  var div = document.getElementsByTagName('div')[0]
+  for(var i=0xA00000;i < 0xFFFFFF;i++) {
+    div.style.backgroundColor = '#'+i.toString(16)
+  }
+}
+{% endhighlight %}
+
+setInterval有一个很重要的应用是javascript中的动画
+
+举个例子，假设我们有一个正方形div，宽度为100px, 现在想让它的宽度在1000毫秒内增加到300px——很简单，算出每毫秒内应该增加的像素，再按每毫秒为周期调用setInterval实现增长
+
+{% highlight javascript %}
+var div = $('div')[0];
+var width = parseInt(div.style.width, 10);
+
+var MAX = 300, duration = 1000;
+var inc = parseFloat( (MAX - width) / duration );
+
+function animate (id) {
+    width += inc;
+    if (width >= MAX) {
+        clearInterval(id);
+        console.timeEnd("animate");
+    }
+    div.style.width = width + "px";
+}
+
+console.time("animate");
+var timer = setInterval(function () {
+    animate(timer);
+}, 0)
+{% endhighlight %}
+
+代码中利用console.time来计算时间所花费的时间——实际上花的时间是明显大于1000毫秒的，为什么？因为上面说到最小周期至少应该是4ms，所以每个周期的增长量应该是没每毫秒再乘以四
+
+{% highlight javascript %}
+var inc = parseFloat( (MAX - width) / duration ) * 4;
+{% endhighlight %}
+
+如果你有心查看jquery的动画源码的话，你能发现源码的时间周期是13ms，这是我不解的地方——如果最求流畅的动画效果来说，每秒（1000毫秒）应该是60帧，这样算下来每帧的时间应该是16.7毫秒，在这里我把每帧定义为完成一个像素增量所花的时间，也就是16毫秒（毫秒不允许存在小数）是让动画流畅的最佳值。哪位朋友可以告诉jquery的13这个值是如何来的？
+
+无论你如何优化setInterval，误差是始终存在的。但其实在HTML5中，有一个实践动画的最佳途径requestAnimationFrame。这个函数能保证能以每帧来执行动画函数。比如上面的例子就可以改写为：
+
+{% highlight javascript %}
+//init some values
+var div = $('div')[0].style;
+var height = parseInt(div.height, 10);
+var seconds = 1;
+
+//calc distance we need to move per frame over a time
+var max = 300;
+var steps = (max- height) / seconds / 16.7;
+
+//16.7ms is approx one frame (1000/60)
+
+//loop
+function animate (id) {
+    height += steps; //use calculated steps
+    div.height = height + "px";
+
+    if (height < max) {
+        requestAnimationFrame(animate);
+    }
+}
+
+animate();
+{% endhighlight %}
+
+关于这个函数和它对应的cancel函数，或者是polyfill就不在这延伸了，有兴趣的同学可以自己查找资料了解。
+
+这种情况下通常会有多个计时器同时运行，如果同时大量计时器同时运行的话，会引起一些个问题，比如如何回收这些计时器？jquery的作者John Resig建议建立一个管理中心，它给出的一个非常简单的代码如下：
+
+{% highlight javascript %}
+var timers = {                               
+  timerID: 0,                                           
+  timers: [],                                           
+  add: function(fn) {                            
+    this.timers.push(fn);
+  },
+  start: function() {                             
+    if (this.timerID) return;
+    (function runNext() {
+      if (timers.timers.length > 0) {
+        for (var i = 0; i < timers.timers.length; i++) {
+          if (timers.timers[i]() === false) {
+            timers.timers.splice(i,1);
+            i--;
+          }
+        }
+        timers.timerID = setTimeout(runNext, 0);
+      }
+    })();
+  },
+  stop: function() {                                  
+    clearTimeout(this.timerID);
+    this.timerID = 0;
+  }
+};
+{% endhighlight %}
+
+注意看中间的start方法：他把所有的定时器都存在一个timers队列（数组）中，只要队列长度不为0，就轮询执行队列中的每一个子计时器，如果某个子计时器执行完毕（这里的标志是返回值是false），那就把这个计时器踢出队列。继续轮询后面的计时器。
+
+上面描述的整个一轮轮询就是runNext，并且递归轮询，一遍一遍的执行下去`timers.timerID = setTimeout(runNext, 0)`直到数组为空。
+
+注意到上面没有使用到stop方法，jquery的动画animate就是使用的是这种机制，不过更完善复杂，摘一段jquery源码看看，比如就类似的runNext这段:
+
+{% highlight javascript %}
+// /src/effects.js:674
+jQuery.fx.tick = function() {
+    var timer,
+        timers = jQuery.timers,
+        i = 0;
+
+    fxNow = jQuery.now();
+
+    for ( ; i < timers.length; i++ ) {
+        timer = timers[ i ];
+        // Checks the timer has not already been removed
+        if ( !timer() && timers[ i ] === timer ) {
+            timers.splice( i--, 1 );
+        }
+    }
+
+    if ( !timers.length ) {
+        jQuery.fx.stop();
+    }
+    fxNow = undefined;
+};
+
+// /src/effects.js:703
+jQuery.fx.start = function() {
+    if ( !timerId ) {
+        timerId = setInterval( jQuery.fx.tick, jQuery.fx.interval );
+    }
+};
+{% endhighlight %}
+
+不解释，和上面的那段已经非常类似了，有兴趣的同学可以在github上阅读整段effect.js代码。
+
+最后setTimeout的应用就是总所周知的，来处理因为js处理时间过长造成浏览器假死的问题了。这个技术在《JavaScript高级程序设计》中已经阐述过了（没有谁没有读过这本书吧）。简单来说，如果你的循环
+
+1. 每一次处理不依赖上一次的处理结果；
+2. 没有执行的先后顺序之分；
+3.（呃，忘了）。
+
+因为手头上暂时找不到这本书，在网上找了一段类似的代码作为抛砖引玉作为结尾吧，有兴趣的同学可以去回顾这段：
+
+{% highlight javascript %}
+function chunk(array, process, context) {
+     setTimeout(function() {
+     var item = array.shift();
+     process.call(context, item);
+    if (array.length > 0) {
+          setTimeout(arguments.callee, 100);
+    }), 100);
+}
+{% endhighlight %}
+
+chunk()函数的用途就是将一个数组分成小块处理，它接受三个参数：要处理的数组，处理函数以及可选的上下文环境。每次函数都会将数组中第一个对象取出交给process函数处理，如果数组中还有对象没有被处理则启动下一个timer，直到数组处理完。这样可保证脚本不会长时间占用处理机，使浏览器出一个高响应的流畅状态。
+
+参考资料:
+
+- [Understanding timers: setTimeout and setInterval](http://javascript.info/tutorial/settimeout-setinterval)
+- [Events and timing in-depth](http://javascript.info/tutorial/events-and-timing-depth)
+- [How JavaScript Timers Work](http://ejohn.org/blog/how-javascript-timers-work/)
+- [如何防止由于脚本引起的浏览器假死](http://www.dewen.org/q/2164)
+- [window.setTimeout](https://developer.mozilla.org/en-US/docs/Web/API/window.setTimeout#Minimum.2F_maximum_delay_and_timeout_nesting)
+- [js线程机制](http://hi.baidu.com/isabella_qi/item/766061fd5ac1a0d7a835a2b4)
+- [Confuse about using javascript setInterval to do animate job](http://stackoverflow.com/questions/17143007/confuse-about-using-javascript-setinterval-to-do-animate-job)

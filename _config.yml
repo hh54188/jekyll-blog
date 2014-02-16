@@ -39,7 +39,7 @@ bing_verify:
 # Links to include in top navigation
 # For external links add external: true
 links:
-  - title: 开源项目
+  - title: 项目
     url: /opensource
   - title: 订阅
     url: /feed.xml
