@@ -40,7 +40,7 @@ bing_verify:
 # For external links add external: true
 links:
   - title: 项目
-    url: /opensource
+    url: /project
   - title: 订阅
     url: /feed.xml
 
