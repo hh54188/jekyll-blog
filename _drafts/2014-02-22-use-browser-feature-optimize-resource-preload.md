@@ -1,3 +1,23 @@
+http://www.ravelrumba.com/blog/script-downloading-chrome/:
+
+- An external JS file in the head blocks the parser. This kicks off the PreloadScanner, which attempts to download all other scripts and stylesheets — but not images.
+
+- Preloaded scripts do not block images and other assets.
+
+- The main parser downloads each resource as it encounters them (exactly how you’d expect). The PreloadScanner has some subtleties. For instance, it will only download scripts and stylesheets while the parser is blocked in the head. This is designed so that images (which will never block the main parser) will not contend for bandwidth with the critical resources that can block the parser. This allows the page to display more progressively with images filling in around the content.
+
+It is possible to contrive test cases where this leads to inefficiencies. There’s a good example here: https://bugs.webkit.org/show_bug.cgi?id=45072
+
+
+
+很奇怪，图片不会被预加载，而且如果脚本预加载的话，body会被阻塞（但是script和link会被提前）
+
+http://stevesouders.com/cuzillion/?c0=hj1hfff2_0_f&c1=bi1hfff2_0_f&c2=bi1hfff2_0_f&c3=bi1hfff2_0_f&c4=bc1hfff2_0_f&c5=bj1hfff2_0_f&t=1393167087614
+
+头部script，body三个image，一个link，一个script
+
+---
+
 # 利用浏览器特性对资源加载进行优化
 
 ## 过去：Preloader
