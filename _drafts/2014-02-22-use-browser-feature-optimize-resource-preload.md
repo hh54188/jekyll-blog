@@ -1,3 +1,48 @@
+
+[1 external script in head, 3 before closing body tag](http://stevesouders.com/cuzillion/?c0=hc1hfff2_0_f&c1=hj1hfff2_0_f&c2=bi1hfff2_0_f&c3=bi1hfff2_0_f&c4=bi1hfff2_0_f&c5=bi1hfff2_0_f&c6=bi1hfff2_0_f&c7=bi1hfff2_0_f&c8=bi1hfff2_0_f&c9=bi1hfff2_0_f&c10=bj1hfff2_0_f&c11=bj1hfff2_0_f&c12=bj1hfff2_0_f&t=1312331291063)
+
+**Chrome**
+![chrome](./images/1-script-head-3-script-body-chrome.png)
+**Firefox**
+![firefox](./images/1-script-head-3-script-body-firefox.png)
+**IE7**
+![ie7](./images/1-script-head-3-script-body-ie7.png)
+**IE8**
+![ie8](./images/1-script-head-3-script-body-ie8.png)
+
+
+[1 inline script in head, 4 before closing body tag](http://stevesouders.com/cuzillion/?c0=hc1hfff2_0_f&c1=hb0hfff0_0_f&c2=bi1hfff2_0_f&c3=bi1hfff2_0_f&c4=bi1hfff2_0_f&c5=bi1hfff2_0_f&c6=bi1hfff2_0_f&c7=bi1hfff2_0_f&c8=bi1hfff2_0_f&c9=bi1hfff2_0_f&c10=bj1hfff2_0_f&c11=bj1hfff2_0_f&c12=bj1hfff2_0_f&c13=bj1hfff2_0_f&t=1393213090671)
+
+
+**Chrome**
+![chrome](./images/1-inline-script-head-4-script-body-chrome.png)
+**Firefox**
+![firefox](./images/1-inline-script-head-4-script-body-firefox.png)
+**IE8**
+![ie7](./images/1-inline-script-head-4-script-body-ie8.png)
+
+
+
+[All scripts in bottom](http://stevesouders.com/cuzillion/?c0=hc1hfff2_0_f&c1=bi1hfff2_0_f&c2=bi1hfff2_0_f&c3=bi1hfff2_0_f&c4=bi1hfff2_0_f&c5=bi1hfff2_0_f&c6=bi1hfff2_0_f&c7=bi1hfff2_0_f&c8=bi1hfff2_0_f&c9=bj1hfff2_0_f&c10=bj1hfff2_0_f&c11=bj1hfff2_0_f&c12=bj1hfff2_0_f&t=1312335422)
+
+**Chrome**
+![chrome](./images/all-script-in-bottom-chrome.png)
+**Firefox**
+![firefox](./images/all-script-in-bottom-firefox.png)
+**IE7**
+![ie7](./images/all-script-in-bottom-ie7.png)
+**IE8**
+![ie8](./images/all-script-in-bottom-ie8.png)
+
+
+
+
+---
+
+http://blogs.msdn.com/b/ieinternals/archive/2011/07/18/optimal-html-head-ordering-to-avoid-parser-restarts-redownloads-and-improve-performance.aspx:
+
+To mitigate this issue when loading a page, Internet Explorer runs a second instance of a parser whose job is to hunt for resources to download while the main parser is paused. This mode is called the lookahead pre-parser[3] because it looks ahead of the main parser for resources referenced in later markup. The download requests triggered by the lookahead are called “speculative” because it is possible (not likely, but possible) that the script run by the main parser will change the meaning of the subsequent markup (for instance, it might adjust the BASE against which relative URLs are combined) and result in the speculative request being wasted.
+
 http://www.ravelrumba.com/blog/script-downloading-chrome/:
 
 - An external JS file in the head blocks the parser. This kicks off the PreloadScanner, which attempts to download all other scripts and stylesheets — but not images.
