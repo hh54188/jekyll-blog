@@ -10,6 +10,8 @@
 **IE8**
 ![ie8](./images/1-script-head-3-script-body-ie8.png)
 
+但如果这个script标签是带async属性的，则不会引起“巨大”的提前，但是底部的script标签仍然会被提前
+
 
 [1 inline script in head, 4 before closing body tag](http://stevesouders.com/cuzillion/?c0=hc1hfff2_0_f&c1=hb0hfff0_0_f&c2=bi1hfff2_0_f&c3=bi1hfff2_0_f&c4=bi1hfff2_0_f&c5=bi1hfff2_0_f&c6=bi1hfff2_0_f&c7=bi1hfff2_0_f&c8=bi1hfff2_0_f&c9=bi1hfff2_0_f&c10=bj1hfff2_0_f&c11=bj1hfff2_0_f&c12=bj1hfff2_0_f&c13=bj1hfff2_0_f&t=1393213090671)
 
