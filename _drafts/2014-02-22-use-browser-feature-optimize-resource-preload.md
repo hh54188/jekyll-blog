@@ -1,4 +1,35 @@
 
+### HTTP
+
+>HTTP uses TCP as its underlying transport protocol (rather than running on top of
+UDP). The HTTP client first initiates a TCP connection with the server. Once the connection is established, the browser and the server processes access TCP through their socket interfaces. As described in Section 2.1, on the client side the socket interface is the door between the client process and the TCP connection; on the server side it is the door between the server process and the TCP connection. The client sends HTTP request messages into its socket interface and receives HTTP response messages from its socket interface.
+
+|
+
+>Once the client sends a message into its socket interface, the message is out of the client’s hands and is
+“in the hands” of TCP.
+
+|
+
+> Here we see one of the great advantages of a layered architecture—HTTP need not worry about lost data or the
+details of how TCP recovers from loss or reordering of data within the network. That is the job of TCP and the protocols in the lower layers of the protocol stack.
+
+### DNS
+
+>The DNS protocol runs over UDP and uses
+port 53.
+
+|
+
+>5.Once the browser receives the IP address from DNS, it can initiate a TCP connection to the HTTP server process located at port 80 at that IP address.
+
+### Network Legend 
+
+![resource network timeline](./images/resource-timing-overview.png)
+
+![legend](./images/network_legend.png)
+
+
 [1 external script in head, 3 before closing body tag](http://stevesouders.com/cuzillion/?c0=hc1hfff2_0_f&c1=hj1hfff2_0_f&c2=bi1hfff2_0_f&c3=bi1hfff2_0_f&c4=bi1hfff2_0_f&c5=bi1hfff2_0_f&c6=bi1hfff2_0_f&c7=bi1hfff2_0_f&c8=bi1hfff2_0_f&c9=bi1hfff2_0_f&c10=bj1hfff2_0_f&c11=bj1hfff2_0_f&c12=bj1hfff2_0_f&t=1312331291063)
 
 **Chrome**
