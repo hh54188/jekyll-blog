@@ -1,3 +1,34 @@
+## TCP
+
+> Either of the two processes participating in a TCP connection can end the connection. When a connection ends, the “resources” (that is, the buffers and variables)
+in the hosts are deallocated.
+
+|
+
+>**Suppose the client decides to close the
+connection**, as shown in Figure 3.40. The client application process issues a close command. This causes the client TCP to send a special TCP segment to the server process. This special segment has a flag bit in the segment’s header, the FIN bit set to 1
+
+|
+
+>When the server receives this segment, it sends the client an acknowledgment segment in return. The server then sends its own shutdown segment, which has the FIN bit set to 1.
+
+|
+
+>Finally, the client acknowledges the server’s shutdown segment. At this point, all the resources in the two hosts are now deallocated.
+
+### DNS
+
+>1. The same user machine runs the client side of the DNS application.
+2. The browser extracts the hostname, www.someschool.edu, from the URL
+and passes the hostname to the client side of the DNS application.
+3. The DNS client sends a query containing the hostname to a DNS server.
+4. The DNS client eventually receives a reply, which includes the IP address for
+the hostname.
+5. Once the browser receives the IP address from DNS, it can initiate a TCP connection to the HTTP server process located at port 80 at that IP address.
+
+![dns_root_TLD](./images/dns_root_TLD.png)
+
+![dns_query](./images/dns_query.png)
 
 ### HTTP
 
