@@ -1,3 +1,23 @@
+## The life of a resource request on the wire
+
+> **Cache**: Given the URL of a resource on the web, the browser starts by checking its local and application caches. If you have previously fetched the resource and the appropriate cache headers were provided (Expires, Cache-Control, etc.), then it is possible that we may be allowed to use the local copy to fulfill the request - **the fastest request is a request not made.**
+
+|
+
+> **Socket Reuse**: Given a hostname and resource path, Chrome first checks for existing open connections it is allowed to reuse - sockets are pooled by {scheme, host, port}.
+
+|
+
+> **DNS**: Finally, if neither of the above conditions is matched, then the request must begin by resolving the hostname to its IP address - aka, a DNS lookup.
+
+|
+
+> **TCP**: With the resolved IP address in hand, Chrome can now open a new TCP connection to the destination, which means that we must perform the "three-way handshake"
+
+|
+
+> **SSL**: Once the TCP handshake is complete, and if we're connecting to a secure destination (HTTPS), then the SSL handshake must take place.
+
 ## TCP
 
 > Either of the two processes participating in a TCP connection can end the connection. When a connection ends, the “resources” (that is, the buffers and variables)
@@ -16,7 +36,7 @@ connection**, as shown in Figure 3.40. The client application process issues a c
 
 >Finally, the client acknowledges the server’s shutdown segment. At this point, all the resources in the two hosts are now deallocated.
 
-### DNS
+## DNS
 
 >1. The same user machine runs the client side of the DNS application.
 2. The browser extracts the hostname, www.someschool.edu, from the URL
@@ -25,6 +45,10 @@ and passes the hostname to the client side of the DNS application.
 4. The DNS client eventually receives a reply, which includes the IP address for
 the hostname.
 5. Once the browser receives the IP address from DNS, it can initiate a TCP connection to the HTTP server process located at port 80 at that IP address.
+
+|
+
+>The DNS protocol runs over UDP and uses port 53.
 
 ![dns_root_TLD](./images/dns_root_TLD.png)
 
@@ -45,15 +69,6 @@ UDP). The HTTP client first initiates a TCP connection with the server. Once the
 > Here we see one of the great advantages of a layered architecture—HTTP need not worry about lost data or the
 details of how TCP recovers from loss or reordering of data within the network. That is the job of TCP and the protocols in the lower layers of the protocol stack.
 
-### DNS
-
->The DNS protocol runs over UDP and uses
-port 53.
-
-|
-
->5.Once the browser receives the IP address from DNS, it can initiate a TCP connection to the HTTP server process located at port 80 at that IP address.
-
 ### Network Legend 
 
 ![resource network timeline](./images/resource-timing-overview.png)
@@ -72,7 +87,13 @@ port 53.
 **IE8**
 ![ie8](./images/1-script-head-3-script-body-ie8.png)
 
-但如果这个script标签是带async属性的，则不会引起“巨大”的提前，但是底部的script标签仍然会被提前
+Chrome/IE/Firefox中，如果head中有script标签（无论是否带有aync），会阻塞body的解析
+
+但是在Firefox中，底部的script不会被提前，在IE中，底部script会提前至head进行解析，会阻塞body的解析
+
+无论头部有没有script标签（仅有link），在IE和firefox中，head的解析会阻塞body的解析：
+
+http://stevesouders.com/cuzillion/?c0=hc1hfff2_0_f&c1=hc1hfff2_0_f&c2=bi1hfff2_0_f&c3=bi1hfff2_0_f&c4=bi1hfff2_0_f&c5=bi1hfff2_0_f&c6=bi1hfff2_0_f&c7=bi1hfff2_0_f&c8=bi1hfff2_0_f&c9=bi1hfff2_0_f&c10=bj1hfff2_0_f&c11=bj1hfff2_0_f&c12=bj1hfff2_0_f&t=1393989334360
 
 
 [1 inline script in head, 4 before closing body tag](http://stevesouders.com/cuzillion/?c0=hc1hfff2_0_f&c1=hb0hfff0_0_f&c2=bi1hfff2_0_f&c3=bi1hfff2_0_f&c4=bi1hfff2_0_f&c5=bi1hfff2_0_f&c6=bi1hfff2_0_f&c7=bi1hfff2_0_f&c8=bi1hfff2_0_f&c9=bi1hfff2_0_f&c10=bj1hfff2_0_f&c11=bj1hfff2_0_f&c12=bj1hfff2_0_f&c13=bj1hfff2_0_f&t=1393213090671)
