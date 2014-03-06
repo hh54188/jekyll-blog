@@ -20,7 +20,12 @@
 
 ## TCP
 
-> Either of the two processes participating in a TCP connection can end the connection. When a connection ends, the “resources” (that is, the buffers and variables)
+> A TCP connection provides a **full-duplex service**: If there is a TCP connection
+between Process A on one host and Process B on another host, then applicationlayer data can flow from Process A to Process B at the same time as application layer data flows from Process B to Process A
+
+### How End
+
+> Either of the two processes participating in a TCP connection can **end** the connection. When a connection ends, the “resources” (that is, the buffers and variables)
 in the hosts are deallocated.
 
 |
