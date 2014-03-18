@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style type="text/css">
+        body {
+            height: 2000px;
+        }
+    </style>
+</head>
+<body>
+    <div>This is a test</div>
+    <script type="text/javascript">
+
+    (function run() {
+        var div = document.getElementsByTagName('div')[0]
+        for(var i=0xA00000;i<0xBBBBBB;i++) {
+            (function (color) {
+
+                setTimeout(function () {
+                    div.style.backgroundColor = '#' + color.toString(16);    
+                })
+
+            })(i);
+        }
+    })()
+
+    </script>
+</body>
+</html>
