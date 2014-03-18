@@ -306,6 +306,25 @@ function chunk(array, process, context) {
 
 chunk()函数的用途就是将一个数组分成小块处理，它接受三个参数：要处理的数组，处理函数以及可选的上下文环境。每次函数都会将数组中第一个对象取出交给process函数处理，如果数组中还有对象没有被处理则启动下一个timer，直到数组处理完。这样可保证脚本不会长时间占用处理机，使浏览器出一个高响应的流畅状态。
 
+---
+
+更新于2014.3.18：
+
+有几位朋友询问我上面那道题的正确答案。首先要道一个歉，是因为浏览器运行那段代码其实已经很吃力了，如果运行完整的答案代码，浏览器一定会崩溃。但原理是一致的，为了能够保证浏览器能运行，能够变换颜色，我把最终颜色`FFFFFF`，改为`BBBBBB`。答案如下：
+
+{% highlight javascript %}
+(function run() {
+    var div = document.getElementsByTagName('div')[0]
+    for(var i=0xA00000;i<0xBBBBBB;i++) {
+        (function (color) {
+            setTimeout(function () {
+                div.style.backgroundColor = '#' + color.toString(16);    
+            });
+        })(i);
+    }
+})()
+{% endhighlight %}
+
 参考资料:
 
 - [Understanding timers: setTimeout and setInterval](http://javascript.info/tutorial/settimeout-setinterval)
