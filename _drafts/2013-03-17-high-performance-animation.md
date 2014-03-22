@@ -51,6 +51,8 @@ setTimeout(function () {
 
 ### 垂直同步问题
 
+首先我们要区分两个60：60fps和60Hz。fps表示GPU渲染画面的速度，Hz表示显示器刷新屏幕的频率。一幅静态图片，你可以说这副图片的FPS是0帧/秒，但绝对不能说刷新率是0Hz，也就是说刷新率不随图像内容的变化而变化。在游戏中，我们谈到掉帧，是指GPU渲染画面频率降低。理想状态当然是60fps，但其实掉落到30fps甚至20fps，在视觉上还是可以接受的
+
 为了保持画面的连贯，画面的最佳刷新频率可以是60fps，但这与屏幕刷新率60Hz是完全不同概念（一幅静态图片，你可以说这副图片的FPS是0帧/秒，但绝对不能说刷新率是0Hz，也就是说刷新率不随图像内容的变化而变化）
 
 GPU渲染出一帧画面的时间一定比显示器刷新一张画面的速度快，那么这样会产生一个问题，当显示器还没有刷新完一张图片时，GPU渲染出的另一张图片已经送达并覆盖了前一张，导致屏幕上画面的撕裂，也就是是上半部分是前一张图片，下半部分是后一张图片：
@@ -121,17 +123,20 @@ function randomColor() {
     return "rgba(" + getRandomInt(0,255) + "," + getRandomInt(0,255) + "," +  getRandomInt(0,255) +", 1)";
 }
 
-function update() {
-    //Cost a lot stuff
-    window.getComputedStyle(div);
-    div.scollTop;
-    div.scollHeight;
-    div.offsetWidth;
-    div.offsetHeight;
+function runForSeconds(s) {
+    var start = +new Date();
+    while (start + s * 1000 > (+new Date())) {}
 }
 
-setTimeout(function () {
-    update()   
+function update () {
+    runForSeconds(2);
+    div.style.backgroundColor = randomColor();
+    requestAnimationFrame(update);
+}
+
+
+setInterval(function () {
+    update();
 })
 
 ```
