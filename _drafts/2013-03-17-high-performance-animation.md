@@ -33,23 +33,9 @@ CLOCK: |----------|----------|
 ```
 所以你要明白，即使你给setTimeout设定的延时为0ms，它也不会毫不延时的触发。目前Chrome与IE9+浏览器的更新频率都为4ms(如果你使用的是笔记本电脑，并且在使用电池而非电源的模式下，为了节省资源，浏览器会将更新频率切换至于系统时间相同)。
 
+接下来我会连退两步，看看Timer到底有多不靠谱。
 
-
-同时John Resign有几篇关于Timer性能与准确性的文章: 1.[Accuracy of JavaScript Time](http://ejohn.org/blog/accuracy-of-javascript-time/), 2.[Analyzing Timer Performance](http://ejohn.org/blog/analyzing-timer-performance/)， 3.[How JavaScript Timers Work](http://ejohn.org/blog/how-javascript-timers-work/)。从文章中可以看到Timer在不同平台浏览器与操作系统下的一些问题
-
-
-
-
-
-我们的目标已经有了，每秒绘制60帧。但坏消息也随之而来，因为这也意味着，留给每帧绘制的时间只有 1000 / 60 = 16.7ms。这时间当然远远不够，下面这些问题是在setTimeout中不可避免的，也是我们接下去需要解决的
-
-- Single thread：说浏览器是单线程(single thread)并不准确，但**大部分**情况下，页面的重排(reflow)、重绘(repaint)，脚本的运行、甚至垃圾回收(garbage collector)所处的线程是相互排斥的(所以你在timeline中看到的是瀑布图)，也就是在任意一个时刻，只允许其中的一项任务在运行。在16.7秒内能把这些工作依次完成实属不易
-
--  Timer resolution: Timer resolution代指浏览器每间隔多少时间更新时钟，没有浏览器是精确到每毫秒级别的（即使你在setTimeout中指定0ms的延时，也只能按照浏览器能够达到的最低延时计算），IE8及其之前的IE版本更新间隔为15.6毫秒，而Chrome的更新间隔为4ms(WHATWG中规定的setTimtout延迟为4ms，setInterval延时为10ms)。也就是说即使在Chrome中，在理想情况下也只能以16ms尽可能的接近16.7ms
-
-- 如果你的运行setTimeout的标签被隐藏，setTimeout的更新频率会被降低，为了节省CPU
-
-- Event loop: Javascript是单线程运行，需要执行的代码只能以队列的方式等待被执行；而异步脚本比如setTimeout(或者XMLHttpRequest请求)只能在队列尾部等待之前的代码被执行，比如下面这段代码：
+我退一步说，假设timer resolution能够达到16.7ms，它还要面临一个异步队列的问题。setTimeout中的回调函数并非立即执行，而是需要加入一个队列中，等到延迟触发后才执行。但问题是，如果在等待延迟触发的过程中，有新的同步脚本需要执行，那么同步脚本不会排在timer的回调之后，而是立即执行，比如下面这段代码：
 
 ```
 function runForSeconds(s) {
@@ -66,20 +52,64 @@ setTimeout(function () {
 }, 1000 * 3);
 ```
 
-如果在3秒钟之内页面没有被点击，`Done!`能够如预期显示出来，但如果在3s钟之内触发了点击事件，我们的`runForSecond`会连续的执行10s，这当中即使3s的期限已到，setTimeout回调也无法被执行，只能等待排在它之前的代码执行完毕
+如果在等待触发延迟的3秒过程中，有人点击了body，那么回调还是准时在3s完成时触发吗？当然不能，它会等待10s，同步函数总是优先于异步函数：
 
+```
+等待3秒延迟 |    1s    |    2s    |    3s    |--->console.log("Done!");
+
+经过2秒     |----1s----|----2s----|          |--->console.log("Done!");
+
+点击body后
+
+以为是这样：|----1s----|----2s----|----3s----|--->console.log("Done!")--->|------------------10s----------------|
+
+其实是这样：|----1s----|----2s----|------------------10s----------------|--->console.log("Done!");
+```
+
+所以浏览器对待Timer的原则不是有能力做这件事的时候，而是有空做这件事的时候。
+
+我再退一步说，假设timer resolution能够达到16.7ms，假设异步函数不会被延后，使用timer控制的动画还是有不尽如人意的地方。就是下一节要说的问题：
 
 ### 垂直同步问题
 
-首先我们要区分两个60：60fps和60Hz。fps表示GPU渲染画面的速度，Hz表示显示器刷新屏幕的频率。一幅静态图片，你可以说这副图片的FPS是0帧/秒，但绝对不能说刷新率是0Hz，也就是说刷新率不随图像内容的变化而变化。在游戏中，我们谈到掉帧，是指GPU渲染画面频率降低。理想状态当然是60fps，但其实掉落到30fps甚至20fps，在视觉上还是可以接受的
+这里请再允许我引入另一个常量60——屏幕的刷新率60Hz。
 
-为了保持画面的连贯，画面的最佳刷新频率可以是60fps，但这与屏幕刷新率60Hz是完全不同概念（一幅静态图片，你可以说这副图片的FPS是0帧/秒，但绝对不能说刷新率是0Hz，也就是说刷新率不随图像内容的变化而变化）
+60Hz和60fps有什么关系？没有任何关系。fps代表GPU渲染画面的频率，Hz表示显示器刷新屏幕的频率。一幅静态图片，你可以说这副图片的fps是0帧/秒，但绝对不能说此时屏幕的刷新率是0Hz，也就是说刷新率不随图像内容的变化而变化。游戏也好浏览器也好，我们谈到掉帧，是指GPU渲染画面频率降低。比如跌落到30fps甚至20fps，但因为视觉暂留原理，我们看到的画面仍然是运动和连贯的。
 
-GPU渲染出一帧画面的时间一定比显示器刷新一张画面的速度快，那么这样会产生一个问题，当显示器还没有刷新完一张图片时，GPU渲染出的另一张图片已经送达并覆盖了前一张，导致屏幕上画面的撕裂，也就是是上半部分是前一张图片，下半部分是后一张图片：
+接上一节，我们假设每一次timer都不会有延时，也不会被同步函数干扰，甚至能把时间缩短至16ms，那么会发生什么呢：
+
+![16ms](./images/16ms.png);
+
+在22秒处发生了丢帧
+
+如果把延迟时间缩的更短，丢失的帧数也就更多：
+
+![14ms](./images/14ms.png);
+
+实际情况会比以上想象的复杂的多。即使你能给出一个固定的延时，解决60Hz屏幕下丢帧问题，那么其他刷新频率的显示器应该怎么办，要知道不同设备、甚至相同设备在不同电池状态下的屏幕刷新率都不尽相同。
+
+以上同时还忽略了屏幕刷新画面的时间成本。问题产生于GPU渲染画面的频率和屏幕刷新频率的不一致：如果GPU渲染出一帧画面的时间比显示器刷新一张画面的时间要短(更快)，那么当显示器还没有刷新完一张图片时，GPU渲染出的另一张图片已经送达并覆盖了前一张，导致屏幕上画面的撕裂，也就是是上半部分是前一张图片，下半部分是后一张图片：
 
 ![teardown](./images/teardown.png)
 
-解决这个问题的方法是开启垂直同步，也就是让GPU妥协，GPU渲染图片必须在屏幕两次刷新之间，等待屏幕刷新完毕给GPU开始的信号（等待垂直同步信号）。但这样同样也是要付出代价的，降低了GPU的输出频率，也就降低了画面的帧数。
+PC游戏中解决这个问题的方法是开启垂直同步(v-sync)，也就是让GPU妥协，GPU渲染图片必须在屏幕两次刷新之间，且必须等待屏幕发出的垂直同步信号。但这样同样也是要付出代价的：降低了GPU的输出频率，也就降低了画面的帧数。以至于你爱玩需要高帧数游戏时(比如竞速、第一人称射击)会出现掉帧的情况。
+
+## requestAnimationFrame
+
+在这里不谈requestAnimationFrame(以下简称rAF)用法，具体请参考[MDN:Window.requestAnimationFrame()](https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame)。我们来具体谈谈rAF所解决的问题。
+
+从上一节我们可以总结出实现平滑动画的两个因素
+
+1. 时机(Frame Timing)：
+2. 成本(Frame Budget)
+
+
+
+同时John Resign有几篇关于Timer性能与准确性的文章: 1.[Accuracy of JavaScript Time](http://ejohn.org/blog/accuracy-of-javascript-time/), 2.[Analyzing Timer Performance](http://ejohn.org/blog/analyzing-timer-performance/)， 3.[How JavaScript Timers Work](http://ejohn.org/blog/how-javascript-timers-work/)。从文章中可以看到Timer在不同平台浏览器与操作系统下的一些问题
+
+
+
+
 
 这些和动画有什么关系？
 
@@ -92,13 +122,7 @@ GPU渲染出一帧画面的时间一定比显示器刷新一张画面的速度�
 
 我们退一万步说，假设setTimeout能够在16ms内完成所有的工作，但这样还是不够，因为会产生下面的情况：
 
-![16ms](./images/16ms.png);
 
-在22秒处发生了丢帧
-
-如果GPU渲染的速度再快一些，丢失的帧数也就更多：
-
-![16ms](./images/14ms.png);
 
 如果有兴趣，大家可以手动使用这个工具：http://www.html5rocks.com/en/tutorials/speed/rendering/raf-motivation.html
 
