@@ -1,6 +1,6 @@
 # Javascript高性能动画与页面渲染
 
-**不确定的地方:**
+**不确定的地方:** 
 
 - 浏览器（不是javascript）真的是单线程的吗？有没有参考？
 - 为什么repaint是异步的
@@ -137,101 +137,297 @@ DEMO版本之所以慢的原因是，在修改每一个物体的left值时，会
 
 此时rAF还是可以为你做一些什么的。比如当它发现无法维持60fps的频率时，它会把频率降低到30fps，至少能够保持帧数的稳定，保持动画的连贯
 
-### No Silver Bullet
+### 使用rAF推迟代码
 
-没有什么是万能的，面对上面困难，我们需要对代码进行组织和优化。
+没有什么是万能的，面对上面的情况，我们需要对代码进行组织和优化。
 
 看看下面这样一段代码：
 
 ```
+function jank(second) {
+    var start = +new Date();
+    while (start + second * 1000 > (+new Date())) {}
+}
+
 div.style.backgroundColor = "red";
 
 // some long run task
+jank(5);
 
 div.style.backgroundColor = "blue";
 ```
 
+无论在任何的浏览器中运行上面的代码，你都不会看到`div`变为红色，页面通常会在假死5秒之后立即变为蓝色。之所以会这样是因为浏览器的始终只有一个线程在运行，所以js引擎与UI引擎是互斥的。虽然你告诉浏览器此时div背景颜色应该为红色，但是它现在无法调用UI线程。
 
-
-
-
-
-
-
-
-这些和动画有什么关系？
-
-为了能够得到平滑的动画，新的一帧画面必须在屏幕的两次刷新之间准备好。这需要两件事同时完成：
-
-1. 时机(frame timing)：什么时候新的一帧准备好
-2. 成本(frame budget)：产生一帧需要多少时间
-
-产生一帧的时机非常有限，只有在两次屏幕刷新之间(在60Hz的屏幕上也就是16ms)
-
-我们退一万步说，假设setTimeout能够在16ms内完成所有的工作，但这样还是不够，因为会产生下面的情况：
-
-
-
-如果有兴趣，大家可以手动使用这个工具：http://www.html5rocks.com/en/tutorials/speed/rendering/raf-motivation.html
-
-更何况还没有考虑考虑其它设备的屏幕刷新率和，一些手机的屏幕刷新率只有59Hz，一些笔记本在电力不足的情况下会降到50Hz。难不成你还要根据屏幕的刷新率来控制setTimeout的延时吗？
-
-
-## requestAnimationFrame
-
-### 动画
-
-requestAnimationFrame(以下简称rAF)在我看来是一个糟糕的名字，Animation？它当然不是仅仅适用于动画特效。Kyle Simpson(labjs的作者)认为这个API应该改名为`scheduleVisualUpdate`，因为它的作用是**在下一次浏览器repaint之前执行你的动画函数**
-
-你不用再关心屏幕的刷新率(其实rAF也不关心，浏览器只是争取把浏览器repaint频率与屏幕刷新频率同步)，也不用再指望js线程在有空的时候才调用`setTimeout`。使用rAF，浏览器能给你一个承诺，保证你的代码在每次repaint之前能够得到调用，使动画保持连贯
-
-对浏览器来说repaint也是异步，因为它会尽可能的和屏幕的刷新率保持一致，每秒60次。和setTimeout一样，这就给了其他的脚本可趁之机，比如
+有了这个前提，我们接下来看这段代码：
 
 ```
-function runForSeconds(s) {
-    var start = +new Date();
-    while (start + s * 1000 > (+new Date())) {}
+var div = document.getElementById("foo");
+
+var currentWidth = div.innerWidth; 
+div.style.backgroundColor = "blue";
+
+// do some "long running" task, like sorting data
+```
+
+这个时候我们不仅仅需要更新背景颜色，还需要获取容器的宽度。可以想象它的执行顺序如下：
+
+![d1](./images/d1.png)
+
+当我们请求innerWidth一类的属性时，浏览器会以为我们马上需要，于是它会立即更新容器的样式(通常浏览器会攒着一批，等待时机一次性的repaint，以便节省性能)，并把计算的结果告诉我们。这通常是性能消耗量大的工作。
+
+但如果我们并非立即需要得到结果呢？
+
+上面的代码还有两处不足，1.是更新背景颜色的代码位置不合理，根据上面的例子，我们知道即使在这里告知了浏览器，浏览器至少也要等到js运行完毕才能调用UI线程；2.假设后面一部分的`long runing`代码会启动一些异步代码，比如setTimeout或者Ajax请求或者web-worker，那应该尽早启动为妙。
+
+综上所述，如果我们不是那么迫切的需要知道`innerWidth`，我们可以使用rAF推迟这部分代码的发生
+
+```
+requestAnimationFrame(function(){
+    var el = document.getElementById("foo");
+
+    var currentWidth = el.innerWidth;
+    el.style.backgroundColor = "blue";
+
+    // ...
+});
+
+// do some "long running" task, like sorting data
+```
+即使我们在这里没有使用到动画，但仍然可以使用rAF优化我们的代码那么，执行的顺序会变成：
+
+![d1](./images/d2.png)
+
+在这里rAF的用法变成了：把代码推迟到下一帧执行。
+
+有时候我们需要把代码推迟的更远，
+
+上面的代码也可以改为：
+
+![d3](./images/d3.png)
+
+再比如我们想要一个效果分两步执行：1.div的display变为block；2. div的top值缩短移动到某处。如果这两项操作都放入同一帧中的话，浏览器会同时把这两项更改应用于容器，在同一帧内。于是我们需要两帧把这两项操作区分开来：
+
+```
+requestAnimationFrame(function(){
+   el.style.display = "block";
+   requestAnimationFrame(function(){
+      // fire off a CSS transition on its `top` property
+      el.style.top = "300px";
+   });
+});
+```
+
+这样的写法好像有些不太讲究，Kyle Simpson有一个开源项目[h5ive](https://github.com/getify/h5ive)，它把上面的用法封装了起来，并且提供了API。实现起来非常简单，摘一段代码：
+
+```
+function qID(){
+    var id;
+    do {
+        id = Math.floor(Math.random() * 1E9);
+    } while (id in q_ids);
+    return id;
 }
 
-var div = document.querySelector("div");
+function queue(cb) {
+    var qid = qID();
 
-div.style.backgroundColor = "red";
-runForSeconds(10);
-div.style.backgroundColor = "yellow";
-```
+    q_ids[qid] = rAF(function(){
+        delete q_ids[qid];
+        cb.apply(publicAPI,arguments);
+    });
 
-上述代码中的div会变成红色吗？当然不会。你会发现页面在无法响应10秒钟后直接变为黄色了。
-
-你可能会说我不会那么傻，不会在repaint中执行一段需要耗费大量时间的脚本。你会在不知不觉中触发一些和样式有关（因为你在执行动画嘛）并且开销非常大的操作，这类操作被称为restyle
-
-```
-var div = document.querySelector("div");
-
-function getRandomInt (min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    return qid;
 }
+
+function queueAfter(cb) {
+    var qid;
+
+    qid = queue(function(){
+        // do our own rAF call here because we want to re-use the same `qid` for both frames
+        q_ids[qid] = rAF(function(){
+            delete q_ids[qid];
+            cb.apply(publicAPI,arguments);
+        });
+    });
+
+    return qid;
+}
+```
+使用方法：
+
+```
+// 插入下一帧
+id1 = aFrame.queue(function(){
+    text = document.createTextNode("##");
+    body.appendChild(text);
+});
+
+// 插入下下一帧
+id2 = aFrame.queueAfter(function(){
+    text = document.createTextNode("!!");
+    body.appendChild(text);
+});
+```
+
+### 使用rAF解耦代码
+
+先从一个2011年twitter遇到的bug说起。
+
+当时twitter加入了一个新功能：“无限滚动”。也就是当页面滚至底部的时候，去加载更多的twitter：
+
+```
+$(window).bind('scroll', function () {
+    if (nearBottomOfPage()) {
+        // load more tweets ...
+    }
+});
+```
+
+但是在这个功能上线之后，发现了一个严重的bug：经过几次滚动到最底部之后，滚动就会变得奇慢无比。
+
+经过排查发现，原来是一条语句引起的：`$details.find(".details-pane-outer");`
+
+这还不是真正的罪魁祸首，真正的原因是因为他们将使用的jQuery类库从1.4.2升级到了1.4.4版。而这jQuery其中一个重要的升级是把Sizzle的上下文选择器全部替换为了`querySelectorAll`。但是这个接口使用的API是`getElementsByClassName`。虽然`querySelectorAll`在大部分情况下性能还是不错的。但在通过Class名称选择元素这一项是占了下风。通过两个对比测试可以看出来：1. [querySelectorAll v getElementsByClassName](http://jsperf.com/queryselectorall-v-getelementsbyclassname) 2. [jQuery Simple Selector](http://jsperf.com/jquery-context-find-class)
+
+通过这个bug，John Resig给出了一条(实际上是两条，但是今天只取与我们话题有关的)非常重要的建议
+
+>It’s a very, very, bad idea to attach handlers to the window scroll event.
+
+他想表达的意思是，像scroll，resize这一类的事件会非常频繁的触发，如果把太多的代码放进这一类的回调函数中，会延迟页面的滚动，甚至造成无法响应。所以应该把这一类代码分离出来，放在一个timer中，有间隔的去检查是否滚动，再做适当的处理。比如如下代码：
+
+```
+var didScroll = false;
  
-function randomColor() {
-    return "rgba(" + getRandomInt(0,255) + "," + getRandomInt(0,255) + "," +  getRandomInt(0,255) +", 1)";
-}
+$(window).scroll(function() {
+    didScroll = true;
+});
+ 
+setInterval(function() {
+    if ( didScroll ) {
+        didScroll = false;
+        // Check your page position and then
+        // Load in more results
+    }
+}, 250)
+```
 
-function runForSeconds(s) {
-    var start = +new Date();
-    while (start + s * 1000 > (+new Date())) {}
-}
-
-function update () {
-    runForSeconds(2);
-    div.style.backgroundColor = randomColor();
-    requestAnimationFrame(update);
-}
-
-
-setInterval(function () {
-    update();
-})
+这样的作法类似于Nicholas将需要长时间运算的循环分解为“片”来进行运算：
 
 ```
+// 具体可以参考他写的《javascript高级程序设计》
+// 也可以参考他的这篇博客： http://www.nczonline.net/blog/2009/01/13/speed-up-your-javascript-part-1/
+function chunk(array, process, context){
+    var items = array.concat();   //clone the array
+    setTimeout(function(){
+        var item = items.shift();
+        process.call(context, item);
+
+        if (items.length > 0){
+            setTimeout(arguments.callee, 100);
+        }
+    }, 100);
+}
+```
+
+原理其实是一样的，为了优化性能、为了防止浏览器假死，将需要长时间运行的代码分解为小段执行，能够使浏览器有时间响应其他的请求。
+
+回到rAF上来，其实rAF也可以完成相同的功能。回到最初的滚动代码：
+
+```
+function onScroll() {
+    update();
+}
+
+function update() {
+
+    // assume domElements has been declared
+    for(var i = 0; i < domElements.length; i++) {
+
+        // read offset of DOM elements
+        // to determine visibility - a reflow
+
+        // then apply some CSS classes
+        // to the visible items - a repaint
+
+    }
+}
+
+window.addEventListener('scroll', onScroll, false);
+```
+按照上面所说，这是一个很典型的反例：每一次滚动都需要遍历所有元素，而且每一次遍历都会引起reflow和repaint。接下来我们要做的事情就是把这些费时的代码从`update`中解耦出来。
+
+首先我们仍然需要给scroll事件添加回调函数，用于记录滚动的情况，以方便其他函数的查询：
+
+```
+var latestKnownScrollY = 0;
+
+function onScroll() {
+    latestKnownScrollY = window.scrollY;
+}
+```
+
+接下来把分离出来的repaint或者reflow操作全部放入一个update函数中，并且使用rAF进行调用：
+
+```
+function update() {
+    requestAnimationFrame(update);
+
+    var currentScrollY = latestKnownScrollY;
+
+    // read offset of DOM elements
+    // and compare to the currentScrollY value
+    // then apply some CSS classes
+    // to the visible items
+}
+
+// kick off
+requestAnimationFrame(update);
+```
+其实解耦的目的已经达到了，但还需要做一些优化，比如不能让update无限执行下去，需要设标志位来控制它的执行：
+
+```
+var latestKnownScrollY = 0,
+    ticking = false;
+
+function onScroll() {
+    latestKnownScrollY = window.scrollY;
+    requestTick();
+} 
+
+function requestTick() {
+    if(!ticking) {
+        requestAnimationFrame(update);
+    }
+    ticking = true;
+}
+```
+最后一个问题，我们始终只需要一个rAF实例的存在，同时也不允许无限次的update下去，于是我们还需要一个出口：
+
+```
+function update() {
+    // reset the tick so we can
+    // capture the next onScroll
+    ticking = false;
+
+    var currentScrollY = latestKnownScrollY;
+
+    // read offset of DOM elements
+    // and compare to the currentScrollY value
+    // then apply some CSS classes
+    // to the visible items
+}
+
+// kick off - no longer needed! Woo.
+// update();
+```
+
+## Compositing Layer
+
+Kyle Simpson说：
+
+>**Rule of thumb: don’t do in JS what you can do in CSS.**
+
 
 
 
