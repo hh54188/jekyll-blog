@@ -68,6 +68,8 @@ setTimeout(function () {
 
 所以浏览器对待Timer的原则不是有能力做这件事的时候，而是有空做这件事的时候。
 
+John Resign有几篇关于Timer性能与准确性的文章: 1.[Accuracy of JavaScript Time](http://ejohn.org/blog/accuracy-of-javascript-time/), 2.[Analyzing Timer Performance](http://ejohn.org/blog/analyzing-timer-performance/)， 3.[How JavaScript Timers Work](http://ejohn.org/blog/how-javascript-timers-work/)。从文章中可以看到Timer在不同平台浏览器与操作系统下的一些问题
+
 我再退一步说，假设timer resolution能够达到16.7ms，假设异步函数不会被延后，使用timer控制的动画还是有不尽如人意的地方。就是下一节要说的问题：
 
 ### 垂直同步问题
@@ -100,12 +102,58 @@ PC游戏中解决这个问题的方法是开启垂直同步(v-sync)，也就是�
 
 从上一节我们可以总结出实现平滑动画的两个因素
 
-1. 时机(Frame Timing)：
-2. 成本(Frame Budget)
+1. 时机(Frame Timing)： 新的一帧准备好的时机
+2. 成本(Frame Budget)： 渲染新的一帧需要多长的时间
+
+这个Native API把我们从纠结于多久刷新的一次的困境中解救出来(其实rAF也不关心距离下次屏幕刷新页面还需要多久)。当我们调用这个函数的时候，我们告诉它需要做两件事： 1. 我们需要新的一帧；2.当你渲染新的一帧时需要执行我传给你的回调函数
+
+那么它解决了我们上面描述的第一个问题，产生新的一帧的时机。
+
+那么第二个问题呢。不，它无能为力。比如可以对比下面两个页面：
+
+1. [DEMO](http://www.html5rocks.com/en/tutorials/speed/rendering/too-much-layout.html)
+2. [DEMO-FIXED](http://www.html5rocks.com/en/tutorials/speed/rendering/too-much-layout-fixed.html)
+
+对比两个页面的源码，你会发现只有一处不同：
+
+```
+// animation loop
+function update(timestamp) {
+    for(var m = 0; m < movers.length; m++) {
+        // DEMO 版本
+        //movers[m].style.left = ((Math.sin(movers[m].offsetTop + timestamp/1000)+1) * 500) + 'px';
+
+        // FIXED 版本
+        movers[m].style.left = ((Math.sin(m + timestamp/1000)+1) * 500) + 'px';
+        }
+    rAF(update);
+};
+rAF(update);
+```
+
+DEMO版本之所以慢的原因是，在修改每一个物体的left值时，会请求这个物体的offsetTop值。这是一个非常耗时的reflow操作(具体还有哪些耗时的reflow操作可以参考这篇: [How (not) to trigger a layout in WebKit](http://gent.ilcore.com/2011/03/how-not-to-trigger-layout-in-webkit.html))。这一点从Chrome调试工具中可以看出来(截图中的某些功能需要在Chrome canary版本中才可启用)
+
+// todo
+
+此时rAF还是可以为你做一些什么的。比如当它发现无法维持60fps的频率时，它会把频率降低到30fps，至少能够保持帧数的稳定，保持动画的连贯
+
+### No Silver Bullet
+
+没有什么是万能的，面对上面困难，我们需要对代码进行组织和优化。
+
+看看下面这样一段代码：
+
+```
+div.style.backgroundColor = "red";
+
+// some long run task
+
+div.style.backgroundColor = "blue";
+```
 
 
 
-同时John Resign有几篇关于Timer性能与准确性的文章: 1.[Accuracy of JavaScript Time](http://ejohn.org/blog/accuracy-of-javascript-time/), 2.[Analyzing Timer Performance](http://ejohn.org/blog/analyzing-timer-performance/)， 3.[How JavaScript Timers Work](http://ejohn.org/blog/how-javascript-timers-work/)。从文章中可以看到Timer在不同平台浏览器与操作系统下的一些问题
+
 
 
 
