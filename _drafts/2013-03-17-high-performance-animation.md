@@ -451,11 +451,95 @@ html在浏览器中会被转化为DOM树，DOM树的每一个节点都会转化�
 3. 将这些位图作为纹理上传至 GPU
 4. 复合多个层来生成最终的屏幕图像(最终只有一个层)。
 
-这和游戏中的3D渲染类似，虽然我们看到的是一个立体的人物，但这个人物的皮肤是由不同的图片“贴”和“拼”上去的。网页比此还多了一个步骤，虽然最终的网页是由多个位图层合成的，但我们看到的只是一个复印版，最终只有一个层。淡然当然有的层是无法拼合的，比如flash。以爱奇艺的一个播放页为例，我们可以利用Chrome的Layer面板(默认不启用，需要手动开启)查看页面上所有的层：
+这和游戏中的3D渲染类似，虽然我们看到的是一个立体的人物，但这个人物的皮肤是由不同的图片“贴”和“拼”上去的。网页比此还多了一个步骤，虽然最终的网页是由多个位图层合成的，但我们看到的只是一个复印版，最终只有一个层。淡然当然有的层是无法拼合的，比如flash。以爱奇艺的一个播放页(http://www.iqiyi.com/v_19rrgyhg0s.html)为例，我们可以利用Chrome的Layer面板(默认不启用，需要手动开启)查看页面上所有的层：
 
-比如这个页面：http://www.iqiyi.com/v_19rrgyhg0s.html 。我们可以看到页面上的层组成如下：
+我们可以看到页面上由如下层组成：
 
 ![./images/layer.png](./images/layer.png)
+
+OK，那么问题来了。
+
+假设我现在想改变一个容器的样式(可以看做动画的一个步骤)，并且是一种最糟糕的情况，改变它的长和宽。为什么说改变长和宽是最糟糕的情况呢。通常改变一个物体的样式需要以下四个步骤：
+
+![steps](./images/devtools-waterfall.jpg)
+
+每一次改变样式都导致浏览器重新计算容器的样式，比如你改变的是容器的尺寸或者位置(reflow)，那么首先影响的就是容器的尺寸和位置(也影响了与它相关的父节点自己点相邻节点的位置等)，接下来浏览器还需要对容器重新绘制(repaint)；但如果你改变的只是容器的背景颜色等无关容器尺寸的属性，那么便省去了第一步计算位置的时间。也就是说如果改变属性在瀑布图中开始的越早(越往上)，那么影响就越大，效率就越低。
+
+因为reflow和repaint会导致所有影响节点所在layer的位图重绘，最后又要再经过合并(compositing layer)，才能算完整的更新网页。
+
+为了把代价降到最低，当然最好只留下compositing layer这一个步骤即可。假设当我们改变一个容器的样式时，影响的只是它自己，并且还无需重绘，直接通过在GPU中改变纹理的属性来改变样式，岂不是更好？这当然是可以实现的，前提是你有自己的layer
+
+这也是上面硬件加速hack的原理，也是css动画的原理——给元素创建自己layer，而非与页面上大部分的元素共用layer。
+
+什么样的元素才能创建自己layer呢？在Chrome中至少要符合以下条件之一：
+
+- Layer has 3D or perspective transform CSS properties(有3D元素的属性) 
+- Layer is used by `<video>` element using accelerated video decoding(video标签并使用加速视频解码)  
+- Layer is used by a `<canvas>` element with a 3D context or accelerated 2D context(canvas元素并启用3D)
+- Layer is used for a composited plugin(插件，比如flash)
+- Layer uses a CSS animation for its opacity or uses an animated webkit transform(CSS动画)
+- Layer uses accelerated CSS filters(CSS滤镜)
+- Layer with a composited descendant has information that needs to be in the composited layer tree, such as a clip or reflection(有一个后代元素是独立的layer)
+- Layer has a sibling with a lower z-index which has a compositing layer (in other words the layer is rendered on top of a composited layer)(元素的相邻元素是独立layer)
+
+
+很明显刚刚我们看到的播放页中的flash和开启了`translate3d`样式的焦点图符合上面的条件。
+
+同时你也可以勾选Chrome开发工具中的rendering选显卡下的`Show composited layer borders` 选项。页面上的layer便会加以边框区别开来。为了验证我们的想法，看下面这样一段代码：
+
+```
+<html>
+<head>
+  <style type="text/css">
+  div {
+      -webkit-animation-duration: 5s;
+      -webkit-animation-name: slide;
+      -webkit-animation-iteration-count: infinite;
+      -webkit-animation-direction: alternate;
+      width: 200px;
+      height: 200px;
+      margin: 100px;
+      background-color: skyblue;
+  }
+  @-webkit-keyframes slide {
+      from {
+          -webkit-transform: rotate(0deg);
+      }
+      to {
+          -webkit-transform: rotate(120deg);
+      }
+  }
+  </style>
+</head>
+<body>
+  <div id="foo">I am a strange root.</div>
+</body>
+</html>
+```
+运行时的timeline截图如下：
+
+![no_repaint](./images/no_repaint.png)
+
+可见元素有自己的layer，并且在动画的过程中没有触发reflow和repaint。
+
+最后我们再看看淘宝首页，不仅仅只有焦点图才拥有了独立的layer：
+
+![taobao](./images/taobao_layer_2.png)
+
+最后，太多的layer也未必是一件好事情，有兴趣的同学可以看一看这篇文章：[Jank Busting Apple's Home Page](http://wesleyhales.com/blog/2013/10/26/Jank-Busting-Apples-Home-Page/)。看一看在苹果首页太多layer时出现的问题。
+
+参考文章：
+
+- [High Performance Animations](http://www.html5rocks.com/en/tutorials/speed/high-performance-animations/)
+- [Accelerated Rendering in Chrome](http://www.html5rocks.com/en/tutorials/speed/layers/)
+- [Jank Busting for Better Rendering Performance](http://www.html5rocks.com/en/tutorials/speed/rendering/)
+- [Leaner, Meaner, Faster Animations with requestAnimationFrame](http://www.html5rocks.com/en/tutorials/speed/animations/)
+- [Optimizing Visual Updates](http://blog.getify.com/optimizing-visual-updates/)
+- [GPU Accelerated Compositing in Chrome](http://www.chromium.org/developers/design-documents/gpu-accelerated-compositing-in-chrome)
+
+
+
+
 
 
 
