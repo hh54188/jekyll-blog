@@ -1,4 +1,4 @@
-## The life of a resource request on the wire
+## HTTP的生命周期 The life of a resource request on the wire
 
 > **Cache**: Given the URL of a resource on the web, the browser starts by checking its local and application caches. If you have previously fetched the resource and the appropriate cache headers were provided (Expires, Cache-Control, etc.), then it is possible that we may be allowed to use the local copy to fulfill the request - **the fastest request is a request not made.**
 
@@ -18,7 +18,7 @@
 
 > **SSL**: Once the TCP handshake is complete, and if we're connecting to a secure destination (HTTPS), then the SSL handshake must take place.
 
-## TCP
+## TCP的有关问题 TCP
 
 > A TCP connection provides a **full-duplex service**: If there is a TCP connection
 between Process A on one host and Process B on another host, then applicationlayer data can flow from Process A to Process B at the same time as application layer data flows from Process B to Process A
@@ -41,7 +41,7 @@ connection**, as shown in Figure 3.40. The client application process issues a c
 
 >Finally, the client acknowledges the server’s shutdown segment. At this point, all the resources in the two hosts are now deallocated.
 
-## DNS
+## DNS的有原理 DNS
 
 >1. The same user machine runs the client side of the DNS application.
 2. The browser extracts the hostname, www.someschool.edu, from the URL
@@ -68,6 +68,7 @@ UDP). The HTTP client first initiates a TCP connection with the server. Once the
 
 >Once the client sends a message into its socket interface, the message is out of the client’s hands and is
 “in the hands” of TCP.
+
 
 |
 

@@ -6,7 +6,7 @@
 
 ### 什么是高效
 
-页面是每一帧变化都是系统绘制出来的(GPU或者CPU)。但这种绘制又和PC游戏的绘制不同，它的最高绘制频率受限于显示器的刷新频率(而非显卡)，所以大多数情况下最高的绘制频率只能是每秒60帧(frame per second，以下用fps简称)，对应于显示器的60Hz。60fps是一个最理想的状态，在日常对页面性能的测试中，60fps也就是一个重要的指标，the closer the better。在Chrome的调试工具中，有不少工具都是用于衡量当前帧数：
+页面是每一帧变化都是系统绘制出来的(GPU或者CPU)。但这种绘制又和PC游戏的绘制不同，它的最高绘制频率受限于显示器的刷新频率(而非显卡)，所以大多数情况下最高的绘制频率只能是每秒60帧(frame per second，以下用fps简称)，对应于显示器的60Hz。60fps是一个最理想的状态，在日常对页面性能的测试中，60fps也是一个重要的指标，the closer the better。在Chrome的调试工具中，有不少工具都是用于衡量当前帧数：
 
 ![frames](./images/fps.jpg)
 
@@ -24,9 +24,9 @@ DELAY: |------------|
 CLOCK: |----------|----------|
           15.6ms    15.6ms
 ```
-所以即使你给setTimeout设定的延时为0ms，它也不会毫不延时的触发。目前Chrome与IE9+浏览器的更新频率都为4ms(如果你使用的是笔记本电脑，并且在使用电池而非电源的模式下，为了节省资源，浏览器会将更新频率切换至于系统时间相同)。
+所以即使你给setTimeout设定的延时为0ms，它也不会立即触发。目前Chrome与IE9+浏览器的更新频率都为4ms(如果你使用的是笔记本电脑，并且在使用电池而非电源的模式下，为了节省资源，浏览器会将更新频率切换至于系统时间相同，也就意味着更新频率更低)。
 
-我退一步说，假使timer resolution能够达到16.7ms，它还要面临一个异步队列的问题。因为异步的关系setTimeout中的回调函数并非立即执行，而是需要加入等待队列中。但问题是，如果在等待延迟触发的过程中，有新的同步脚本需要执行，那么同步脚本不会排在timer的回调之后，而是立即执行，比如下面这段代码：
+退一步说，假使timer resolution能够达到16.7ms，它还要面临一个异步队列的问题。因为异步的关系setTimeout中的回调函数并非立即执行，而是需要加入等待队列中。但问题是，如果在等待延迟触发的过程中，有新的同步脚本需要执行，那么同步脚本不会排在timer的回调之后，而是立即执行，比如下面这段代码：
 
 ```
 function runForSeconds(s) {
@@ -57,9 +57,9 @@ setTimeout(function () {
 其实是这样：|----1s----|----2s----|------------------10s----------------|--->console.log("Done!");
 ```
 
-John Resign有三篇关于Timer性能与准确性的文章: 1.[Accuracy of JavaScript Time](http://ejohn.org/blog/accuracy-of-javascript-time/), 2.[Analyzing Timer Performance](http://ejohn.org/blog/analyzing-timer-performance/)， 3.[How JavaScript Timers Work](http://ejohn.org/blog/how-javascript-timers-work/)。从文章中可以看到Timer在不同平台浏览器与操作系统下的一些问题
+John Resign有三篇关于Timer性能与准确性的文章: 1.[Accuracy of JavaScript Time](http://ejohn.org/blog/accuracy-of-javascript-time/), 2.[Analyzing Timer Performance](http://ejohn.org/blog/analyzing-timer-performance/)， 3.[How JavaScript Timers Work](http://ejohn.org/blog/how-javascript-timers-work/)。从文章中可以看到Timer在不同平台浏览器与操作系统下的一些问题。
 
-我再退一步说，假设timer resolution能够达到16.7ms，并且假设异步函数不会被延后，使用timer控制的动画还是有不尽如人意的地方。就是下一节要说的问题。
+再退一步说，假设timer resolution能够达到16.7ms，并且假设异步函数不会被延后，使用timer控制的动画还是有不尽如人意的地方。这也就是下一节要说的问题。
 
 ### 垂直同步问题
 
@@ -69,13 +69,13 @@ John Resign有三篇关于Timer性能与准确性的文章: 1.[Accuracy of JavaS
 
 接上一节，我们假设每一次timer都不会有延时，也不会被同步函数干扰，甚至能把时间缩短至16ms，那么会发生什么呢：
 
-![16ms](./images/16ms.png);
+![16ms](./images/16ms.png)
 
 在22秒处发生了丢帧
 
 如果把延迟时间缩的更短，丢失的帧数也就更多：
 
-![14ms](./images/14ms.png);
+![14ms](./images/14ms.png)
 
 实际情况会比以上想象的复杂的多。即使你能给出一个固定的延时，解决60Hz屏幕下丢帧问题，那么其他刷新频率的显示器应该怎么办，要知道不同设备、甚至相同设备在不同电池状态下的屏幕刷新率都不尽相同。
 
@@ -179,7 +179,7 @@ div.style.backgroundColor = "blue";
 
 1. 更新背景颜色的代码过于提前，根据前一个例子，我们知道，即使在这里告知了浏览器我需要更新背景颜色，浏览器至少也要等到js运行完毕才能调用UI线程；
 
-2.假设后面部分的`long runing`代码会启动一些异步代码，比如setTimeout或者Ajax请求又或者web-worker，那应该尽早为妙。
+2. 假设后面部分的`long runing`代码会启动一些异步代码，比如setTimeout或者Ajax请求又或者web-worker，那应该尽早为妙。
 
 综上所述，如果我们不是那么迫切的需要知道`innerWidth`，我们可以使用rAF推迟这部分代码的发生：
 
