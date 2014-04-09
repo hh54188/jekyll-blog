@@ -159,6 +159,78 @@ html片段决定。
 
 Steve Souders的[ControlJS](http://stevesouders.com/controljs/)是我认为一直被忽视的一个加载器，它与Labjs一样能够控制的脚本的异步加载，甚至(包括行内脚本，但不完美)延迟执行。它延迟执行脚本的思路非常简单：既然只要在页面上插入脚本就会导致脚本的执行，那么在需要执行的时候才把脚本插入进页面。但这样一来脚本的加载也被延迟了？不，我们会通过其他元素来加载脚本，比如img或者是object标签，或者是非法的mine type的script标签。这样当真正的脚本被插入页面时，只会从缓存中读取。而不会发出新的请求。
 
+[Stoyan Stefanov](http://www.phpied.com/)在它的博客中详细描述了这个技巧, 如果判断浏览器是IE就是用image标签，如果是其他浏览器，则使用object元素。：
+
+```
+window.onload = function () {
+ 
+    var i = 0,
+        max = 0,
+        o = null,
+ 
+        preload = [
+            // list of stuff to preload    
+        ],
+
+        isIE = navigator.appName.indexOf('Microsoft') === 0;
+ 
+    for (i = 0, max = preload.length; i < max; i += 1) {
+        
+        if (isIE) {
+            new Image().src = preload[i];
+            continue;
+        }
+        o = document.createElement('object');
+        o.data = preload[i];
+        
+        // IE stuff, otherwise 0x0 is OK
+        //o.width = 1;
+        //o.height = 1;
+        //o.style.visibility = "hidden";
+        //o.type = "text/plain"; // IE 
+        o.width  = 0;
+        o.height = 0;
+        
+        
+        // only FF appends to the head
+        // all others require body
+        document.body.appendChild(o);
+    }
+    
+};
+```
+同时它还列举了其他的一些尝试，但并非对所有的浏览器都有效，比如：
+
+- 使用`<link>`元素加载script，这么做在Chrome中的风险是，在当页有效，但是在以后打开需要使用该脚本的页面会无视该文件为缓存
+
+- 改变script标签外链的type值，比如改为`text/cache`来阻止脚本的执行。这么做的风险是在某些浏览器(比如FF3.6)压根连请求都不会发出
+
+
+### `type=prefetch`
+
+延迟执行并非仅仅作为当前页面的优化方案，还可以为用户可能打开的页面提前缓存资源，如果你对这两种`link`熟悉的话：
+
+-  `<link rel="subresource" href="jquery.js">`: `subresource`类型用于加载当前页面将使用(但还未使用)的资源(预先载入缓存中)，拥有较高优先级
+
+-  `<link rel="prefetch" href="http://NextPage.html">`: `prefetch`类型用于加载用户将会打开页面中使用到的资源，但优先级较低，也就意味着浏览器不做保证它能够加载到你指定的资源。
+
+那么上一节延迟执行的方案就可以作为`subresource`与`prefeth`的回滚方案。同时还有其他的类型：
+
+- `<link rel="dns-prefetch" href="//host_name_to_prefetch.com">`: `dns-prefetch`类型用于提前dns解析和缓存域名主机信息，以确保将来再请求同域名的资源时能够节省dns查找时间，比如我们可以看到淘宝首页就使用了这个类型的标签:
+
+![./images/taobao_dns.png](./images/taobao_dns.png)
+
+- `<link rel="prerender" href="http://example.org/index.html">`: `prerender`类型就比较逆天了，它告诉浏览器打开一个新的标签页(但不可见)来渲染指定页面，比如这个[页面](http://prerender-test.appsp0t.com/):
+
+![./images/prerender01.png](./images/prerender01.png)
+
+这也就意味着如果用户真的访问到该页面时，就会有“秒开”的用户体验。
+
+但现实并非那么美好，首先你如何能预测用户打开的页面呢，这个功能更适合阅读或者论坛类型的网站，因为用户有很大的概率会往下翻页；同时提前渲染页面的网络请求和优先级和GPU使用优先级都比其他页面的要低，浏览器对提前渲染页面也有一定的要求，具体可以参考[这里](http://www.igvita.com/posa/high-performance-networking-in-google-chrome/#prerendering)
+
+### localstorage
+
+
 
 
 
