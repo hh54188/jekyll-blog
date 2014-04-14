@@ -57,3 +57,99 @@ CACHE MANIFEST
 ```
 `*`表示浏览器允许请求没有缓存的文件
 
+
+### 6. App Cache没法配合响应式，只能把全分辨率下的图片下载下来
+
+### 7. 我们没法知道缓存页面是如何失败的
+
+当页面跨域时，或者40x,50x时，或者是网络请求失败时，进入fallback页面
+
+- 好处是如果用户在线但是站点垮了，浏览器会立即显示缓存数据，很好的用户体验
+- 坏处是，我们没法获得确切垮掉的原因
+
+### 8. 禁止跨域
+
+### 9. 可以通过XHR去请求缓存资源，但是通常会失败，
+
+因为Webkit浏览器返回的`statuscode`为0，但是不一定其他浏览器也有这个bug
+
+```
+$.ajax( url ).always( function(response) {
+ // Exit if this request was deliberately aborted
+ if (response.statusText === 'abort') { return; } // Does this smell like an error?
+ if (response.responseText !== undefined) {
+  if (response.responseText && response.status < 400) {
+   // Not a real error, recover the content    resp
+  }
+  else {
+   // This is a proper error, deal with it
+   return;
+  }
+ } // do something with 'response'
+});
+```
+
+### 从离线的Wikipedia聊起
+
+http://diveintohtml5.info/offline.html#fallback
+
+每一个页面都指向一个空的mainfest文件，当用户浏览这些页面时，这些页面便成了缓存的一部分
+
+但这么做是灾难性的！
+
+用户不知道哪些页面被缓存了，开发者也不知道，没有对应的API。即使能获得manifest文件，但它也无法告诉我们哪些页面被缓存了
+
+为了能够让用户看到最新的页面，根据上面的规则2，我们应该修改manifest文件，但多频繁更新一次？只要有一个wikipedia页面更新了，我们的manifest文件就更新？这样可能导致更新失败
+
+假设我们已经访问了上千个页面，那么一旦manifest更新之后，上千个页面也要更新？appcache并没有一个移出的机制
+
+
+### 我们的离线需求是什么
+
+- 在线的时候能展现实时的数据，离线的时候也可以
+
+- 能够让开发者控制什么被缓存，如何被缓存
+
+- 能够让用户来控制缓存，比如“离线收藏”按钮
+
+- 每一个被访问过的页面都能够离线访问
+
+### App Cache最好可以用于静态资源文件
+
+### 使用Localstorage来弥补不足
+
+比如我们想保存`articles/1.html`时，我们可以这么干：
+
+```
+// Get the page content
+var pageHtml = document.body[removed];
+var urlPath = location.pathName;
+
+// Save it in local storage
+localStorage.setItem( urlPath, pageHtml );
+
+// index用于保存缓存信息，让我们能知道究竟什么页面被缓存了
+
+// Get our index
+var index = JSON.parse( localStorage.getItem( 'index' ) );
+
+// Set the title and save it
+index[ urlPath ] = document.title;
+localStorage.setItem( 'index', JSON.stringify( index ) );
+```
+
+当我们想离线访问`1.html`时：
+
+```
+var pageHtml = localStorage.getItem( urlPath );
+if ( !pageHtml ) {
+    document.body[removed] = `Page not available';
+} else {
+    document.body[removed] = localStorage.getItem( urlPath );
+    document.title = localStorage.getItem( 'index' )[ urlPath ];
+}
+
+```
+
+
+
