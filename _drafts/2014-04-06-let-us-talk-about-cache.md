@@ -1,3 +1,7 @@
+## Local Storage
+
+早在2011年Google和Bing就是最早将localstorage使用于手机端的网站之一
+
 ## App Cache:
 
 ### How to use:
