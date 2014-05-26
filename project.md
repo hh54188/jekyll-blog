@@ -11,9 +11,19 @@ image:
 share: true
 ---
 
+## Utility库
+
+[Github](https://github.com/hh54188/UtilityLib)
+
+这个类库是为自己制作的jekyll主题准备的特效类库，包含大部分在博客网站中用到的特效，比如回到顶部，`position:sticky`，延迟加载等。
+
+写这个类库的另一个目的也是想对自己积累的知识来一次实践。**类库中的每一处代码尽可能做到专业与高效，充分利用浏览器特性；使用的每一处hack或者思想也都标明了引用之处**。同时也欢迎各位指出不足之处。
+
+---
+
 ## 简单灵活的的Nodejs缓存管理模块
 
-[On Github](https://github.com/hh54188/Node-Simple-Cache)
+[Github](https://github.com/hh54188/Node-Simple-Cache)
 
 这是一个非常简单的缓存管理模块，具体的技术实现和原理可以参考这一篇文章：[在Node.js中搭建缓存管理模块](http://qingbob.com/built-cache-management-module-in-nodejs/)
 
@@ -25,7 +35,7 @@ share: true
 
 ## 豆瓣数据抓取工具
 
-[On Github](https://github.com/hh54188/scrapy_douban)
+[Github](https://github.com/hh54188/scrapy_douban)
 
 在线运行地址（部署在heroku上，可能不太稳定）：[houseinbeijing](http://houseinbeijing.herokuapp.com)
 
