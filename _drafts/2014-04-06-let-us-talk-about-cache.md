@@ -1,6 +1,6 @@
 ## Local Storage
 
-早在2011年Google和Bing就是最早将localstorage使用于手机端的网站之一
+LocalStorage(以下都用LS代指LocalStorage)的用法我们在这里不谈。让我们先抑后扬，先谈谈人们谈论中的LS的劣势。
 
 ## App Cache:
 
@@ -154,6 +154,7 @@ if ( !pageHtml ) {
 }
 
 ```
+
 
 
 
