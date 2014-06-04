@@ -1,6 +1,38 @@
 ## Local Storage
 
-LocalStorage(以下都用LS代指LocalStorage)的用法我们在这里不谈。让我们先抑后扬，先谈谈人们谈论中的LS的劣势。
+LocalStorage(以下都用LS代指LocalStorage)的用法我们在这里不谈。在聊如何用它来解决我们遇到的问题之前，我们首先应该区分它的优势和劣势。
+
+Chris Heilmann在文章[There is no simple solution for local storage](http://hacks.mozilla.org/2012/03/there-is-no-simple-solution-for-local-storage/)中指出了一些常见的LS劣势，比如同步时可能会阻塞页面的渲染、I/O操作会引起不确定的延时、持久化机制会导致冗余的数据等。虽然Chirs在文章中用到了比如"*terrible performance*", "*slow*"等字眼，但却没有真正的指出究竟是具体的哪一项操作导致了性能的低下，或者和其他的一些机制相比彰显了性能的低下。
+
+Nicholas C. Zakas于是写了一篇针对该文的文章[In defense of localStorage](http://www.nczonline.net/blog/2012/03/07/in-defense-of-localstorage/)，从文章的名字就可以看出，Nicholas想要捍卫LS，毕竟它不是在上一文章中被描述的那样一无是处，不应该被抵制。
+
+比较性能这种事情，应该看怎么比，和谁比。
+
+### VS 内存
+
+就“读”数据而言，如果你把“从LS中读一个值”和“从Object对象中读一个属性”相比，是不公平的，前者是从硬盘里读，后者是从内存里读，就好比让汽车与飞机赛跑一样，有一个benchmark各位可以参考一下：[localStorage vs. Objects](http://jsperf.com/localstorage-vs-objects):
+
+![./images/localStorage-vs-Objects.png](./images/localStorage-vs-Objects.png)
+
+跑分的标准是OPS(operation per second)，值当然是越高越好。你可能会注意到，在某个浏览器的对比列中，没有显示关于LS的红色列——这是因为LS的操作性能太差，跑分太低(相对从Object中读取属性而言)，所以无法显示在同一张表格内，如果你真的想看的话，可以给你看一张放大的版本：
+
+![./images/localStorage-vs-Objects.png](./images/localStorage-vs-Objects-2.png)
+
+这样以来你大概就知道两者在什么级别上了。
+
+### VS Cookie
+
+在浏览器中与LS最相近的机制莫过于Cookie了：Cookie同样以key-value的形式进行存储，同样需要进行I/O操作，同样需要对不同的tab标签进行同步。同样有benchmark可以供我们进行参考：[localStorage vs. Cookies](http://jsperf.com/localstorage-vs-objects/19)
+
+从Brwoserscope中提供的结果可以看出，就`Reading from cookie`, `Reading from localStorage getItem`, `Writing to cookie`, `Writing to localStorage property`四项操作而言，在不同浏览器不同平台，读和写的效率都不太相同，有的趋于一致，有的大相径庭。
+
+
+### single VS batch
+
+甚至就LS自己而言，不同的存储方式和不同的读取方式也会产生效率方面的问题
+
+
+
 
 ## App Cache:
 
