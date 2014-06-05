@@ -29,9 +29,15 @@ Nicholas C. Zakas于是写了一篇针对该文的文章[In defense of localStor
 
 ### single VS batch
 
-甚至就LS自己而言，不同的存储方式和不同的读取方式也会产生效率方面的问题
+甚至就LS自己而言，不同的存储方式和不同的读取方式也会产生效率方面的问题。有两个benchmark非常值得说明问题：
 
+1. [localStorage-string-size](http://jsperf.com/localstorage-string-size)
 
+在上面这个测试中，Nicholas在LS中用四个key分别存储了100个字符，500个字符，1000个字符和2000个字符。测试分别读取不同长度字符的速度。结果是：读取速度与读取字符的长度无关。
+
+2. [localStorage String Size Retrieval](http://jsperf.com/localstorage-string-size-retrieval)
+
+这个测试用于测试读取1000个字符的速度，不同的是对照组是一次性读取1000个字符；实验组是从10个key中(每个key存储100个字符)分10次读取。结论是分10此读取的速度会比一次性读取慢90%左右。
 
 
 ## App Cache:
