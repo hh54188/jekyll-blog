@@ -8,8 +8,6 @@ Nicholas C. Zakas于是写了一篇针对该文的文章[In defense of localStor
 
 比较性能这种事情，应该看怎么比，和谁比。
 
-### VS 内存
-
 就“读”数据而言，如果你把“从LS中读一个值”和“从Object对象中读一个属性”相比，是不公平的，前者是从硬盘里读，后者是从内存里读，就好比让汽车与飞机赛跑一样，有一个benchmark各位可以参考一下：[localStorage vs. Objects](http://jsperf.com/localstorage-vs-objects):
 
 ![./images/localStorage-vs-Objects.png](./images/localStorage-vs-Objects.png)
@@ -20,14 +18,11 @@ Nicholas C. Zakas于是写了一篇针对该文的文章[In defense of localStor
 
 这样以来你大概就知道两者在什么级别上了。
 
-### VS Cookie
 
 在浏览器中与LS最相近的机制莫过于Cookie了：Cookie同样以key-value的形式进行存储，同样需要进行I/O操作，同样需要对不同的tab标签进行同步。同样有benchmark可以供我们进行参考：[localStorage vs. Cookies](http://jsperf.com/localstorage-vs-objects/19)
 
 从Brwoserscope中提供的结果可以看出，就`Reading from cookie`, `Reading from localStorage getItem`, `Writing to cookie`, `Writing to localStorage property`四项操作而言，在不同浏览器不同平台，读和写的效率都不太相同，有的趋于一致，有的大相径庭。
 
-
-### single VS batch
 
 甚至就LS自己而言，不同的存储方式和不同的读取方式也会产生效率方面的问题。有两个benchmark非常值得说明问题：
 
@@ -38,6 +33,19 @@ Nicholas C. Zakas于是写了一篇针对该文的文章[In defense of localStor
 2. [localStorage String Size Retrieval](http://jsperf.com/localstorage-string-size-retrieval)
 
 这个测试用于测试读取1000个字符的速度，不同的是对照组是一次性读取1000个字符；实验组是从10个key中(每个key存储100个字符)分10次读取。结论是分10此读取的速度会比一次性读取慢90%左右。
+
+但LS并非没有痛点。大部分的LS都是基于同一个域名共享存储数据，所以当你在多个标签打开同一个域名下的站点时，必须面临一个同步的问题，当A标签想写入LS与B标签想从LS中读同时发生时，哪一个操作应该首先发生？为了保证数据的一致性，在读或者在写时
+务必会把LS锁住。甚至不会是因为读或者因为写把LS文件锁住，而是操作系统安装的杀毒软件在扫描到该文件时，会暂时锁住该文件。因为单线程的关系，在等待LS I/O操作的同时，UI线程和Javascript也无法被执行。
+
+但实际情况远比我们想象的复杂的多。为了提高读写的速度，某些浏览器(比如火狐)会在加载页面时就把该域名下LS数据加载入内存中，这么做的副作用是延迟了页面的加载速度。但如果不这么做而是在临时读写LS时再加载，同样有死锁浏览器的风险。并且把数据载入内存中也面临着将内存同步至硬盘的问题。
+
+上面说到的这些问题很大程度大部分归咎于内部实现上的问题，需要依赖浏览器开发者来改进。并且并非仅仅存在于LS中，相信在`IndexedDB`、`webSQL`甚至`Cookie`中也有类似的问题发生
+
+## LS实战
+
+因为这次我们是谈资源的加载，关于LS的其他用法我们不谈(比如百度和github会用LS记住用户搜索的行为，提供更好的搜索建议)
+
+
 
 
 ## App Cache:

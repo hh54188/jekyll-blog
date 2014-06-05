@@ -230,6 +230,148 @@ window.onload = function () {
 
 ### localstorage
 
+LocalStorage(以下都用LS代指LocalStorage)的用法我们在这里不谈。在聊如何用它来解决我们遇到的问题之前，我们首先应该区分它的优势和劣势。
+
+Chris Heilmann在文章[There is no simple solution for local storage](http://hacks.mozilla.org/2012/03/there-is-no-simple-solution-for-local-storage/)中指出了一些常见的LS劣势，比如同步时可能会阻塞页面的渲染、I/O操作会引起不确定的延时、持久化机制会导致冗余的数据等。虽然Chirs在文章中用到了比如"*terrible performance*", "*slow*"等字眼，但却没有真正的指出究竟是具体的哪一项操作导致了性能的低下，或者和其他的一些机制相比彰显了性能的低下。
+
+Nicholas C. Zakas于是写了一篇针对该文的文章[In defense of localStorage](http://www.nczonline.net/blog/2012/03/07/in-defense-of-localstorage/)，从文章的名字就可以看出，Nicholas想要捍卫LS，毕竟它不是在上一文章中被描述的那样一无是处，不应该被抵制。
+
+比较性能这种事情，应该看怎么比，和谁比。
+
+就“读”数据而言，如果你把“从LS中读一个值”和“从Object对象中读一个属性”相比，是不公平的，前者是从硬盘里读，后者是从内存里读，就好比让汽车与飞机赛跑一样，有一个benchmark各位可以参考一下：[localStorage vs. Objects](http://jsperf.com/localstorage-vs-objects):
+
+![./images/localStorage-vs-Objects.png](./images/localStorage-vs-Objects.png)
+
+跑分的标准是OPS(operation per second)，值当然是越高越好。你可能会注意到，在某个浏览器的对比列中，没有显示关于LS的红色列——这是因为LS的操作性能太差，跑分太低(相对从Object中读取属性而言)，所以无法显示在同一张表格内，如果你真的想看的话，可以给你看一张放大的版本：
+
+![./images/localStorage-vs-Objects.png](./images/localStorage-vs-Objects-2.png)
+
+这样以来你大概就知道两者在什么级别上了。
+
+
+在浏览器中与LS最相近的机制莫过于Cookie了：Cookie同样以key-value的形式进行存储，同样需要进行I/O操作，同样需要对不同的tab标签进行同步。同样有benchmark可以供我们进行参考：[localStorage vs. Cookies](http://jsperf.com/localstorage-vs-objects/19)
+
+从Brwoserscope中提供的结果可以看出，就`Reading from cookie`, `Reading from localStorage getItem`, `Writing to cookie`, `Writing to localStorage property`四项操作而言，在不同浏览器不同平台，读和写的效率都不太相同，有的趋于一致，有的大相径庭。
+
+
+甚至就LS自己而言，不同的存储方式和不同的读取方式也会产生效率方面的问题。有两个benchmark非常值得说明问题：
+
+1. [localStorage-string-size](http://jsperf.com/localstorage-string-size)
+
+在上面这个测试中，Nicholas在LS中用四个key分别存储了100个字符，500个字符，1000个字符和2000个字符。测试分别读取不同长度字符的速度。结果是：读取速度与读取字符的长度无关。
+
+2. [localStorage String Size Retrieval](http://jsperf.com/localstorage-string-size-retrieval)
+
+这个测试用于测试读取1000个字符的速度，不同的是对照组是一次性读取1000个字符；实验组是从10个key中(每个key存储100个字符)分10次读取。结论是分10此读取的速度会比一次性读取慢90%左右。
+
+但LS并非没有痛点。大部分的LS都是基于同一个域名共享存储数据，所以当你在多个标签打开同一个域名下的站点时，必须面临一个同步的问题，当A标签想写入LS与B标签想从LS中读同时发生时，哪一个操作应该首先发生？为了保证数据的一致性，在读或者在写时
+务必会把LS锁住。甚至不会是因为读或者因为写把LS文件锁住，而是操作系统安装的杀毒软件在扫描到该文件时，会暂时锁住该文件。因为单线程的关系，在等待LS I/O操作的同时，UI线程和Javascript也无法被执行。
+
+但实际情况远比我们想象的复杂的多。为了提高读写的速度，某些浏览器(比如火狐)会在加载页面时就把该域名下LS数据加载入内存中，这么做的副作用是延迟了页面的加载速度。但如果不这么做而是在临时读写LS时再加载，同样有死锁浏览器的风险。并且把数据载入内存中也面临着将内存同步至硬盘的问题。
+
+上面说到的这些问题很大程度大部分归咎于内部实现上的问题，需要依赖浏览器开发者来改进。并且并非仅仅存在于LS中，相信在`IndexedDB`、`webSQL`甚至`Cookie`中也有类似的问题发生
+
+**实战**
+
+不同网站，在不同平台对LS的使用都不大相同，主要看看PC平台的利用
+
+- 比如百度和github用LS记录用户的搜素行为，为了提供更好的搜索建议
+
+![baidu](./images/baidu_sug.png)
+![git](./images/git_sug.png)
+
+- Twitter利用LS最主要的记录了与用户关联的信息(截图自我的Twitter账号，因为关注者和被关注者的不同数据会有差异)：
+    - `userAdjacencyList`表占40,158 bytes，用于记录每个字关联的用户信息
+    - `userHash`表占36,883 bytes，用于记录用户被关注的人信息
+
+![twitter](./images/ls_twitter.png)
+
+- Google利用LS记录了样式：
+
+![google](./images/ls_google.png)
+
+- 天猫用LS记录了导航栏的HTML碎片代码：
+
+![tmall](./images/ls_tmall.png)
+
+百度音乐的做法最值得一提，他们将所依赖的jQuery类库存入LS中，用一段很简单的[代码](http://play.baidu.com/player/static/js/naga/common/localjs.js)对这jQuery进行载入，具体就不详解了，直接写在代码的注释中：
+
+```
+!function (globals, document) {
+    var storagePrefix = "mbox_";
+    globals.LocalJs = {
+        require: function (file, callback) {
+            /*
+                如果无法使用localstorage，则使用document.write把需要请求的脚本写在页面上
+                作为fallback，使用document.write确保已经加载了所需要的类库
+            */
+
+            if (!localStorage.getItem(storagePrefix + "jq")) {
+                document.write('<script src="' + file + '" type="text/javascript"></script>');
+                var self = this;
+
+            /*
+                并且3s后再请求一次，但这次请求的目的是为了获取jquery源码，写入localstorage中(见下方的_loadjs函数)
+                这次“一定”走缓存，不会发出多余的请求
+                为什么会延迟3s执行？为了确保通过document.write请求jQuery已经加载完成。但很明显3s也并非一个保险的数值
+                同时使用document.write也是出于需要故意阻塞的原因，而无法为其添加回调，所以延时3s
+            */
+                setTimeout(function () {
+                    self._loadJs(file, callback)
+                }, 3e3)
+            } else {
+                // 如果可以使用localstorage，则执行注入
+                this._reject(localStorage.getItem(storagePrefix + "jq"), callback)
+            }
+        },
+        _loadJs: function (file, callback) {
+            if (!file) {
+                return false
+            }
+            var self = this;
+            var xhr = new XMLHttpRequest;
+            xhr.open("GET", file);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        localStorage.setItem(storagePrefix + "jq", xhr.responseText)
+                    } else {}
+                }
+            };
+            xhr.send()
+        },
+        _reject: function (data, callback) {
+            var el = document.createElement("script");
+            el.type = "text/javascript";
+            /*
+                关于如何执行LS中的源码，我们有三种方式
+                1. eval
+                2. new Function
+                3. 在一段script标签中插入源码，再将该script标签插入页码中
+
+                关于这三种方式的执行效率，我们内部初步测试的结果是
+                不同的浏览器下效率各不相同
+            */
+            el.appendChild(document.createTextNode(data));
+            document.getElementsByTagName("head")[0].appendChild(el);
+            callback && callback()
+        },
+        isSupport: function () {
+            return window.localStorage
+        }
+    }
+}(window, document);
+!
+function () {
+    var url = _GET_HASHMAP ? _GET_HASHMAP("/player/static/js/naga/common/jquery-1.7.2.js") : "/player/static/js/naga/common/jquery-1.7.2.js";
+    url = url.replace(/^\/\/mu[0-9]*\.bdstatic\.com/g, "");
+    LocalJs.require(url, function () {})
+}(); 
+/** If u are interested in our code and would like to make it robust, just contact us^^  <enimong#gmail.com> **/
+/** Generated by M3D. **/
+
+```
+
 
 
 
