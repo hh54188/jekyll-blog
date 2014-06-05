@@ -110,33 +110,119 @@ filamentgroup有一种解决响应式设计的图片解决方案[Responsive Desi
 
 理想是丰满的，现实是骨感的。出于种种的原因，我们几乎从不直接在页面上插入js脚本，而是使用第三方的加载器，比如seajs或者requirejs。关于使用加载器和模块化开发的优势在这里不再赘述。但我想回到原点，讨论应该如何利用加载器，就从seajs与requirejs的不同聊起。
 
-如果你还是习惯在部署上线前把所有js文件合并打包成一个文件，那么seajs和requirejs其实对你来说并无差异。但seajs有一点是值得注意的(以下引用都来自于[此贴](http://www.douban.com/note/283566440/)):
+在开始之前我已经假设你对requirejs与seajs语法已经基本熟悉了，如果还没有，请移步这里：
 
->SeaJS只会在真正需要使用(依赖)模块时才执行该模块
+- CMD标准：https://github.com/cmdjs/specification/blob/master/draft/module.md
+- AMD标准：https://github.com/amdjs/amdjs-api/blob/master/AMD.md
+
+###  加载差异
+
+如果你还是习惯在部署上线前把所有js文件合并打包成一个文件，那么seajs和requirejs其实对你来说并无差异。
+
+玉伯转过的一个帖子：[SeaJS与RequireJS最大的区别](http://www.douban.com/note/283566440/)，这个帖子原始(不包括后记)的结论是
+
+>RequireJS你坑的我一滚啊, 这也就是为什么我不喜欢RequireJS的原因, 坑隐藏得太深了.
 
 |
 
->而RequireJS会先尽早地执行(依赖)模块, 相当于所有的require都被提前了
+>SeaJS是异步加载模块的没错, 但执行模块的顺序也是严格按照模块在代码中出现(require)的顺序, 这样才更符合逻辑吧! 你说呢, RequireJS?
 
-你觉得哪一种更合理？比如看一看这个人的回答：
+|
 
->我个人感觉requirejs更科学，所有依赖的模块要先执行好。如果A模块依赖B。当执行A中的某个操doSomething()后，再去依赖执行B模块require('B');如果B模块出错了，doSomething的操作如何回滚？很多语言中的import,include,useing都是先将导入的类或者模块执行好。如果被导入的模块都有问题，有错误，执行当前模块有何意义？ 
+>而RequireJS会先尽早地执行(依赖)模块, 相当于所有的require都被提前了, 而且模块执行的顺序也不一定100%就是先mod1再mod2
+因此你看到执行顺序和你预想的完全不一样! 颤抖吧~ RequireJS!
 
-但我想上面的回答忽略了一种可能，是比如B模块并非是对每一用户都必须要加载的，比如只对登陆用户有效：
+因为他认为他的测试代码
 
 ```
-if (user_sign_in) {
-    require("dep_B");
-}
+define(function(require, exports, module) {
+    console.log('require module: main');
+
+    var mod1 = require('./mod1');
+    mod1.hello();
+    var mod2 = require('./mod2');
+    mod2.hello();
+
+    return {
+        hello: function() {
+            console.log('hello main');
+        }
+    };
+});
 ```
 
-在这种情况下模块A对B的依赖仅限于可能，那是否也应该提前加载B呢？不错，如果不提前加载B模块可能会出现回滚A的问题，但在我看来，这样的风险和提前加载B的成本相比还是值得商榷的。
+运行结果应该是顺序的(sea.js下的结果)：
+
+```
+require module: main
+require module: mod1
+hello mod1
+require module: mod2
+hello mod2
+helo main
+```
+
+而不应该是异步的require.js下：
+
+
+```
+require module: mod2
+require module: mod1
+require module: main
+hello mod1
+hello mod2
+helo main
+```
+
+但问题是，为什么"执行模块的顺序"应该是"严格按照模块在代码中出现(require)的顺序"? 并且"这样才更符合逻辑吧"?
+
+如果他以seajs的运行结果来要求requirejs，那requirejs肯定吃亏了。AMD标准从来都没有规定模块的加载顺序，它只是需要保证：
+
+>The dependencies must be resolved prior to the execution of the module factory function, and the resolved values should be passed as arguments to the factory function with argument positions corresponding to indexes in the dependencies array.
+
+评论下方有人(jockchou)的回复更切中要害：
+
+>我个人感觉requirejs更科学，所有依赖的模块要先执行好。如果A模块依赖B。当执行A中的某个操doSomething()后，再去依赖执行B模块require('B');如果B模块出错了，doSomething的操作如何回滚？ 
+很多语言中的import, include, useing都是先将导入的类或者模块执行好。如果被导入的模块都有问题，有错误，执行当前模块有何意义？
+
+|
+
+>楼主说requirejs是坑，是因为你还不太理解AMD“异步模块”的定义，被依赖的模块必须先于当前模块执行，而没有依赖关系的模块，可以没有先后。
+
+|
+
+>想像一下factory是个模块工厂吧，而依赖dependencies是工厂的原材料，在工厂进行生产的时候，是先把原材料一次性都在它自己的工厂里加工好，还是把原材料的工厂搬到当前的factory来什么时候需要，什么时候加工，哪个整体时间效率更高？显然是requirejs，requirejs是加载即可用的。为了响应用户的某个操作，当前工厂正在进行生产，当发现需要某种原材料的时候，突然要停止生产，去启动原材料加工，这不是让当前工厂非常焦燥吗？
+
+这样看来其实两者并无太大差别?
+
+**不**
+
+但考虑这样一种业务情况，考虑某一个功能只对登陆用户开放，这样的话requirejs提前把模块加载是否有必要？(因为来到你页面的用户到离开也不会登陆)。
+
+这是非常实际的问题，一个页面可以有非常多的功能，比如登陆、分享、留言、收藏……但不一定每一个来到页面的用户都会使用这些功能，如果都作为页面模块的依赖提前加载的话，对页面一定是一个不小的负担。
+
+但seajs可以即用即加载，比如代码可以这么写
+
+```
+define(function () {
+
+    if (user_login) {
+        require(login_feature_module)
+    }    
+
+    document.body.onclick = function () {
+        require(show_module)
+    }
+})
+```
+
+在这种情况下模块A对B(login_feature_module/show_module)的依赖仅限于可能，那是否也应该提前加载B呢？不错，如果不提前加载B模块可能会出现回滚A的问题，但在我看来，这样的风险和提前加载B的成本相比还是值得商榷的。
 
 为什么说值得商榷，举一个实际的例子：比如爱奇艺一个普通的视频播放的页面，我们有没有必要在第一屏加载页面的时候就加载登陆注册，或者评论，或者分享模块呢？因为有非常大的可能用户只是来这里看这个视频，直至看完视频它都不会用到登陆注册功能，也不会去分享这个视频等。加载这些模块不仅仅是前端的问题，还有可能调用后台的接口，并且类似模块的数量也是相当可观的。
 
 如果你同意这么做是合理的，seajs会比requirejs更适合你
 
-由此可见是否提前加载模块取决于用户使用这个模块的概率有多少。Faceboook早在09年的时候就已经注意到这个[问题](http://velocityconf.com/velocity2009/public/schedule/detail/7611)了，只不过他们是以样式碎片来引出这个问题。
+由此可见是否提前加载模块取决于用户使用这个模块的概率有多少。Faceboook早在09年的时候就已经注意到这个问题：[Frontend Performance Engineering in Facebook : Velocity 2009](http://velocityconf.com/velocity2009/public/schedule/detail/7611)，只不过他们是以样式碎片来引出这个问题。
 
 假设我们需要在页面上加入A、B、C三个功能，意味着我们需要引入A、B、C对应的html片段和样式碎片(暂不考虑js)，并且最终把三个功能样式碎片在上线前压缩到同一个文件中。但可能过了相当长时间，我们移除了A功能，但这个时候大概不会有人记得也把关于A功能的样式从上线样式中移除。Facebook引入了一套静态资源管理方案(Static Resource Management)解决的方法如下：
 
@@ -150,6 +236,82 @@ html片段决定。
 ![./images/facebook_02.png](./images/facebook_02.png)
 
 这一套系统不仅仅是对样式碎片，对js，对图片sprites的拼合同样有效。
+
+我同意这句话：
+
+>很多语言中的import, include, useing都是先将导入的类或者模块执行好。如果被导入的模块都有问题，有错误，执行当前模块有何意义？
+
+但个人觉得考虑到页面的性能，可以考虑将要导入模块的懒加载(Lazy load)。
+
+你会不会觉得我上面说的懒加载是一种天方夜谭？
+
+但然不是，你去看看现在的人人网个人主页看看
+
+![renren](./images/renren.jpg)
+
+如果你在点击图中标注的“与我相关”、“相册”、“分享”按钮并观察Chrome的Timeline工具，那么都是在点击之后才加载对应的模块
+
+
+###  执行差异
+
+为了增强对比，我们在定义依赖模块的时候，故意让它的factory函数要执行相当长的时间，比如1秒：
+
+```
+// dep_A.js定义如下，dep_B/dep_C定义同理
+
+define(function(require, exports, module) {
+    
+    (function(second) {
+        var start = +new Date();
+        while (start + second * 1000 > +new Date()) {}
+    })(window.EXE_TIME);
+
+    // window.EXE_TIME = 1；此处会连续执行1s
+
+    exports.foo = function() {
+        console.log("A");
+    }
+})
+
+// main中同时加载三个相同模块
+
+//require.js:
+require(["dep_A", "dep_B", "dep_C"], function(A, B, C) {
+
+});
+
+
+//sea.js:
+define(function(require, exports, module) {
+
+    var mod_A = require("dep_A");
+    var mod_B = require("dep_B");
+    var mod_C = require("dep_C");
+});
+```
+
+requirejs加载的瀑布图：
+
+![require-waterfall](./images/require-waterfall.jpg)
+
+seajs加载的瀑布图：
+
+![sea-waterfall](./images/sea-waterfall.jpg)
+
+如果把一个模块的执行拆分为执行define和执行factory函数的话(对requirejs和seajs都适用)，从上图可以看出：
+
+requirejs：一个模块的factory函数执行是紧跟随在define(也就是Evaluate Script脚本模块文件)之后
+seajs: 执行一个模块的factory函数需要等待所有模块define完毕。
+
+重点不是这些，我想说的是我在seajs中看到一个闪光点。
+
+在上面一节中我提到了懒加载模块，在加载模块的时候需要1. 临时请求模块文件 ; 2. 执行factory函数。
+
+但如果我们在载入页面时仅仅是执行把懒加载的模块的define(从上面两个图可以看出define的代价是非常小的)，而设法不执行factory函数。
+
+那么在真正需要懒加载的时候只要执行factory函数即可。这样不是能够让模块响应更及时，更靠谱？
+
+
 
 ## Delay Execution
 
@@ -349,8 +511,8 @@ Nicholas C. Zakas于是写了一篇针对该文的文章[In defense of localStor
                 2. new Function
                 3. 在一段script标签中插入源码，再将该script标签插入页码中
 
-                关于这三种方式的执行效率，我们内部初步测试的结果是
-                不同的浏览器下效率各不相同
+                关于这三种方式的执行效率，我们内部初步测试的结果是不同的浏览器下效率各不相同
+                参考一些jsperf上的测试，执行效率甚至和具体代码有关。
             */
             el.appendChild(document.createTextNode(data));
             document.getElementsByTagName("head")[0].appendChild(el);
