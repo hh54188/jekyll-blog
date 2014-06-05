@@ -327,7 +327,7 @@ define(["dep_A", "dep_B", "dep_C"], function(require, exports, module){
 
 Steve Souders的[ControlJS](http://stevesouders.com/controljs/)是我认为一直被忽视的一个加载器，它与Labjs一样能够控制的脚本的异步加载，甚至(包括行内脚本，但不完美)延迟执行。它延迟执行脚本的思路非常简单：既然只要在页面上插入脚本就会导致脚本的执行，那么在需要执行的时候才把脚本插入进页面。但这样一来脚本的加载也被延迟了？不，我们会通过其他元素来提前加载脚本，比如img或者是object标签，或者是非法的mine type的script标签。这样当真正的脚本被插入页面时，只会从缓存中读取。而不会发出新的请求。
 
-[Stoyan Stefanov](http://www.phpied.com/)在它的博客中详细描述了这个技巧, 如果判断浏览器是IE就是用image标签，如果是其他浏览器，则使用object元素。：
+[Stoyan Stefanov](http://www.phpied.com/)在它的文章[Preload CSS/JavaScript without execution](http://www.phpied.com/preload-cssjavascript-without-execution/)中详细描述了这个技巧, 如果判断浏览器是IE就是用image标签，如果是其他浏览器，则使用object元素。：
 
 ```
 window.onload = function () {
@@ -539,6 +539,22 @@ function () {
 - 天猫用LS记录了导航栏的HTML碎片代码：
 
 ![tmall](./images/ls_tmall.png)
+
+## 其他参考文献
+
+- [Chrome’s preloader delivers a ~20% speed improvement!](https://plus.google.com/+IlyaGrigorik/posts/8AwRUE7wqAE)
+- [High Performance Networking in Google Chrome](https://www.igvita.com/posa/high-performance-networking-in-google-chrome/)
+- [The real conflict behind <picture> and @srcset](http://blog.cloudfour.com/the-real-conflict-behind-picture-and-srcset/)
+- [How the Browser Pre-loader Makes Pages Load Faster](http://andydavies.me/blog/2013/10/22/how-the-browser-pre-loader-makes-pages-load-faster/)
+- [Script downloading in Chrome](http://www.ravelrumba.com/blog/script-downloading-chrome/)
+- [Who’s Afraid of the Big Bad Preloader?](http://calendar.perfplanet.com/2013/big-bad-preloader/)
+- [localStorage Read Performance](http://calendar.perfplanet.com/2011/localstorage-read-performance/)
+- [The performance of localStorage revisited](http://www.nczonline.net/blog/2012/04/25/the-performance-of-localstorage-revisited/)
+- [Storager case study: Bing, Google](http://www.stevesouders.com/blog/2011/03/28/storager-case-study-bing-google/)
+- [Measuring localStorage Performance](http://www.stevesouders.com/blog/2014/02/11/measuring-localstorage-performance/)
+- [Application Cache is a Douchebag](http://alistapart.com/article/application-cache-is-a-douchebag)
+
+
 
 
 
