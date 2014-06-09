@@ -114,111 +114,6 @@ filamentgroup有一种著名的响应式设计的图片解决方案[Responsive D
 
 理想是丰满的，现实是骨感的。出于种种的原因，我们几乎从不直接在页面上插入js脚本，而是使用第三方的加载器，比如seajs或者requirejs。关于使用加载器和模块化开发的优势在这里不再赘述。但我想回到原点，讨论应该如何利用加载器，就从seajs与requirejs的不同聊起。
 
-
-对比require.js与sea.js，某种意义上说就是对比AMD标准与CMD标准，个人认为两个类库在模块和factory的书写上其实无太大差异，差异在于
-
-- 模块的加载
-- factory函数的执行。
-
-
-
-###  加载差异
-
-玉伯转过的一个帖子：[SeaJS与RequireJS最大的区别](http://www.douban.com/note/283566440/)，这个帖子原始(不包括后记)的结论是
-
->RequireJS你坑的我一滚啊, 这也就是为什么我不喜欢RequireJS的原因, 坑隐藏得太深了.
-
-|
-
->SeaJS是异步加载模块的没错, 但执行模块的顺序也是严格按照模块在代码中出现(require)的顺序, 这样才更符合逻辑吧! 你说呢, RequireJS?
-
-|
-
->而RequireJS会先尽早地执行(依赖)模块, 相当于所有的require都被提前了, 而且模块执行的顺序也不一定100%就是先mod1再mod2
-因此你看到执行顺序和你预想的完全不一样! 颤抖吧~ RequireJS!
-
-之所以会得出以上的结论，因为他认为他的测试代码
-
-```
-define(function(require, exports, module) {
-    console.log('require module: main');
-
-    var mod1 = require('./mod1');
-    mod1.hello();
-    var mod2 = require('./mod2');
-    mod2.hello();
-
-    return {
-        hello: function() {
-            console.log('hello main');
-        }
-    };
-});
-```
-
-运行结果应该是顺序的(sea.js下的结果)：
-
-```
-require module: main
-require module: mod1
-hello mod1
-require module: mod2
-hello mod2
-helo main
-```
-
-而不应该是异步的(require.js下)：
-
-
-```
-require module: mod2
-require module: mod1
-require module: main
-hello mod1
-hello mod2
-helo main
-```
-
-但问题是，为什么"执行模块的顺序"应该是"严格按照模块在代码中出现(require)的顺序"? 并且"这样才更符合逻辑吧"?
-
-如果他以seajs的运行结果来要求requirejs，那requirejs肯定吃亏了。AMD标准从来都没有规定模块的加载顺序，它只是需要保证：
-
->The dependencies must be resolved prior to the execution of the module factory function, and the resolved values should be passed as arguments to the factory function with argument positions corresponding to indexes in the dependencies array.
-
-评论下方有人(jockchou)的回复更切中要害：
-
->我个人感觉requirejs更科学，所有依赖的模块要先执行好。如果A模块依赖B。当执行A中的某个操doSomething()后，再去依赖执行B模块require('B');如果B模块出错了，doSomething的操作如何回滚？ 
-很多语言中的import, include, useing都是先将导入的类或者模块执行好。如果被导入的模块都有问题，有错误，执行当前模块有何意义？
-
-|
-
->楼主说requirejs是坑，是因为你还不太理解AMD“异步模块”的定义，被依赖的模块必须先于当前模块执行，而没有依赖关系的模块，可以没有先后。
-
-|
-
->想像一下factory是个模块工厂吧，而依赖dependencies是工厂的原材料，在工厂进行生产的时候，是先把原材料一次性都在它自己的工厂里加工好，还是把原材料的工厂搬到当前的factory来什么时候需要，什么时候加工，哪个整体时间效率更高？显然是requirejs，requirejs是加载即可用的。为了响应用户的某个操作，当前工厂正在进行生产，当发现需要某种原材料的时候，突然要停止生产，去启动原材料加工，这不是让当前工厂非常焦燥吗？
-
-孰对孰错？
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-理想是丰满的，现实是骨感的。出于种种的原因，我们几乎从不直接在页面上插入js脚本，而是使用第三方的加载器，比如seajs或者requirejs。关于使用加载器和模块化开发的优势在这里不再赘述。但我想回到原点，讨论应该如何利用加载器，就从seajs与requirejs的不同聊起。
-
 在开始之前我已经假设你对requirejs与seajs语法已经基本熟悉了，如果还没有，请移步这里：
 
 - CMD标准：https://github.com/cmdjs/specification/blob/master/draft/module.md
@@ -276,11 +171,11 @@ define(["dep_A", "dep_B", "dep_C"], function(require, exports, module){
 
 接下来我们看看代码执行的瀑布图:
 
-1. require.js：在加载完依赖模块之后立即执行了该模块的factory函数
+1.require.js：在加载完依赖模块之后立即执行了该模块的factory函数
 
 ![require-waterfall](./images/require-waterfall.jpg)
 
-2. sea.js: 下面两张图应该放在一起比较。两处代码都同时加载了依赖模块，但因为没有require的关系，第三张图中没有像第二张图那样执行耗时的factory函数。可见seajs执行的原则正如CMD标准中所述`Execution must be lazy`。
+2.sea.js: 下面两张图应该放在一起比较。两处代码都同时加载了依赖模块，但因为没有require的关系，第三张图中没有像第二张图那样执行耗时的factory函数。可见seajs执行的原则正如CMD标准中所述`Execution must be lazy`。
 
 ![sea-waterfall](./images/sea-waterfall.jpg)
 
@@ -295,24 +190,22 @@ document.body.onclick = function () {
 }
 ```
 
-记得玉伯转过的一个帖子：[SeaJS与RequireJS最大的区别](http://www.douban.com/note/283566440/)。我们看看其中反对这么做的人的观点：
+这是非常实际的问题，比如爱奇艺一个视频播放的页面，我们有没有必要在第一屏加载页面的时候就加载登陆注册，或者评论，或者分享功能呢？因为有非常大的可能用户只是来这里看这个视频，直至看完视频它都不会用到登陆注册功能，也不会去分享这个视频等。加载这些功能不仅仅对浏览器是一个负担，还有可能调用后台的接口，这样的性能消耗是非常可观的。
+
+我们可以把这样称之为"懒执行"。但是先暂停一会，听一听其他的声音。
+
+记得玉伯转过的一个帖子：[SeaJS与RequireJS最大的区别](http://www.douban.com/note/283566440/)。我们看看其中反对这么做的人的[观点](http://www.douban.com/note/283566440/#36022364)：
 
 >我个人感觉requirejs更科学，所有依赖的模块要先执行好。如果A模块依赖B。当执行A中的某个操doSomething()后，再去依赖执行B模块require('B');如果B模块出错了，doSomething的操作如何回滚？ 
 很多语言中的import, include, useing都是先将导入的类或者模块执行好。如果被导入的模块都有问题，有错误，执行当前模块有何意义？
 
 
 
+### 懒加载
 
+其实我们可以走的更远，对于非必须模块不仅仅可以延迟它的执行，甚至可以延迟它的加载。
 
-我们看到了“懒执行”的情况。让我们再退一步，我们是否可以拓展到“懒加载”？
-
-我们继续考虑这样一种业务情况，某一个功能只对登陆用户开放。那么requirejs提前把模块加载是否有必要？
-
-这是非常实际的问题，比如爱奇艺一个视频播放的页面，我们有没有必要在第一屏加载页面的时候就加载登陆注册，或者评论，或者分享模块呢？因为有非常大的可能用户只是来这里看这个视频，直至看完视频它都不会用到登陆注册功能，也不会去分享这个视频等。加载这些模块不仅仅是前端的问题，还有可能调用后台的接口，这样的性能消耗是非常可观的。
-
-在这种情况下模块A对B(login_feature_module/show_module)的依赖仅限于可能，那是否也应该提前加载B呢？如果不提前加载B模块可能会出现回滚A的问题，但这样的风险和提前加载B的性能成本相比还是值得商榷的。
-
-从另一面看，是否提前加载模块也取决于用户使用这个模块的概率有多少。Faceboook早在09年的时候就已经注意到这个问题：[Frontend Performance Engineering in Facebook : Velocity 2009](http://velocityconf.com/velocity2009/public/schedule/detail/7611)，只不过他们是以样式碎片来引出这个问题。
+但问题是我们如何决定一个模块是必须还是非必须呢，最恰当莫过取决于用户使用这个模块的概率有多少。Faceboook早在09年的时候就已经注意到这个问题：[Frontend Performance Engineering in Facebook : Velocity 2009](http://velocityconf.com/velocity2009/public/schedule/detail/7611)，只不过他们是以样式碎片来引出这个问题。
 
 假设我们需要在页面上加入A、B、C三个功能，意味着我们需要引入A、B、C对应的html片段和样式碎片(暂不考虑js)，并且最终把三个功能样式碎片在上线前压缩到同一个文件中。但可能过了相当长时间，我们移除了A功能，但这个时候大概不会有人记得也把关于A功能的样式从上线样式中移除。久而久之冗余的代码会变得越来越多。Facebook引入了一套静态资源管理方案(Static Resource Management)来解决这个问题：
 
@@ -335,30 +228,6 @@ html片段决定。
 如果你在点击图中标注的“与我相关”、“相册”、“分享”按钮并观察Chrome的Timeline工具，那么都是在点击之后才加载对应的模块
 
 ![renren-share](./images/renren-share.png)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## 三. Delay Execution
 
@@ -484,7 +353,7 @@ LS也并非没有痛点。大部分的LS都是基于同一个域名共享存储�
 
 **实战开始**
 
-考虑到移动端网络环境的不稳定，为了避免网络延迟(network latency)，大部分网站的移动端站点会将体积庞大的类库存储于本地浏览器的LS中。但[百度音乐](http://play.baidu.com/)同时将这个技术应用于PC端，他们将所依赖的jQuery类库存入LS中。用一段很简单的[代码](http://play.baidu.com/player/static/js/naga/common/localjs.js)来保证对jQuery的正确载入。我们一起来看看这段代码。代码详解就书写在注释中了：
+考虑到移动端网络环境的不稳定，为了避免网络延迟(network latency)，大部分网站的移动端站点会将体积庞大的类库存储于本地浏览器的LS中。但[百度音乐](http://play.baidu.com/)将这个技术也应用到了PC端，他们将所依赖的jQuery类库存入LS中。用一段很简单的[代码](http://play.baidu.com/player/static/js/naga/common/localjs.js)来保证对jQuery的正确载入。我们一起来看看这段代码。代码详解就书写在注释中了：
 
 ```
 !function (globals, document) {
@@ -583,6 +452,14 @@ function () {
 
 
 ## 总结
+
+No silver bullet.没有任何一项技术或者方案是万能的，虽然开源社区和浏览器厂商在提供给我们越来越丰富的资源，但并不意味着今后遇见的问题就会越来越少。相反，或许正因为多样性，和发展中技术的不完善，事情会变得更复杂，我们在选择时要权衡更多。我无意去推崇某一项解决方案，我想尽可能多的把这些方案与这些方案的厉害呈现给大家，毕竟不同人考虑问题的方面不同，业务需求不同。
+
+还有一个问题是，本文描述的大部分技术都是针对现代浏览器而言，那么如何应对低端浏览器呢？
+
+![IE6](./images/IE6_market.jpg)
+
+从百度统计这张17个月的浏览器市场份额图中可以看出(当然可能因为不同站点的用户特征不同会导致使用的浏览器分布与上图有出入)，我们最关心的IE6的市场份额一直是呈现的是下滑的趋势，目前已经降至几乎与IE9持平；而IE9在今年的市场份额也一直稳步上升；IE7已经被遥遥甩在身后。领头的IE8与Chrome明显让我们感受到有足够的信心去尝试新的技术。还等什么，行动起来吧！
 
 
 ## 其他参考文献
