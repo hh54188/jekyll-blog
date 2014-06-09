@@ -10,7 +10,7 @@ execution begins.
 
 为什么要在标题中使用“再”这个字？因为在工作中逐渐发现，我们经常谈论的一些页面优化技巧，比如上面所说的总是把脚本放在页面的底部，压缩合并样式或者脚本文件等，时至今日已不再是最佳的解决方案，甚至事与愿违，转化为性能的毒药。这篇文章所要聊的，便是展示某些不被人关注的浏览器特性或者技巧，来继续完成资源加载性能优化的任务。
 
-## Pre-loader
+## 一. Pre-loader
 
 ### 什么是pre-loader
 
@@ -110,21 +110,17 @@ filamentgroup有一种著名的响应式设计的图片解决方案[Responsive D
 
 在preloader搜寻到该元素并且试图去下载该资源时，它应该怎么办？一个正常的paser应该是在解析该元素时根据当时页面的渲染布局去下载，而当时这类工作不一定已经完成，preloader只是提前找到了该元素。退一步来说，即使不考虑页面渲染的情况，假设preloader在这种情形下会触发一种默认加载策略，那应该是"mobile first"还是"desktop first"？默认应该加载高清还是低清照片？
 
-## JS Loader
+## 二. JS Loader
 
 理想是丰满的，现实是骨感的。出于种种的原因，我们几乎从不直接在页面上插入js脚本，而是使用第三方的加载器，比如seajs或者requirejs。关于使用加载器和模块化开发的优势在这里不再赘述。但我想回到原点，讨论应该如何利用加载器，就从seajs与requirejs的不同聊起。
 
-在开始之前我已经假设你对requirejs与seajs语法已经基本熟悉了，如果还没有，请移步这里：
-
-- CMD标准：https://github.com/cmdjs/specification/blob/master/draft/module.md
-- AMD标准：https://github.com/amdjs/amdjs-api/blob/master/AMD.md
 
 对比require.js与sea.js，某种意义上说就是对比AMD标准与CMD标准，个人认为两个类库在模块和factory的书写上其实无太大差异，差异在于
 
 - 模块的加载
 - factory函数的执行。
 
-BTW: 如果你还是习惯在部署上线前把所有js文件合并打包成一个文件，那么seajs和requirejs其实对你来说并无差异。
+
 
 ###  加载差异
 
@@ -204,28 +200,117 @@ helo main
 
 孰对孰错？
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+理想是丰满的，现实是骨感的。出于种种的原因，我们几乎从不直接在页面上插入js脚本，而是使用第三方的加载器，比如seajs或者requirejs。关于使用加载器和模块化开发的优势在这里不再赘述。但我想回到原点，讨论应该如何利用加载器，就从seajs与requirejs的不同聊起。
+
+在开始之前我已经假设你对requirejs与seajs语法已经基本熟悉了，如果还没有，请移步这里：
+
+- CMD标准：https://github.com/cmdjs/specification/blob/master/draft/module.md
+- AMD标准：https://github.com/amdjs/amdjs-api/blob/master/AMD.md
+
+BTW: 如果你还是习惯在部署上线前把所有js文件合并打包成一个文件，那么seajs和requirejs其实对你来说并区别。
+
+seajs与requirejs在模块的加载方面是没有差异的，无论是requirejs在定义模块时定义的依赖模块，还是seajs在factory函数中require的依赖模块，在会在加载当前模块时被载入，异步，并且顺序不可控。差异在于factory函数执行的时机。
+
+###  执行差异
+
+为了增强对比，我们在定义依赖模块的时候，故意让它们的factory函数要执行相当长的时间，比如1秒：
+
+```
+// dep_A.js定义如下，dep_B、dep_C定义同理
+
+define(function(require, exports, module) {
+    
+    (function(second) {
+        var start = +new Date();
+        while (start + second * 1000 > +new Date()) {}
+    })(window.EXE_TIME);
+
+    // window.EXE_TIME = 1；此处会连续执行1s
+
+    exports.foo = function() {
+        console.log("A");
+    }
+})
+
+```
+
+为了增强对比，设置了三组进行对照试验，分别是：
+
+```
+//require.js:
+require(["dep_A", "dep_B", "dep_C"], function(A, B, C) {
+
+});
+
+
+//sea.js:
+define(function(require, exports, module) {
+
+    var mod_A = require("dep_A");
+    var mod_B = require("dep_B");
+    var mod_C = require("dep_C");
+});
+
+//sea.js(定义依赖但并不require):
+define(["dep_A", "dep_B", "dep_C"], function(require, exports, module){
+
+}
+```
+
+接下来我们看看代码执行的瀑布图:
+
+1. require.js：在加载完依赖模块之后立即执行了该模块的factory函数
+
+![require-waterfall](./images/require-waterfall.jpg)
+
+2. sea.js: 下面两张图应该放在一起比较。两处代码都同时加载了依赖模块，但因为没有require的关系，第三张图中没有像第二张图那样执行耗时的factory函数。可见seajs执行的原则正如CMD标准中所述`Execution must be lazy`。
+
+![sea-waterfall](./images/sea-waterfall.jpg)
+
+![sea-waterfall](./images/sea-waterfall-no-exec.jpg)
+
+
+我想进一步表达的是，无论requirejs和seajs，通常来说大部分的逻辑代码都会放在模块的factory函数中，所以factory函数执行的代价是非常大的。但上图也同样告诉我们模块的define，甚至模块文件的Evaluate代价非常小，与factory函数无关。所以我们是不是应该尽可能的避免执行factory函数，或者等到我们需要的指定功能的时候才执行对应的factory函数？比如：
+
+```
+document.body.onclick = function () {
+    require(some_kind_of_module);
+}
+```
+
+记得玉伯转过的一个帖子：[SeaJS与RequireJS最大的区别](http://www.douban.com/note/283566440/)。我们看看其中反对这么做的人的观点：
+
+>我个人感觉requirejs更科学，所有依赖的模块要先执行好。如果A模块依赖B。当执行A中的某个操doSomething()后，再去依赖执行B模块require('B');如果B模块出错了，doSomething的操作如何回滚？ 
+很多语言中的import, include, useing都是先将导入的类或者模块执行好。如果被导入的模块都有问题，有错误，执行当前模块有何意义？
+
+
+
+
+
+我们看到了“懒执行”的情况。让我们再退一步，我们是否可以拓展到“懒加载”？
+
 我们继续考虑这样一种业务情况，某一个功能只对登陆用户开放。那么requirejs提前把模块加载是否有必要？
 
 这是非常实际的问题，比如爱奇艺一个视频播放的页面，我们有没有必要在第一屏加载页面的时候就加载登陆注册，或者评论，或者分享模块呢？因为有非常大的可能用户只是来这里看这个视频，直至看完视频它都不会用到登陆注册功能，也不会去分享这个视频等。加载这些模块不仅仅是前端的问题，还有可能调用后台的接口，这样的性能消耗是非常可观的。
 
-但seajs可以即用即加载，比如代码可以这么写
-
-```
-define(function () {
-
-    if (user_login) {
-        require(login_feature_module)
-    }    
-
-    document.body.onclick = function () {
-        require(show_module)
-    }
-})
-```
-
 在这种情况下模块A对B(login_feature_module/show_module)的依赖仅限于可能，那是否也应该提前加载B呢？如果不提前加载B模块可能会出现回滚A的问题，但这样的风险和提前加载B的性能成本相比还是值得商榷的。
-
-如果你倾向于不提前加载依赖模块，那么seajs会比requirejs更适合你。
 
 从另一面看，是否提前加载模块也取决于用户使用这个模块的概率有多少。Faceboook早在09年的时候就已经注意到这个问题：[Frontend Performance Engineering in Facebook : Velocity 2009](http://velocityconf.com/velocity2009/public/schedule/detail/7611)，只不过他们是以样式碎片来引出这个问题。
 
@@ -242,12 +327,6 @@ html片段决定。
 
 这一套系统不仅仅是对样式碎片，对js，对图片sprites的拼合同样有效。
 
-我同意这句话：
-
->很多语言中的import, include, useing都是先将导入的类或者模块执行好。如果被导入的模块都有问题，有错误，执行当前模块有何意义？
-
-但个人觉得考虑到页面的性能，可以考虑将要导入模块的懒加载(Lazy load)。
-
 你会不会觉得我上面说的懒加载还是离自己太远了？
 但然不是，你去看看现在的人人网个人主页看看
 
@@ -255,71 +334,35 @@ html片段决定。
 
 如果你在点击图中标注的“与我相关”、“相册”、“分享”按钮并观察Chrome的Timeline工具，那么都是在点击之后才加载对应的模块
 
-
-###  执行差异
-
-为了增强对比，我们在定义依赖模块的时候，故意让它的factory函数要执行相当长的时间，比如1秒：
-
-```
-// dep_A.js定义如下，dep_B/dep_C定义同理
-
-define(function(require, exports, module) {
-    
-    (function(second) {
-        var start = +new Date();
-        while (start + second * 1000 > +new Date()) {}
-    })(window.EXE_TIME);
-
-    // window.EXE_TIME = 1；此处会连续执行1s
-
-    exports.foo = function() {
-        console.log("A");
-    }
-})
-
-// main中同时加载三个相同模块
-
-//require.js:
-require(["dep_A", "dep_B", "dep_C"], function(A, B, C) {
-
-});
+![renren-share](./images/renren-share.png)
 
 
-//sea.js:
-define(function(require, exports, module) {
 
-    var mod_A = require("dep_A");
-    var mod_B = require("dep_B");
-    var mod_C = require("dep_C");
-});
-```
 
-requirejs加载的瀑布图：
 
-![require-waterfall](./images/require-waterfall.jpg)
 
-seajs加载的瀑布图：
 
-![sea-waterfall](./images/sea-waterfall.jpg)
 
-如果把一个模块的执行拆分为执行define和执行factory函数的话(对requirejs和seajs都适用)，从上图可以看出：
 
-- requirejs：一个模块的factory函数执行是紧跟随在define(也就是Evaluate Script脚本模块文件)之后
-- seajs: 执行一个模块的factory函数需要等待所有模块define完毕。
 
-在上面一节中我提到了懒加载模块，在加载模块的时候需要1. 临时请求模块文件 ; 2. 执行factory函数。
 
-但如果我们在载入页面时仅仅是执行懒加载的模块的define(从上面两个图可以看出define的代价是非常小的)，而设法不执行factory函数。
-那么在真正需要加载时只要执行factory函数即可。这样不是能够让模块响应更靠谱？
-seajs的确允许你这么做：
 
-```
-define(["dep_A", "dep_B", "dep_C"], function(require, exports, module){
 
-}
-```
 
-## Delay Execution
+
+
+
+
+
+
+
+
+
+
+
+## 三. Delay Execution
+
+### 利用浏览器缓存
 
 脚本最致命的不是加载，而是执行。因为何时加载毕竟是可控的，甚至可以是异步的，比如通过调整外链的位置，动态的创建脚本。但一旦脚本加载完成，它就会被立即执行(Evaluate Script)，页面的渲染也就随之停止，甚至导致在低端浏览器上假死。
 
@@ -327,7 +370,7 @@ define(["dep_A", "dep_B", "dep_C"], function(require, exports, module){
 
 Steve Souders的[ControlJS](http://stevesouders.com/controljs/)是我认为一直被忽视的一个加载器，它与Labjs一样能够控制的脚本的异步加载，甚至(包括行内脚本，但不完美)延迟执行。它延迟执行脚本的思路非常简单：既然只要在页面上插入脚本就会导致脚本的执行，那么在需要执行的时候才把脚本插入进页面。但这样一来脚本的加载也被延迟了？不，我们会通过其他元素来提前加载脚本，比如img或者是object标签，或者是非法的mine type的script标签。这样当真正的脚本被插入页面时，只会从缓存中读取。而不会发出新的请求。
 
-[Stoyan Stefanov](http://www.phpied.com/)在它的文章[Preload CSS/JavaScript without execution](http://www.phpied.com/preload-cssjavascript-without-execution/)中详细描述了这个技巧, 如果判断浏览器是IE就是用image标签，如果是其他浏览器，则使用object元素。：
+[Stoyan Stefanov](http://www.phpied.com/)在它的文章[Preload CSS/JavaScript without execution](http://www.phpied.com/preload-cssjavascript-without-execution/)中详细描述了这个技巧, 如果判断浏览器是IE就是用image标签，如果是其他浏览器，则使用object元素：
 
 ```
 window.onload = function () {
@@ -396,7 +439,7 @@ window.onload = function () {
 
 但现实并非那么美好，首先你如何能预测用户打开的页面呢，这个功能更适合阅读或者论坛类型的网站，因为用户有很大的概率会往下翻页；要注意提前的渲染页面的网络请求和优先级和GPU使用权限优先级都比其他页面的要低，浏览器对提前渲染页面类型也有一定的要求，具体可以参考[这里](http://www.igvita.com/posa/high-performance-networking-in-google-chrome/#prerendering)
 
-### LocalStorage
+### 利用LocalStorage
 
 在聊如何用它来解决我们遇到的问题之前，个人觉得首先应该聊聊它的优势和劣势。
 
@@ -428,9 +471,9 @@ Nicholas C. Zakas于是写了一篇针对该文的文章[In defense of localStor
 
 2. [localStorage String Size Retrieval](http://jsperf.com/localstorage-string-size-retrieval)
 
-在第一个测试中，Nicholas在LS中用四个key分别存储了100个字符，500个字符，1000个字符和2000个字符。测试分别读取不同长度字符的速度。结果是：读取速度与读取字符的长度无关。
+在第一个测试中，Nicholas在LS中用四个key分别存储了100个字符，500个字符，1000个字符和2000个字符。测试分别读取不同长度字符的速度。结果是：**读取速度与读取字符的长度无关**。
 
-第二个测试用于测试读取1000个字符的速度，不同的是对照组是一次性读取1000个字符；而实验组是从10个key中(每个key存储100个字符)分10次读取。结论是分10此读取的速度会比一次性读取慢90%左右。
+第二个测试用于测试读取1000个字符的速度，不同的是对照组是一次性读取1000个字符；而实验组是从10个key中(每个key存储100个字符)分10次读取。结论: **是分10此读取的速度会比一次性读取慢90%左右**。
 
 LS也并非没有痛点。大部分的LS都是基于同一个域名共享存储数据，所以当你在多个标签打开同一个域名下的站点时，必须面临一个同步的问题，当A标签想写入LS与B标签想从LS中读同时发生时，哪一个操作应该首先发生？为了保证数据的一致性，在读或者在写时
 务必会把LS锁住(甚至在操作系统安装的杀毒软件在扫描到该文件时，会暂时锁住该文件)。因为单线程的关系，在等待LS I/O操作的同时，UI线程和Javascript也无法被执行。
@@ -439,9 +482,9 @@ LS也并非没有痛点。大部分的LS都是基于同一个域名共享存储�
 
 上面说到的这些问题大部分归咎于内部的实现，需要依赖浏览器开发者来改进。并且并非仅仅存在于LS中，相信在`IndexedDB`、`webSQL`甚至`Cookie`中也有类似的问题在发生。
 
-**实战**
+**实战开始**
 
-与这篇文章主题契合的，我想介绍百度音乐(PC端)对LS的应用，他们将所依赖的jQuery类库存入LS中(就个人观察的情况，这其实是很多站点移动端的做法)，用一段很简单的[代码](http://play.baidu.com/player/static/js/naga/common/localjs.js)对这jQuery进行载入，从而避免了网络延迟(network latency)。代码详解就书写在注释中了：
+考虑到移动端网络环境的不稳定，为了避免网络延迟(network latency)，大部分网站的移动端站点会将体积庞大的类库存储于本地浏览器的LS中。但[百度音乐](http://play.baidu.com/)同时将这个技术应用于PC端，他们将所依赖的jQuery类库存入LS中。用一段很简单的[代码](http://play.baidu.com/player/static/js/naga/common/localjs.js)来保证对jQuery的正确载入。我们一起来看看这段代码。代码详解就书写在注释中了：
 
 ```
 !function (globals, document) {
@@ -517,9 +560,7 @@ function () {
 
 ```
 
-不同网站，在不同平台对LS的使用都不大相同，最后主要看看不同站点在PC平台的利用。
-
-因为桌面端的浏览器兼容性问题比移动端会严峻的多，所以大多数对LS利用属于“做加法”，或者“轻量级”的应用
+因为桌面端的浏览器兼容性问题比移动端会严峻的多，所以大多数对LS利用属于“做加法”，或者“轻量级”的应用。最后一瞥不同站点在PC平台的对LS的使用情况：
 
 - 比如百度和github用LS记录用户的搜素行为，为了提供更好的搜索建议
 
@@ -539,6 +580,10 @@ function () {
 - 天猫用LS记录了导航栏的HTML碎片代码：
 
 ![tmall](./images/ls_tmall.png)
+
+
+## 总结
+
 
 ## 其他参考文献
 
