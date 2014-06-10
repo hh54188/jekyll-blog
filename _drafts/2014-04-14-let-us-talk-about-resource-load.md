@@ -192,14 +192,42 @@ document.body.onclick = function () {
 
 这是非常实际的问题，比如爱奇艺一个视频播放的页面，我们有没有必要在第一屏加载页面的时候就加载登陆注册，或者评论，或者分享功能呢？因为有非常大的可能用户只是来这里看这个视频，直至看完视频它都不会用到登陆注册功能，也不会去分享这个视频等。加载这些功能不仅仅对浏览器是一个负担，还有可能调用后台的接口，这样的性能消耗是非常可观的。
 
-我们可以把这样称之为"懒执行"。但是先暂停一会，听一听其他的声音。
+我们可以把这样称之为"懒执行"。虽然seajs并非有意实现如上所说的“懒执行”(它只是在尽可能遵循CommonJS标准靠近)。但“懒执行”确实能够有助于提升一部分性能。
+
+但也有人会对此产生顾虑。
 
 记得玉伯转过的一个帖子：[SeaJS与RequireJS最大的区别](http://www.douban.com/note/283566440/)。我们看看其中反对这么做的人的[观点](http://www.douban.com/note/283566440/#36022364)：
 
 >我个人感觉requirejs更科学，所有依赖的模块要先执行好。如果A模块依赖B。当执行A中的某个操doSomething()后，再去依赖执行B模块require('B');如果B模块出错了，doSomething的操作如何回滚？ 
 很多语言中的import, include, useing都是先将导入的类或者模块执行好。如果被导入的模块都有问题，有错误，执行当前模块有何意义？
 
+|
 
+>而依赖dependencies是工厂的原材料，在工厂进行生产的时候，是先把原材料一次性都在它自己的工厂里加工好，还是把原材料的工厂搬到当前的factory来什么时候需要，什么时候加工，哪个整体时间效率更高？
+
+首先回答第一个问题。
+
+第一个问题的题设并不完全正确，“依赖”和“执行”的概念比较模糊。编程语言执行通常分为两个阶段，编译(compilation)和运行(runtime)。对于静态语言(比如C/C++)来说，在编译时如果出现错误，那可能之前的编译都视为无效，的确会出现描述中需要回滚或者重新编译的问题。但对于[动态语言](http://en.wikipedia.org/wiki/Dynamic_programming_language)或者脚本语言，大部分执行都处在运行时阶段或者解释器中：假设我使用Nodejs或者Python写了一段服务器运行脚本，在持续运行了一段时间之后因为某项需求要加载某个(依赖)模块，同时也因为这个模块导致服务端挂了——我认为这时并不存在回滚的问题。在加载依赖模块之前当前的模块的大部分功能已经成功运行了。
+
+再回答第二个问题。
+
+对于“工厂”和“原材料”的比喻不够恰当。难道依赖模块没有加载完毕当前模块就无法工作吗？requirejs的确是这样的，从上面的截图可以看出，依赖模块总是先于当前模块加载和执行完毕。但我们考虑一下基于CommonJS标准的Nodejs的语法，使用require函数加载依赖模块可以在页面的任何位置，可以只是在需要的时候。也就是说当前模块不必在依赖模块加载完毕后才执行。
+
+你可能会问，为什么要拿AMD标准与CommonJS标准比较，而不是CMD标准？
+
+玉伯在[CommonJS 是什么](https://github.com/seajs/seajs/issues/269)这篇文章中已经告诉了我们CMD某种程度上遵循的就是CommonJS标准：
+
+>从上面可以看出，Sea.js 的初衷是为了让 CommonJS Modules/1.1 的模块能运行在浏览器端，但由于浏览器和服务器的实质差异，实际上这个梦无法完全达成，也没有必要去达成。
+
+>更好的一种方式是，Sea.js 专注于 Web 浏览器端，CommonJS 则专注于服务器端，但两者有共通的部分。对于需要在两端都可以跑的模块，可以 有便捷的方案来快速迁移。
+
+其实AMD标准的推出同时也是遵循CommonJS，在requirejs官方文档的[COMMONJS NOTES](http://requirejs.org/docs/commonjs.html)中说道：
+
+>CommonJS defines a module format. Unfortunately, it was defined without giving browsers equal footing to other JavaScript environments. Because of that, there are CommonJS spec proposals for Transport formats and an asynchronous require.
+
+>**RequireJS tries to keep with the spirit of CommonJS**, with using string names to refer to dependencies, and to avoid modules defining global objects, but still allow coding a module format that works well natively in the browser. 
+
+CommonJS当然是一个理想的标准，但至少现阶段对浏览器来说还不够友好，所以才会出现AMD与CMD，其实他们都是在做同一件事，就是致力于前端代码更友好的模块化。所以个人认为依赖模块的加载和执行在不同标准下实现不同，可以理解为在用不同的方式在完成同一个目标， 并不是一件太值得过于纠结的事。
 
 ### 懒加载
 
