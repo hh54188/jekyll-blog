@@ -1,9 +1,9 @@
 # Food
 
 Chinese has Eight Great Traditions food which origin from different regions of China:
-Anhui, Cantonese(Yue), Fujian, Hunan, Jiangsu, Shandong, Sichuan, and Zhejiang. Each kind of food tradition has its own cuisine(way of cooking/cooking style). Each kind of food need specify cuisine method, like Boiling, frying, and braising are the most common way. Also different tradition style depend on special region related food ingredients(material).
+Anhui, Cantonese(Yue), Fujian, Hunan, Jiangsu, Shandong, Sichuan, and Zhejiang. Each kind of food tradition has its own cuisine(way of cooking/cooking style). What a pity is my hometown's food is not on the list but they are delicious as well and worth to taste. Each kind of food need specify cuisine method, like Boiling, frying, or make them together, more than one processour. and braising are the most common way. Also different tradition style depend on special region related food ingredients(material).
 
-Now let's talk about western food. About few weeks ago, there is a popular documentary TV serial called **A bit of China**. They travel across China to show what I just told the traditional food. At the same time, there are some amuse version like **A bit of England** and **A bit of American**
+Now let's talk about western food. About few weeks ago, there is a popular documentary TV serial called **A bit of China**. They(Production unit/crew ) travel across China, using almost eight hours/episodes to show what I just told the traditional food. At the same time, there are some amuse version like **A bit of England** and **A bit of American**
 
 ![fish_and_chips](./images/fish_and_chips.jpg)
 
@@ -13,8 +13,11 @@ We both know this is not true but just some kind of joke. I this truly reflect p
 
 Compare with Chinese food, we can summarize western food have features like: 
 
+
+
 1. simple cook way
-2. protein most (beef and milk)
+2. Largely protein intake (beef and milk)
+3. because of advanced food industry(food study), western food collection seems more Nutrition
 
 
 # Relationships
