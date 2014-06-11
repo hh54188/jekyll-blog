@@ -10,9 +10,9 @@ execution begins.
 
 为什么要在标题中使用“再”这个字？因为在工作中逐渐发现，我们经常谈论的一些页面优化技巧，比如上面所说的总是把脚本放在页面的底部，压缩合并样式或者脚本文件等，时至今日已不再是最佳的解决方案，甚至事与愿违，转化为性能的毒药。这篇文章所要聊的，便是展示某些不被人关注的浏览器特性或者技巧，来继续完成资源加载性能优化的任务。
 
-## 一. Pre-loader
+## 一. Preloader
 
-### 什么是pre-loader
+### 什么是Preloader
 
 首先让我们看一看这样一类资源分布的[页面](http://stevesouders.com/cuzillion/?c0=hc1hfff2_0_f&c1=hj1hfff2_0_f&c2=bi1hfff2_0_f&c3=bi1hfff2_0_f&c4=bi1hfff2_0_f&c5=bi1hfff2_0_f&c6=bi1hfff2_0_f&c7=bi1hfff2_0_f&c8=bi1hfff2_0_f&c9=bi1hfff2_0_f&c10=bj1hfff2_0_f&c11=bj1hfff2_0_f&c12=bj1hfff2_0_f&t=1312331291063)：
 
@@ -44,7 +44,7 @@ execution begins.
 
 虽然浏览器引擎的实现不同，但原理都十分的近似。不同浏览器的制造厂商们(vendor)非常清楚浏览器的瓶颈在哪(比如network, javascript evaluate, reflow, repaint)。针对这些问题，浏览器也在不断的进化，所以我们才能看到更快的脚本引擎，调用GPU的渲染等一推陈出新的优化技术和方案。
 
-同样在资源加载上，早在IE8开始，一种叫做`lookahead pre-parser`(在Chrome中称为pre-loader)的机制就已经开始在不同浏览器中兴起。IE8相对于之前IE版本的提升除了将每台host最高并行下载的资源数从2提升至6，并且能够允许并行下载脚本文件之外，最后就是这个lookahead pre-parser机制
+同样在资源加载上，早在IE8开始，一种叫做`lookahead pre-parser`(在Chrome中称为preloader)的机制就已经开始在不同浏览器中兴起。IE8相对于之前IE版本的提升除了将每台host最高并行下载的资源数从2提升至6，并且能够允许并行下载脚本文件之外，最后就是这个lookahead pre-parser机制
 
 但我还是没有详述这是一个什么样的机制，不着急，首先看看与IE7的对比：
 
@@ -58,7 +58,7 @@ execution begins.
 
 ![./images/chrome-waterfall.jpg](./images/1-script-head-3-script-body-ie8.png)
 
-并没有统一的标准规定这套机制应具备何种功能已经如何实现。但你可以大致这么理解：浏览器通常会准备两个页面解析器parser，一个(main parser)用于正常的页面解析，而另一个(preload scanner/lookahead pre-parser)则试图去文档中搜寻更多需要加载的资源，但这里的资源通常仅限于外链的js、stylesheet、image；不包括audio、video等。并且动态插入页面的资源无效。
+并没有统一的标准规定这套机制应具备何种功能已经如何实现。但你可以大致这么理解：浏览器通常会准备两个页面解析器parser，一个(main parser)用于正常的页面解析，而另一个(preloader)则试图去文档中搜寻更多需要加载的资源，但这里的资源通常仅限于外链的js、stylesheet、image；不包括audio、video等。并且动态插入页面的资源无效。
 
 但细节方面却值得注意：
 
@@ -119,7 +119,7 @@ filamentgroup有一种著名的响应式设计的图片解决方案[Responsive D
 - CMD标准：https://github.com/cmdjs/specification/blob/master/draft/module.md
 - AMD标准：https://github.com/amdjs/amdjs-api/blob/master/AMD.md
 
-BTW: 如果你还是习惯在部署上线前把所有js文件合并打包成一个文件，那么seajs和requirejs其实对你来说并区别。
+BTW: 如果你还是习惯在部署上线前把所有js文件合并打包成一个文件，那么seajs和requirejs其实对你来说并无区别。
 
 seajs与requirejs在模块的加载方面是没有差异的，无论是requirejs在定义模块时定义的依赖模块，还是seajs在factory函数中require的依赖模块，在会在加载当前模块时被载入，异步，并且顺序不可控。差异在于factory函数执行的时机。
 
