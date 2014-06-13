@@ -16,7 +16,7 @@ Now let's talk about western food. About few weeks ago, there is a popular docum
 
 We both know this is not true but just some kind of joke. I this truly reflect people's impression about western food: lack of variety, high calories, not so healthy.
 
-Compare with Chinese food, we can summarize western food have features like: 
+Compare with Chinese food, we can summarize western food have features like:  
 
 
 
