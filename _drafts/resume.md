@@ -65,6 +65,13 @@
         - 提供REST API规范接口
         - 使用MongoDB进行后台数据存储
 
+- **2014.3 - 2014.4 &nbsp;&nbsp; PC端播放页面改版**
+    - 项目描述:
+        - 配合后台进行接口合并工作，维护组件以适应新接口
+        - 开发新的页面功能模块
+        - 优化模块间通信
+        - 合并与重构模块
+
 ## [开源项目](http://qingbob.com/project/)
 
 - **[Node-Simple-Cache](https://github.com/hh54188/Node-Simple-Cache)**
