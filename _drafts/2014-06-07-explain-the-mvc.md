@@ -121,3 +121,104 @@ appropriate model changes in the appropriate manner
 - Responsibility
 - Communication
 
+# Autonomous View & Model1
+
+Puts all presentation state and behavior for a window in a single class.
+
+# Other:
+
+- MVP
+- MVVM
+
+# Model2
+
+## Controller:
+
+In the world of the MVC pattern, controllers process incoming HTTP requests from 
+users. Each HTTP request is handled by a specific controller. ASP.NET MVC implements the concept of controllers 
+with .NET classes that have **methods** to process such requests. The methods in a controller are called action methods
+because they return an object of type ActionResult.
+
+![workflow](./images/RouterEngine.png)
+
+## Action
+
+- ViewResult: Used to return a view to render HTML in the browser. This is the most common 
+ActionResult.
+- FileResult: Used to return binary content (e.g., if you want to download a file).
+- JsonResult: Used to return an object in JavaScript Object Notation (JSON) format.
+- JavaScriptResult: Used to return JavaScript code.
+
+
+```
+public ActionResult Display()
+{
+	var name = (string)RouteData.Values["id"];
+	var model = PetManagement.GetByName(name);
+	if (model == null)
+		return RedirectToAction("NotFound");
+	return View(model);
+}
+
+public ActionResult NotFound()
+{
+	return View();
+}
+```
+
+
+File result
+
+```
+public FileResult DownloadPetPicture()
+{
+	var name = (string)RouteData.Values["id"];
+	var picture = "/Content/Uploads/" + name + ".jpg";
+	var contentType = "image/jpg";
+	var fileName = name + ".jpg";
+	return File(picture, contentType, fileName);
+}
+```
+
+## Model
+
+- Data model:The objects in the data model represent classes that interact with a database.
+- **Business model**: The classes in the business model normally implement functionality that represents business 
+rules or processing (for example, the calculation of a particular shipping cost for a shopping cart 
+item based on the weight of the item being purchased).
+- View model: The view model classes provide information passed in from controllers to views, so that the views 
+know what to render in the user’s browser. For example, a view model class can contain product 
+information that is used by a view to display the product name, price, and images. The function 
+of a view model class is not to process anything; rather, its only function is to contain data and 
+optional metadata for the view to render properly.
+
+## View
+
+```
+	<header>
+	<div class="content-wrapper">
+		<div class="float-left">
+			<p class="site-title">
+				@Html.ActionLink("your logo here", "Index", "Home")
+			</p>
+		</div>
+		<div class="float-right">
+			<section id="login">
+				@Html.Partial("_LoginPartial")
+			</section>
+			<nav>
+				<ul id="menu">
+					<li>@Html.ActionLink("Home", "Index", "Home")</li>
+					<li>@Html.ActionLink("About", "About", "Home")</li>
+					<li>@Html.ActionLink("Contact Us", "Contact", "Home")</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+	</header>
+```
+
+# Other:
+
+- fat model skinny controller
+- "贫血" VS "充血"
