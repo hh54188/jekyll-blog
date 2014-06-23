@@ -224,3 +224,186 @@ optional metadata for the view to render properly.
 
 - fat model skinny controller
 - "贫血" VS "充血"
+
+
+# Sails VS Kraken:
+
+## Controller:
+
+### Sails:
+
+`./config/routes.js`:
+
+```
+/*
+	sails generate controller comment create destroy tag like
+*/
+
+module.exports.routes = {
+  // route to index page of the home controller
+  '/': {
+    controller: 'home'
+  },
+ 
+  // route to the auth controller, login action
+  '/login': {
+    controller: 'auth',
+    action: 'login'
+  },
+ 
+  // route to blog controller, add action to add a post to a blog
+  // note that we use also the HTTP method/verb before the path
+  'post /blog/add': {
+    controller: 'blog',
+    action: 'add_post'
+  },
+ 
+  // route to get the first blog post. The find action will return
+  // the database row containing the desired information
+  '/blog/:item': {
+    controller: blog,
+    action: find
+  }
+}
+```
+
+`./api/controller/CommentController.js`:
+
+```
+module.exports = {
+    
+  
+  /**
+   * Action blueprints:
+   *    `/comment/create`
+   */
+   create: function (req, res) {
+    
+    // Send a JSON response
+    return res.json({
+      hello: 'world'
+    });
+  },
+
+
+  /**
+   * Action blueprints:
+   *    `/comment/destroy`
+   */
+   destroy: function (req, res) {
+    
+    // Send a JSON response
+    return res.json({
+      hello: 'world'
+    });
+  }
+}
+```
+
+### Kraken:
+
+`./controller/products/index.js`:
+
+```
+'use strict';
+var Product = require('../../models/productModel');
+
+module.exports = function (router) {
+
+	/**
+	 * Retrieve a list of all products for editing.
+	 */
+	router.get('/', function (req, res) {
+
+		Product.find(function (err, prods) {
+			if (err) {
+				console.log(err);
+			}
+			prods.forEach(function(prod) {
+				prod.prettyPrice = prod.prettyPrice();
+			});
+			var model =
+			{
+				products: prods
+			};
+			res.render('products', model);
+		});
+
+	});
+}
+```
+
+## Model
+
+### Sails
+
+```
+var bcrypt = require('bcrypt');
+
+module.exports = {
+
+  attributes: {
+
+    username: {
+      type: 'string',
+      required: true
+    },
+
+    password: {
+      type: 'string',
+      minLength: 6,
+      required: true,
+      columnName: 'encrypted_password'
+    }
+
+  },
+
+
+  // Lifecycle Callbacks
+  beforeCreate: function(values, next) {
+    bcrypt.hash(values.password, 10, function(err, hash) {
+      if(err) return next(err);
+      values.password = hash;
+      next();
+    });
+  }
+};
+```
+
+### Kraken
+
+`./models/productModel`
+
+```
+'use strict';
+
+var mongoose = require('mongoose');
+
+var productModel = function () {
+
+    //Define a super simple schema for our products.
+    var productSchema = mongoose.Schema({
+        name: String,
+        price: Number
+    });
+
+    //Verbose toString method
+    productSchema.methods.whatAmI = function () {
+        var greeting = this.name ?
+            'Hello, I\'m a ' + this.name + ' and I\'m worth ' + this.prettyPrice()
+            : 'I don\'t have a name :(';
+    };
+
+    //Format the price of the product to show a dollar sign, and two decimal places
+    productSchema.methods.prettyPrice = function () {
+        return (this && this.price) ? '$' + this.price.toFixed(2) : '$';
+    };
+
+    return mongoose.model('Product', productSchema);
+
+};
+
+module.exports = new productModel();
+```
+
+
