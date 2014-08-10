@@ -24,11 +24,11 @@ share: true
 
 没错，如果我发现有一类动物像鸭子一样叫，像鸭子一样游泳，那么它就是一只鸭子！
 
-![duck](../images/aop-programming/duck.jpg);
+![duck](../images/aop-programming/duck.jpg)
 
 这个检测看上去似乎有一些无厘头，但可以用来解决另一个问题——对于Javascript或者类似的动态语言，如何保证实现“接口”或者“基类”的实现呢？Stackoverflow上的这个问题[Does JavaScript have the interface type (such as Java's 'interface')?](http://stackoverflow.com/questions/3710275/does-javascript-have-the-interface-type-such-as-javas-interface)就谈到了这个问题。 针对Javascript的类似情况，我们就可以使用duck typing这个方法。对于check是否是我们需要的接口是否是我们需要的，是否符合我们需要的那种类型，我们可以检查接口的类型或者参数是否是我们需要的：
 
-```
+{% highlight javascript %}
 var quack = someObject.quack;
 
 if (typeof quack == "function" && quck.length == arguLength)
@@ -36,7 +36,7 @@ if (typeof quack == "function" && quck.length == arguLength)
     // This thing can quack
 }
 
-```
+{% endhighlight %}
 
 扯远了，其实我想表达的duck punch其实是由duck typing演化而来的：
 
@@ -48,4 +48,65 @@ if (typeof quack == "function" && quck.length == arguLength)
 (中间省略......)
 最后是某国警察，只有四个，先打了一天麻将，黄昏时一人拿一警棍进入森林，没五分钟，听到森林里传来一阵动物的惨叫，某国警察一人抽着一根烟有说有笑的出来，后面拖着一只鼻青脸肿的熊，熊奄奄一息的说到：“不要再打了，我就是兔子……”
 
-虽然duck punch有些暴力，
+又跑题了，虽然duck punch有些暴力，但不失为一个有效的方法。落实到代码上来说就是**让原有的代码兼容我们需要的功能**。比如Paul Irish博客上的这个例子：
+
+{% highlight javascript %}
+/**
+    我们都知道jQuery的`$.css`方法可以通过使用颜色的名称给元素进行颜色赋值。
+    但jQuery内置的颜色并非是那么丰富，如果我们想添加我们自定义的颜色名称应该怎么办？比如我们想添加`Burnt Sienna`这个颜色
+*/
+
+(function($){
+    
+    // 把原方法暂存起来：
+    var _oldcss = $.fn.css;
+
+    // 重写原方法：
+    $.fn.css = function(prop,value){
+
+        // 把自定义的颜色写进分支判断里，特殊情况特殊处理
+        if (/^background-?color$/i.test(prop) &amp;&amp; value.toLowerCase() === 'burnt sienna') {
+           return _oldcss.call(this,prop,'#EA7E5D');
+
+        // 一般情况一般处理，调用原方法
+        } else {
+           return _oldcss.apply(this,arguments);
+        }
+    };
+})(jQuery);
+
+// 使用方法：
+jQuery(document.body).css('backgroundColor','burnt sienna')
+{% endhighlight %}
+
+可以看出`duck punch`的模式不过如此：
+
+{% highlight javascript %}
+(function($){
+
+    var _old = $.fn.method;
+
+    $.fn.method = function(arg1,arg2){
+
+        if ( ... condition ... ) {
+           return  ....
+        } else {           // do the default
+           return _old.apply(this,arguments);
+        }
+    };
+})(jQuery);
+{% endhighlight %}
+
+**但是这么做有一个问题：需要修改原方法。**这违背了“开放-封闭”原则，本应对拓展开放，对修改关闭。怎么解决这个问题呢？使用AOP编程。
+
+## AOP
+
+AOP全称为`Aspect-oriented programming`，很明显这是相对于`Object-oriented programming`而言。`Aspect`可以翻译为切面，也就是面向切面编程。
+
+怎么理解切面？
+
+## 参考文献：
+
+- [How to Fulfill Your Own Feature Request -or- Duck Punching With jQuery!](http://www.paulirish.com/2010/duck-punching-with-jquery/)
+- [Duck Punching JavaScript - Metaprogramming with Prototype](http://www.ericdelabar.com/2008/05/metaprogramming-javascript.html)
+
