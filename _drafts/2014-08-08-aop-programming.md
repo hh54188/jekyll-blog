@@ -101,7 +101,7 @@ jQuery(document.body).css('backgroundColor','burnt sienna')
 
 ## AOP
 
-AOP全称为`Aspect-oriented programming`，很明显这是相对于`Object-oriented programming`而言。`Aspect`可以翻译为切面，也就是面向切面编程。
+AOP全称为`Aspect-oriented programming`，很明显这是相对于`Object-oriented programming`而言。`Aspect`可以翻译为“切面”或者“侧面”，也就是面向切面编程。
 
 怎么理解切面？
 
