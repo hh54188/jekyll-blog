@@ -142,6 +142,10 @@ Class Person
 
 更可怕的是，其他的方法中也要添加相似的代码，这样以来代码的可维护性和可读性便成了很大的问题。我们希望把这些零散但是公共的非业务代码收集起来，更友好的使用和管理他们，这便是切面编程。切面编程在避免修改远代码的基础上实现了代码的复用。就好比把不同的对象横向剖开，关注于改造内部方法，而非全局。
 
+
+### 实现
+
+
 在上一节中介绍的Duck punch与切面编程类似，都是在改造原方法的同时保证原方法功能。但就像结尾说的一样，直接修改原方法的模式有悖于面向对象的原则。
 
 切面编程在Java上实现的更好，本想把Java的实现模式也搬来这篇文章中，但不才Java水平有限无法，对Java的实现不是非常理解。在这里就只展示Javascript的实现。
@@ -154,7 +158,55 @@ AOP中有一些概念需要介绍一下，虽然我们不一定要严格执行
 - advice：拦截方式
 - point-cut：拦截方法
 
-当我们使用AOP封装一个方法的时候，比如加入日志发送功能，我们要考虑在什么情况下发送日志，是在业务方法触发之前还是之后；还是在抛出异常的时候
+当我们使用AOP封装一个方法的时候，比如加入日志发送功能，我们要考虑在什么情况下发送日志，是在业务方法触发之前还是之后；还是在抛出异常的时候，还是由日志发送是否成功再决定是否执行业务方法
+
+比如gihub上的[meld](https://github.com/cujojs/meld)这个开源项目，就是一个很典型的AOP类库，我们看看它的API：
+
+{% highlight javascript %}
+// 假设我们有一个对象myObject, 并且该对象有一个doSomething方法：
+
+var myObject = {
+    doSomething: function(a, b) {
+        return a + b;
+    }
+};
+
+// 现在我们想拓展它，在执行那个方法之后打印出刚刚执行的结果:
+
+var remover = meld.after(myObject, 'doSomething', function(result) {
+    console.log('myObject.doSomething returned: ' + result);
+});
+
+// 试试执行看：
+
+myObject.doSomething(1, 2); // Logs: "myObject.doSomething returned: 3"
+
+// 这个时候我们想移除刚刚的修改：
+
+remover.remove();
+
+{% endhighlight %}
+
+由此可以看出，通常我们需要三个参数，被修改的对象，被修改对象的方法，以及触发的时机，还有触发的动作。我们不必按照`meld`实现一个一模一样的版本，我们可以暂且实现一个简易版，一窥内部究竟。
+
+上面聊了那么多的概念和理论，貌似高大上的样子，但是实现起来却非常的简单。比如我们想实现上面描述的`before`方法可以这么办:
+
+{% highlight javascript %}
+
+function doAfter(target, method, afterFunc){
+    var func = target[method];
+    return function(){
+        var res = func.apply(this, arguments);
+        afterFunc.apply(this, arguments);
+        return res;   
+    };
+}
+
+{% endhighlight %}
+
+
+
+
 
 
 
