@@ -105,6 +105,47 @@ AOP全称为`Aspect-oriented programming`，很明显这是相对于`Object-orie
 
 怎么理解切面？
 
+在面向对象编程中，当我们定义的类通常是领域模型，它的拥有的方法通常是和纯粹的业务逻辑相关。比如：
+{% highlight java %}
+Class Person
+{
+    private int money
+    public void pay(price)
+    {
+         this.money = this.money - price;   
+    }
+}
+{% endhighlight %}
+
+但通常实际情况会更复杂，比如我们需要在付款的`pay`方法中加入授权检测，或者用于统计的日志发送，甚至容错代码。于是代码会变成这样：
+
+{% highlight java %}
+Class Person
+{
+    private int money
+    public void pay(price)
+    {
+        try 
+        {
+            if (checkAuthorize() == true) {
+                this.money = this.money - price;    
+                sendLog();
+            }
+        }
+        catch (Exception e)
+        {
+
+        }   
+    }
+}
+{% endhighlight %}
+
+更可怕的是，其他的方法中也要添加相似的代码，这样以来代码的可维护性和可读性便成了很大的问题。我们希望把这些零散但是公共的非业务代码收集起来，更友好的使用和管理他们，这便是切面编程。切面编程在避免修改远代码的基础上实现了代码的复用。就好比把不同的对象横向剖开，关注于改造内部方法，而非全局。
+
+
+
+其实上面
+
 ## 参考文献：
 
 - [How to Fulfill Your Own Feature Request -or- Duck Punching With jQuery!](http://www.paulirish.com/2010/duck-punching-with-jquery/)
