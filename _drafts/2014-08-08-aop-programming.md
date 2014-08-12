@@ -212,13 +212,6 @@ function doAfter(target, method, afterFunc){
 这一篇一定让你失望了，代码简单又寥寥无几。本篇主要在于介绍有关duck和AOP的这几类思想，我想编程的乐趣不仅仅在于落实在编码上，更在于整个架构的设计。提高代码的可维护性和可拓展性会比高深莫测的代码更重要。
 
 
-
-
-
-
-
-其实上面
-
 ## 参考文献：
 
 - [How to Fulfill Your Own Feature Request -or- Duck Punching With jQuery!](http://www.paulirish.com/2010/duck-punching-with-jquery/)
