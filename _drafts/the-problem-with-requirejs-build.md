@@ -77,7 +77,18 @@ OK，那问题来了，当你使用build.js开始进行打包时，配置的根�
 
 那么即使build.js与main.js都配置了打包目录，都应该指向的是main.js所在的`/src`目录。
 
-打包脚本的配置肯定已经比我们先考虑到了这个问题，在打包配置中有这样一个字段`mainConfigFile`，用来单独指定有关main.js的配置文件
+打包脚本的配置肯定已经比我们先考虑到了这个问题，在打包配置中有这样一个字段`mainConfigFile`，用来单独指定有关main.js的配置文件，这也就意味着main.js与build.js公用同一个配置文件，在这里我们比如叫`config.js`。看上去很美好，但第一个问题是如何在main.js中如何引入config.js?
+
+// 这里还是需要确定一下先的
+OK，requirejs貌似没有提供这样的机制，目前我找到的两个方法都并不完美
+
+1. 方法一：把config.js中的内容在main.js中再复制一遍。也就是同时维护两份相同内容的代码。
+
+2. 方法二： 把config.js在main中引入，而main.js中首先引入config.js。比如这个样子：
+
+```
+
+```
 
 
 
