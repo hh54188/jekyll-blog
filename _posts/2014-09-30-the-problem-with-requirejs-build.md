@@ -26,7 +26,7 @@ share: true
     |--lib
         |--jQuery.js
         |--Bakcbone.js
-```
+{% endhighlight %}
 
 这种情况的特点是，入口main.js和其他的模块并不在同一目录中。
 
