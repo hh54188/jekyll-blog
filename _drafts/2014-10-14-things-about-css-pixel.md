@@ -161,6 +161,19 @@ window.devicePixelRatio = physical pixels / dips
 
 分母dips全称为device-independent pixels，意为*与设备无关像素*。以iPhone4为例，在垂直状态下手机的物理像素宽度有640px，但是因为2:1缩放的关系，手机的分辨率像素只有320px。此时的DevicePixelRatio就为 640 / 320 = 2; 几乎所有的1080P手机都采用了类似的缩放技术，所以大部分手机都有DevicePixelRatio，
 
+visual  viewport
+layout  viewport
+
+ device-width  Vs width
+ 
+
+  当元素宽度大于浏览器宽度时，浏览器是否应该进行适配？ Zoom in or zoom out
+
+  content="width=device-width 中的 width究竟是什么的宽度  ？	
+
+  This means a page with initial-scale=1 will render at close to the same physical size in Fennec for Maemo, Mobile Safari for iPhone, and the Android Browser on both HDPI and MDPI phones.
+
+
 
 
 
