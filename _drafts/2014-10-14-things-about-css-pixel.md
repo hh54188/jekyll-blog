@@ -117,6 +117,8 @@ DPI全称为Dots per inch。译为每英寸点数。当你听到人们在谈一�
 
 【待续】
 
+【为什么大型显示器和电视的dpi都非常低】
+
 但是当我们谈论一张图片的PPI或者DPI的时候又是另外一回事了。
 
 
@@ -128,7 +130,7 @@ DPI全称为Dots per inch。译为每英寸点数。当你听到人们在谈一�
 
 ## CSS Reference Pixel
 
-退一步来说，即使我们规定了CSS像素值需要与设备像素大小相等，但当随着手持设备距离人的远近不同， 都会导致设备上的CSS像素的可见大小也会发生变化（类似于巨大的月亮因为离地球遥远在人眼看来也不过像硬币一样大小），甚至还未每台设备上物理像素的大小不同。为了保证CSS像素在不同设备和不同距离上观测到的大小保持一致保持连贯性。W3C定义了一个CSS相对像素（CSS reference pixel）的概念
+我们规定了CSS像素值需要与设备像素大小相等，但当随着手持设备距离人的远近不同，设备像素密度的不同，都会导致我们看见的设备上的CSS像素的可见大小发生变化（类似于巨大的月亮因为离地球遥远在人眼看来也不过像硬币一样大小）。为了保证CSS像素在不同设备和不同距离上观测到的大小保持一致保持连贯性。W3C定义了一个CSS相对像素（CSS reference pixel）的概念
 
 > It is recommended that the reference pixel be the visual angle of one pixel on a device with a pixel density of 96dpi and a distance from the reader of an arm's length. For a nominal arm's length of 28 inches, the visual angle is therefore about 0.0213 degrees.
 
@@ -145,7 +147,19 @@ W3C把距离自己一个手臂长度（约28英寸），像素密度为96dpi设�
 
 ![Fig-03-CSS-Reference-Pixel](./images/ppi/Fig-03-CSS-Reference-Pixel.jpg)
 
-这个概念已经推出相当长一段时间了，但是一直得到很少的注意。当然不得不承认也缺少一定的可行性
+这个概念已经推出相当长一段时间了，但是一直得到很少的注意。当然不得不承认也缺少一定的可行性。
+
+## DevicePixelRatio
+
+接下来进入我们的主角手机身上： 有了物理像素，分辨率像素，CSS像素——那么问题来了，当你在手机上使用浏览器打开一张网页时，网页的宽度应该是多少？
+
+还记得上面说过的Surface和Macbook上应用的缩放技术吗？如何形容缩放后的分辨率与实际的设备分辨率之间的关系呢？DevicePixelRatio就是干这个的，DevicePixelRatio定义如下：
+
+```
+window.devicePixelRatio = physical pixels / dips
+```
+
+分母dips全称为device-independent pixels，意为*与设备无关像素*。以iPhone4为例，在垂直状态下手机的物理像素宽度有640px，但是因为2:1缩放的关系，手机的分辨率像素只有320px。此时的DevicePixelRatio就为 640 / 320 = 2; 几乎所有的1080P手机都采用了类似的缩放技术，所以大部分手机都有DevicePixelRatio，
 
 
 
