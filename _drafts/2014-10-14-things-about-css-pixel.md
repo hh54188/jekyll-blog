@@ -165,9 +165,38 @@ W3C把距离自己一个手臂长度（约28英寸），像素密度为96dpi设�
 相对于`html`元素的，那么html元素又是相对于谁的？
 相对于浏览器窗口的。并且在浏览器最大化的情况下，10%实际上是相对于桌面分辨率宽度而言的。
 
-OK，在于是我们得到了一个结论，在桌面浏览器中，html的布局是由浏览器窗口决定的。我们把浏览器窗口的大小称之为viewport（视口）
+OK，在于是我们得到了一个结论，在桌面浏览器中，html的布局是由浏览器窗口决定的。这个窗口称之为viewport（视口）
 
-但这一套规则在手机则是无法被执行的。一台不同手机的屏幕分辨率目测为400px，如果一个网页在手机浏览器上显示时只
+但这一套规则在手机则是无法被执行的。大部分手机的屏幕分辨率目测为400px，如果页面上真的有某一个页面元素仅占10%，也就是40px的话，肉眼几乎是无法分辨的。实际情况应该会更糟糕，iPhone4的Safari默认是以980px来渲染网页的。如果你在Chrome以桌面版的方式访问stackoverflow，那么结果会是这样的:
+
+![iphone_stackoverflow](./images/ppi/iphone_stackoverflow.png)
+
+体验非常糟糕吧，所以的链接几乎都无法准确点击。OK，那么如何解决这个问题？
+
+第一个办法，放大页面。
+
+我们会很习惯的用手势去放大页面。但是要注意我们这里做的仅仅是放大页面，改变的是页面的缩放(scale)，效果与PC上浏览器的Ctrl+"+"类似。但是没有改变页面的布局，此时用于渲染页面布局的layout仍然是980px
+
+![iphone_stackoverflow_zoomin](./images/ppi/iphone_stackoverflow_zoomin.png)
+
+第二个办法是，改变布局。
+比如下面一个页面上有一张320px宽的图片，如果我们以默认的980px去渲染的话，它会显得过于窄小：
+
+![vp980notspecified](./images/ppi/vp980notspecified.jpg)
+
+但如果我们可以将渲染它的布局设为320px的话，看上去就会好很多了，同时此时我们也未对页面进行缩放：
+
+![vp320width](./images/ppi/vp320width.jpg)
+
+当然你也可以结合上一步，同时对页面进行缩放：
+
+![vp320width150scale](./images/ppi/vp320width150scale.jpg)
+
+不仅仅是放大，即使是在320px的像素下，我们也可以进行缩小：
+
+![vp320width50scale](./images/ppi/vp320width50scale.jpg)
+
+
 
 ## DevicePixelRatio
 
