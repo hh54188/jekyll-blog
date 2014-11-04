@@ -141,7 +141,7 @@ DPI全称为Dots per inch。译为每英寸点数。当你听到人们在谈一�
 > It is recommended that the reference pixel be the visual angle of one pixel on a device with a pixel density of 96dpi and a distance from the reader of an arm's length. For a nominal arm's length of 28 inches, the visual angle is therefore about 0.0213 degrees.
 
 
-W3C把距离自己一个手臂长度（约28英寸），像素密度为96dpi设备上的一个物理像素设为参考像素。同时可以算出眼睛看到参考像素的视野角度为0.0213度
+W3C规定，把人眼辨别到，距离自己一个手臂长度（约28英寸），像素密度为96dpi设备上的一个物理像素设为参考像素。同时可以算出眼睛看到参考像素的视野角度为0.0213度
 
 ![pxangles](./images/ppi/pxangles.png)
 
@@ -153,7 +153,6 @@ W3C把距离自己一个手臂长度（约28英寸），像素密度为96dpi设�
 
 ![Fig-03-CSS-Reference-Pixel](./images/ppi/Fig-03-CSS-Reference-Pixel.jpg)
 
-这个概念已经推出相当长一段时间了，但是一直得到很少的注意。当然不得不承认也缺少一定的可行性。
 
 ## `<meta name="viewport">`
 
@@ -161,15 +160,17 @@ W3C把距离自己一个手臂长度（约28英寸），像素密度为96dpi设�
 
 我们有了物理像素，分辨率像素，CSS像素——那么问题来了，当你再手机上使用浏览器打开网页时，网页的宽度应该是多少？
 
-首先我们需要了解一个概念：viewport，我常见到的中文译为视口，但个人觉得这个翻译有一些灰色。 Viewport是用于限制Html元素——“限制”这两个字不是那么好理解。quirksmode上有一篇[文章](http://www.quirksmode.org/mobile/viewports.html)谈到这个概念时打了一个非常形象的比方：
+首先我们需要了解一个概念：viewport，我常见到的中文译为视口，但个人觉得这个翻译有一些晦涩。 Viewport是用于限制Html元素——“限制”这两个字不是那么好理解。quirksmode上有一篇[文章](http://www.quirksmode.org/mobile/viewports.html)谈到这个概念时打了一个非常形象的比方：
 
-首先让我们仔细考虑一下PC桌面浏览器的情形：假设body标签内有一个元素宽度为10%: `div {width:10%;}`，那么它这里所说的10%是相对于谁的？
+假设body标签内有一个块状元素宽度为10%: `div {width:10%;}`，我们知道当我们缩放浏览器时这个块状元素的宽度也会跟着变化。 这是因为它的宽度占它父元素的10%。那么它的父元素，也就是body元素的宽度是由谁决定的呢？
 
-相对于`body`标签的，那么body标签又是相对于谁的？
-相对于`html`元素的，那么html元素又是相对于谁的？
-相对于浏览器窗口的。并且在浏览器最大化的情况下，10%实际上是相对于桌面分辨率宽度而言的。
+我们知道一个块状元素默认宽度为它父元素的100%，也就是body元素的宽度与包裹它的html元素宽度相同。那么问题又变成了html元素的宽度是由谁决定的？
 
-OK，在于是我们得到了一个结论，在桌面浏览器中，html的布局是由浏览器窗口决定的。这个窗口称之为viewport（视口）
+答案是浏览器窗口。现在我们可以归纳起来，html元素是被浏览器限制并且包裹起来的。html的宽度就是浏览器的宽度。
+
+但事实上，html元素宽度是占据viewport的100%，而在桌面浏览器中，viewport与浏览器窗口大小刚好相等。**注意，这仅仅是在桌面浏览器上**
+
+OK，在于是我们得到了一个结论，html宽度是由viewport决定的，但是 在桌面浏览器中，viewport大小与浏览器窗口大小相等。
 
 但这一套规则在手机则是无法被执行的。大部分手机的屏幕分辨率目测为400px，如果页面上真的有某一个页面元素仅占10%，也就是40px的话，肉眼几乎是无法分辨的。实际情况应该会更糟糕，iPhone4的Safari默认是以980px来渲染网页的。如果你在Chrome以桌面版的方式访问stackoverflow，那么结果会是这样的:
 
