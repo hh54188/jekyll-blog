@@ -29,7 +29,9 @@ CSS像素(黑色边框)开始被拉伸，此时1个CSS像素大于1个屏幕像�
 
 那么在未被拉伸的情况下，原始像素的大小是应该是多大呢？这是由设备的屏幕像素决定的，这里我们可以称之为物理像素（physical pixel）或者设备像素（device pixel）。大部分显示器都是基于点阵的，也就是说通过一系列的小点排成一个大矩形，每个小点显示不同的颜色来形成图像。在上面的例子中，显示器分辨率宽度为1280，也就意味着显示器上有1280个设备物理像素点。当然这里的考虑只是最佳分辨率的情况。
 
-这里例子说明了一件非常重要的事：CSS像素从来只是一个**相对值**。 W3C从来就没有规定过一个单位的CSS像素值需要和一个设备像素值相等。那么设备像素和CSS像素之间应该是具备什么样的关系呢，请允许我再引入一个概念：PPI，再继续我们下面的讨论。
+这里例子说明了一件非常重要的事：CSS像素从来只是一个**相对值**。 W3C从来就没有规定过一个单位的CSS像素值需要和一个设备像素值相等。这是一个非常重要的概念，现在我们所使用的大多数移动设备，甚至桌面设备，你所看到的单个像素都是由多个物理像素组成的像素
+
+那么设备像素和CSS像素之间应该是具备什么样的关系呢，请允许我再引入一个概念：PPI，再继续我们下面的讨论。
 
 
 
@@ -83,6 +85,18 @@ OK，现在我们认识了三种像素，CSS像素，分辨率下像素，物理
 官方告诉我们在2160x1440的分辨率下的原始PPI为216（由此我们可以推算出屏幕的长为10英寸），因此在放大1.5倍之后的像素密度应该是144PPI(1440/10)。但是这样的话视觉体验会不会差了很多，其实是不一定的。这个问题我们聊到DPI的时候可以再谈。同时是因为微软的历史包袱过于沉重，放大之后仍然存在问题，比如大部分软件如果使用的是点阵字体而非适量字体的话（点阵在这里可以理解为与位图类似），强制拉伸会出现字体虚化的情况（基本上大部分软件都有这样的情况）。
 
 这里可以拿来相提并论的是Retina版本的Macbook Pro，它使用的也是同样解决办法，显示器的物理像素点实际上有2880x1880，但默认的最优分辨率只有1440x900，刚好是物理像素的一半，也就是说操作系统默认就使用了4:1的缩放（iPhone也是这么处理的）。	但是这就意味一个分辨率下像素面积被拓展了放大了四倍，那么和Windows一样会导致图片模糊虚化问题，导致像素的颗粒增大和肉眼可见。 那么如何继续发挥Retina的优势呢，苹果鼓励开发者准备两份素材，普通和高清素材（通过文件名称来区分，比如普通素材名称为apple.png，那么高清素材名称就为apple@2x.png），自然高清素材是普通素材面积的四倍，系统会优先使用高清素材，但自动缩小到普通素材的大小，这样图像也就更加细腻了，也就解决了图片被拉伸的问题。
+
+## DevicePixelRatio
+
+接下来进入我们的主角手机身上： 有了物理像素，分辨率像素，CSS像素——那么问题来了，当你在手机上使用浏览器打开一张网页时，网页的宽度应该是多少？
+
+还记得上面说过的Surface和Macbook上应用的缩放技术吗？如何形容缩放后的分辨率与实际的设备分辨率之间的关系呢？DevicePixelRatio就是干这个的，DevicePixelRatio定义如下：
+
+```
+window.devicePixelRatio = physical pixels / dips
+```
+
+分母dips全称为device-independent pixels，意为*与设备无关像素*。以iPhone4为例，在垂直状态下手机的物理像素宽度有640px，但是因为2:1缩放的关系，手机的分辨率像素只有320px。此时的DevicePixelRatio就为 640 / 320 = 2; 几乎所有的1080P手机都采用了类似的缩放技术，所以大部分手机都有DevicePixelRatio，
 
 ## 番外篇：PPI VS DPI
 
@@ -231,29 +245,9 @@ OK，在于是我们得到了一个结论，html宽度是由viewport决定的，
 
 
 
-## DevicePixelRatio
 
-接下来进入我们的主角手机身上： 有了物理像素，分辨率像素，CSS像素——那么问题来了，当你在手机上使用浏览器打开一张网页时，网页的宽度应该是多少？
 
-还记得上面说过的Surface和Macbook上应用的缩放技术吗？如何形容缩放后的分辨率与实际的设备分辨率之间的关系呢？DevicePixelRatio就是干这个的，DevicePixelRatio定义如下：
-
-```
-window.devicePixelRatio = physical pixels / dips
-```
-
-分母dips全称为device-independent pixels，意为*与设备无关像素*。以iPhone4为例，在垂直状态下手机的物理像素宽度有640px，但是因为2:1缩放的关系，手机的分辨率像素只有320px。此时的DevicePixelRatio就为 640 / 320 = 2; 几乎所有的1080P手机都采用了类似的缩放技术，所以大部分手机都有DevicePixelRatio，
-
-visual  viewport
-layout  viewport
-
- device-width  Vs width
- 
-
-  当元素宽度大于浏览器宽度时，浏览器是否应该进行适配？ Zoom in or zoom out
-
-  content="width=device-width 中的 width究竟是什么的宽度  ？	
-
-  This means a page with initial-scale=1 will render at close to the same physical size in Fennec for Maemo, Mobile Safari for iPhone, and the Android Browser on both HDPI and MDPI phones.
+HDPI and MDPI phones.
 
 
 
