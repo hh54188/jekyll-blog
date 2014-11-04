@@ -35,6 +35,8 @@ CSS像素(黑色边框)开始被拉伸，此时1个CSS像素大于1个屏幕像�
 
 ## PPI
 
+PPI的复杂之处在于他所属的上下文环境不同，意义会完全不一样。就好像”师傅“这个词在西游记里可以指唐僧，可以是正在询问的路人，也可以是公交车司机，也可以是你学艺的老师。同理，当我们谈论显示设备时可以是指像素密度，可以和图片打印相关一个参数，也可以和dpi互换。
+
 这个概念在不同上下文中意义是不同的，在这里我们只讨论在显示器上的情况。并且它经常和DPI混淆。文章的最后会介绍PPI的在其他语境中的一些情况和对DPI的区别。
 
 PPI全称为Pixel Per Inch，译为每英寸像素取值，更确切的说法应该是像素密度，也就是衡量单位物理面积内拥有像素值的情况。
@@ -159,6 +161,8 @@ W3C把距离自己一个手臂长度（约28英寸），像素密度为96dpi设�
 
 我们有了物理像素，分辨率像素，CSS像素——那么问题来了，当你再手机上使用浏览器打开网页时，网页的宽度应该是多少？
 
+首先我们需要了解一个概念：viewport，我常见到的中文译为视口，但个人觉得这个翻译有一些灰色。 Viewport是用于限制Html元素——“限制”这两个字不是那么好理解。quirksmode上有一篇[文章](http://www.quirksmode.org/mobile/viewports.html)谈到这个概念时打了一个非常形象的比方：
+
 首先让我们仔细考虑一下PC桌面浏览器的情形：假设body标签内有一个元素宽度为10%: `div {width:10%;}`，那么它这里所说的10%是相对于谁的？
 
 相对于`body`标签的，那么body标签又是相对于谁的？
@@ -206,7 +210,23 @@ OK，在于是我们得到了一个结论，在桌面浏览器中，html的布�
 
 更重要的是，我们还可以通过设置布局宽度等于手机分辨率宽度来更好的利用响应式设计，比如`width=device-width`，注意这里的`device-width`表示手机的分辨率宽度，而并非手机物理像素宽度。iPhone4在垂直状态下物理像素宽度为640，这里的`device-width`代表的则应该是它的dip像素320px。
 
-给viewport标签添加`width=device-width`适用于这样一种情况：你为移动设备开发的响应式网页，首先你会面临多重分辨率，但是你又没有必要使用mediaquery，同时也为了避免手机浏览器使用桌面分辨率宽度去渲染页面，造成可用性的问题。
+给viewport标签添加`width=device-width`适用于这样一种情况：你为移动设备开发的响应式网页，首先你会面临多重分辨率，但是你又没有必要使用到重量级的mediaquery，同时也为了避免手机浏览器使用桌面分辨率宽度去渲染页面，造成可用性的问题。这样让你的响应式页面能够适用大多数的移动设备。
+
+你可能会进一步的以为在iPhone下设置`width=device-width`其实就是与`width=320`一个意思吧？不，你还需要考虑当用户将手机横握时，此时设备宽度就变成了480。但如果你将`width`设置成一个固定的数值时。如论用户手持设备的方向如何，都能保证用于渲染网页的宽度不变。
+
+写到这里我们可以做一个总结，viewport标签的作用是什么？它能够让你撇开设备的干扰，告诉设备你想用什么样的宽度渲染网页。让它听命于你，而不是你听命于他。
+
+上面我们谈到viewport有个半专业的名词成为layout viewport，顾名思义这个viewport专用于页面渲染的控制。还有一种viewport称之为visual viewport可以译为可视窗口。两种viewport的区分如下：
+
+![mobile_layoutviewport](./images/ppi/mobile_layoutviewport.jpg)
+![mobile_visualviewport](./images/ppi/mobile_visualviewport.jpg)
+
+由此可以看出visual viewport就好比是浏览网页的一个窗口，网页正是这窗外的景色。当然我们还会遇见layout viewport与visual viewport大小相等的情况。比如像下面这样：
+
+![mobile_viewportzoomedout](./images/ppi/mobile_viewportzoomedout.jpg)
+
+这也就是我上面描述的`width=device-width`的情况了
+
 
 
 
