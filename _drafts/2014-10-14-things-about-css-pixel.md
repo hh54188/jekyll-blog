@@ -121,13 +121,12 @@ CSS像素(黑色边框)开始被拉伸，此时1个CSS像素大于1个屏幕像�
 
 但把素材和文字放大就真的一劳永逸了吗？不，甚至还会带来副作用。放大素材对位图来说是非常危险的一件事。假设一款软件中的素材的像素为32x32的图片，但是为了配合整体界面的拉伸,它也必须被拉伸至原来的1.5倍，成为48x48。你一定有在Photoshop中把图片强制放大为原来几倍的效果。没错，这样以来，图片素材就变得模糊了。同时因为Window使用的字体为点阵字体而非矢量字体，所以甚至在软件中的字体也会变得模糊。
 
-【缺图】![blurry](./images/ppi/blurry.png)
-
-但位图可能会被拉伸的问题并非也是绝对的，假设软件需要显示的icon大小为32x32，但是图片素材大小为64x64，那么即使Windows的UI界面拉伸1.5倍，icon大小为48x48，因为原图片足够大，图片仍处于未拉伸的状态。那么也不会模糊。
-
 再简单一点来说，采用这种技术需要将32x32的图片强制拉伸为48x48，多出来的像素如何凭空生成？计算机只有猜测了，通过线性插值算法。所以图片便会出现模糊。
 
 ![enlarged](./images/ppi/enlarged.jpg)
+
+但位图可能会被拉伸的问题并非也是绝对的，假设软件需要显示的icon大小为32x32，但是图片素材大小为64x64，那么即使Windows的UI界面拉伸1.5倍，icon大小为48x48，因为原图片足够大，图片仍处于未拉伸的状态。那么也不会模糊。
+
 
 反过来我们可以得出结论，为了让在低PPI上和高PPI上图片显示的效果一致，图片素材应该尽可能的高清。
 
@@ -138,76 +137,46 @@ iPhone也是一样的原理，那么如果解决这个问题呢，苹果鼓励�
 
 ## PPI之于Web
 
+从上面我知道，因为高像素密度设备下的UI会采用一定比例的缩放，所以CSS像素也会面临同样的问题：
+
+![css-device-bitmap-pixels](./images/ppi/css-device-bitmap-pixels.png)
+
+正如上图所示，左侧普通屏幕中，2x2的CSS像素真的只需要2x2的物理像素。但是右侧高清屏中，2x2的CSS像素却需要4x4的物理像素。
+
 上面说道，解决高清PPI下图片渲染问题的方法之一就是使用更高清的图片素材。但问题是需要有多高清？
 
 在Retina显示屏上，根据上一节描述的原理，当我们需要渲染一张32x32的图片，我们实际上需要准备64x64的素材。因为苹果默认把所有素材都进行了两倍的放大。但如果有一台更高清的设备，进行了三倍或者四倍或者更高的倍数，我们岂不是需要准备体积更大的文件素材？在Web开发中我们正在面临这样的问题。
 
-首先我们要学会如何表达和判断这样一种CSS像素和物理像素不平等
-
-
-
+首先我们要学会如何表达和判断这样一种CSS像素和物理像素不平等。
 
 ### DevicePixelRatio
 
-接下来进入我们的主角手机身上： 有了物理像素，分辨率像素，CSS像素——那么问题来了，当你在手机上使用浏览器打开一张网页时，网页的宽度应该是多少？
-
-还记得上面说过的Surface和Macbook上应用的缩放技术吗？如何形容缩放后的分辨率与实际的设备分辨率之间的关系呢？DevicePixelRatio就是干这个的，DevicePixelRatio定义如下：
+DevicePixelRatio定义如下：
 
 ```
 window.devicePixelRatio = physical pixels / dips
 ```
 
-分母dips全称为device-independent pixels，意为*与设备无关像素*。以iPhone4为例，在垂直状态下手机的物理像素宽度有640px，但是因为2:1缩放的关系，手机的分辨率像素只有320px。此时的DevicePixelRatio就为 640 / 320 = 2; 几乎所有的1080P手机都采用了类似的缩放技术，所以大部分手机都有DevicePixelRatio，
+分母dips全称为device-independent pixels，译为*与设备无关像素*。 更通俗的说是与物理像素无关的CSS像素。
 
-## 番外篇：PPI VS DPI
+以iPhone4为例，在垂直状态下手机的物理像素宽度有640px，但是因为2:1缩放的关系，此时的dip，也就是 CSS像素只有320px。 此时的DevicePixelRatio就为 640 / 320 = 2; 
 
-DPI全称为Dots per inch。译为每英寸点数。当你听到人们在谈一台显示设备的DPI时，他们其实仍然是在谈论这台设备的的PPI，此时的dots就代表设备的物理像素，此时的DPI就是设备的像素密度。
+注意devicePixelRatio并非是一个默认值。在默认情况下CSS像素是由手机默认的缩放决定的。但同时浏览器字体也可以被认为的进行缩放。iPhon4中默认的分辨率宽度为320px。我们完全可以自行放大两倍为160px。这样以来window.devicePixelRatio就变味了 640 / 160 = 4。
 
-如果你查看一张JPG格式的图片属性中的详情，或者使用PHOTOSHOP打开新建一些图 片你会发现在其中有一个以dpi为单位的分辨率的字段。但这个字段对图片来说是没有意义的，在图片生成的时候它是以文件的形式存储在硬件设备上的，换句话说，你能告诉我你八百万像素的图片有多少寸吗？只有当图片被显示，被打印出来时，dpi才有它的意义。
+### dppx
 
-判断一张数码照片的质量好坏只与下面几个因素相关：
+与divicePixelRatio几乎等价的一个概念时dppx：dots per pixel。 表示单个CSS像素占用的物理像素个数。仔细想想，这与devicePixelRatio不是同一个意思吗, iPhone4的dppx为2，不就是与devicePixelRatio刚好相等吗。devicePixelRatio是从宏观上来说这件事。把整体宽度做运算。dppx是从微观角度上说这件事，考虑的是单个像素之间的比较
 
-1. 文件的大小（像素多少）
-2. 生成照片的设备好坏（照相机的传感器或者扫描仪）
-3. 照片存储的格式（是否有损）
-4. 拍摄者的水平
+### dpi
 
+请记住，当我们在谈论一台显示设备的像素密度时，dpi与ppi是等价的。dots per pixel中的dots就是代指物理像素。
 
+但是如果你在mediaquery中使用dpi是就要注意了，Chrome会在控制台中提示你使用dppx而非dpi:
 
+>Consider using 'dppx' units instead of 'dpi', as in CSS 'dpi' means dots-per-CSS-inch, not dots-per-physical-inch, so does not correspond to the actual 'dpi' of a screen. In media query expression: only screen and (-webkit-min-device-pixel-ratio: 2), not all, not all, only screen and (min-resolution: 192dpi), only screen and (min-resolution: 2dppx)
+也就是实际生活中的一英寸。但是在mediaquery中inch表示的CSS定义中的一英寸。
 
-
-
-
-但是DPI真正的意义是体现在印刷行业中。首先我们要解释DPI中dots是一个什么概念
-
-当一张显示器上的图片打印在图片上的时候，便不再有像素这个观念，取而代之的是印刷设备的每一个“点”：
-
-![DPI_and_PPI](./images/ppi/DPI_and_PPI.png)
-
-当你尝试去用放大镜去查看彩色印刷物品上的图片时，从小到大你看到的结果应该是这样的：
-
-![zoom_pic](./images/ppi/zoom_pic.gif)
-
-为什么会这样？简而言之，印刷的原理是通过半色调(halftone)技术，通过控制CMYK四种颜色点印刷时的每一个印刷点的大小，角度，间隙来模拟出一种颜色的感觉：
-
-![color-halftoning](./images/ppi/color-halftoning.png)
-
-那么DPI也就意味着印刷产品中点的稀疏程度，点的密度。
-
-但DPI是否与印刷品的质量有什么关系呢。这个问题比较复杂。
-
-【待续】
-
-【为什么大型显示器和电视的dpi都非常低】
-
-但是当我们谈论一张图片的PPI或者DPI的时候又是另外一回事了。
-
-
-
-
-
-
-
+实话实说我买有找到关于CSS中一英寸的定义，但是在W3C关于[Resolution](http://www.w3.org/TR/css3-values/#resolution)的定义中，我们可以看到看到它所定义的1dppx是与96dpi具有同样含义的。那么2dppx也就是192dpi了咯。这当然脱离了我们传统上的dpi了，Surface Pro 3的dpi（也就是ppi）能够达到216ppi，但是dppx仍然可以是1。
 
 ## CSS Reference Pixel
 
@@ -216,7 +185,7 @@ DPI全称为Dots per inch。译为每英寸点数。当你听到人们在谈一�
 > It is recommended that the reference pixel be the visual angle of one pixel on a device with a pixel density of 96dpi and a distance from the reader of an arm's length. For a nominal arm's length of 28 inches, the visual angle is therefore about 0.0213 degrees.
 
 
-W3C规定，把人眼辨别到，距离自己一个手臂长度（约28英寸），像素密度为96dpi设备上的一个物理像素设为参考像素。同时可以算出眼睛看到参考像素的视野角度为0.0213度
+W3C规定，把人眼能够辨别到的，距离自己一个手臂长度（约28英寸），像素密度为96dpi设备上的一个物理像素设为参考像素。同时可以算出眼睛看到参考像素的视野角度为0.0213度
 
 ![pxangles](./images/ppi/pxangles.png)
 
@@ -229,11 +198,10 @@ W3C规定，把人眼辨别到，距离自己一个手臂长度（约28英寸）
 ![Fig-03-CSS-Reference-Pixel](./images/ppi/Fig-03-CSS-Reference-Pixel.jpg)
 
 
+
 ## `<meta name="viewport">`
 
-接下来进入到这期的主角：手机设备上
-
-我们有了物理像素，分辨率像素，CSS像素——那么问题来了，当你再手机上使用浏览器打开网页时，网页的宽度应该是多少？
+我们有了物理像素，CSS像素——那么问题来了，当你再手机上使用浏览器打开网页时，网页的宽度应该是多少？
 
 首先我们需要了解一个概念：viewport，我常见到的中文译为视口，但个人觉得这个翻译有一些晦涩。 Viewport是用于限制Html元素——“限制”这两个字不是那么好理解。quirksmode上有一篇[文章](http://www.quirksmode.org/mobile/viewports.html)谈到这个概念时打了一个非常形象的比方：
 
@@ -305,10 +273,52 @@ OK，在于是我们得到了一个结论，html宽度是由viewport决定的，
 
 
 
+## 番外篇：PPI和DPI使用的更多场景
+
+在文章的开头我又说PPI在不同上下文中的含义是不同的，如果你仍有好奇心，可以继续往下阅读。接下来我们谈谈Web以外的PPI含义。
+
+首先我们要重申上面的结论，就谈论显示设备的像素密度而已，PPI和DPI和一样的概念，并且其中的像素pixel和点dots代指的都是物理像素。
+
+如果你去查看一张JPG图片的属性时，你会发现有横向或者纵向的以dpi为单位的属性：
+
+![jpg_dpi](./images/ppi/jpg_dpi.jpg)
+
+或者在Phototshop新建一份文档时，要填写一个以ppi为单位的属性值：
+
+![photoshop-imagesize](./images/ppi/photoshop-imagesize.png)
+
+这里也存在被混用和混淆的地方。其实他们都表示打印时的分辨率值。意为在打印时每英寸上的像素（也就是跟接近PPI）。这里的英寸当然不再是屏幕像素了，而是纸张尺寸了。
+
+PPI或者DPI对于图片来说意味着什么？准确来说什么都不意味着。 一张图片只是存在相机或者硬盘里的数据文件而已，你能告诉我它有多少英寸长或者多少英寸宽吗？只有当它被打印出来的时候才会涉及到打印媒介的尺寸，PPI才有意义。 如果你想让图片更丰富，唯一的办法是增加图片的像素，提升你的拍摄技巧。
+
+当然在纸张上是没有像素的概念。但我们可以去抽象的去想象它。假设有一张300x300像素的图片。打印分辨率的PPI值为30DPI,那么最后打印出来尺寸为10x10英寸。假如打印时的DPI值为300DPI，那么打印出来的尺寸则为1x1英寸。所以我们可以把DPI当做调节打印结果的手段。
+
+那么DPI值越高，图片越小就越清晰？当然也并非如此。如果你距离60厘米去观看一张194DPI打印出来的图片。你会没法区分它到底是194DPI还是300DPI。因为人眼的分辨率是有限的。这对显示设备时同样通用的。iPhon4的像素密度有326DPI，而New iPad的像素密度只有264DPI，New iPad的显示效果会更差吗？参考大多数人使用的距离和方式，其实眼睛得到的效果其实是无太大差异的。这也是为什么大型显示器或者户外广告DPI都不会很高，因为我们观看他们的时候距离很远，效果并非太差。
+
+最后我们可以来看另一个场景的DPI：描述打印机的打印分辨率：
+
+当一张显示器上的图片打印在图片上的时候，像素这个概念其实是我们想象出来的，更加实际的概念时是印刷设备的每一个“点”：
+
+![DPI_and_PPI](./images/ppi/DPI_and_PPI.png)
+
+当你尝试去用放大镜去查看彩色印刷物品上的图片时，从小到大你看到的结果应该是这样的：
+
+![zoom_pic](./images/ppi/zoom_pic.gif)
+
+为什么会这样？简而言之，印刷的原理是通过半色调(halftone)技术，通过控制CMYK四种颜色点印刷时的每一个印刷点的大小，角度，间隙来模拟出一种颜色的感觉：
+
+![color-halftoning](./images/ppi/color-halftoning.png)
+
+比如当你以600DPI打印一张150PPI的图片时，每一个像素应该包含16个点(600dots / 150pixels = 4)。
+
+从上面我们已经知道PPI能够决定印刷品物理尺寸的大小，打印机的DPI参数更是能进一步决定印刷体的好坏。法则一
+永远都是在追求更高的PPI和DPI。
+
+. 150dpi is generally considered the minimum standard for high quality photographic reproduction in books and magazines. Newspapers often use 85dpi and the effect is clear: individual dots are visible and some detail is lost. Billboards go as low as 45dpi, but you can’t tell because you’re typically viewing from very far away. Typical dot matrix printers are capable for 60 – 90dpi, inkjet printers 300 – 600dpi, and laser printers 600 – 1,800dpi.
+
+150dpi通常已经是被认为算的上是高质量的打印分辨率了。新闻报纸使用的分辨率通常是85dpi。户外的广告牌通常使用的是45dpi。但是因为距离的关系一般
 
 
-
-HDPI and MDPI phones.
 
 
 
