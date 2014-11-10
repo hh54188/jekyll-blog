@@ -1,5 +1,6 @@
 ---
 layout: post
+permalink: /preview/
 title: 移动开发的那些事（上）：
 modified: 2014-10-14
 tags: [css, mobile, javascript]
