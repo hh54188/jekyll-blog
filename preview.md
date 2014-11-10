@@ -1,7 +1,7 @@
 ---
 layout: page
 permalink: /preview/
-title: 关于我
+title: 移动开发的那些事（上）
 tags: [Jekyll, theme, modern, minimal, responsive]
 image:
   feature: abstract-5.jpg
@@ -24,13 +24,13 @@ PPI的复杂之处在于如果他所属的上下文环境不同，意义也会�
 
 PPI全称为Pixel Per Inch，译为每英寸像素取值，更确切的说法应该是像素密度，也就是衡量单位物理面积内拥有像素值的情况。
 
-![original](./images/ppi/original.png)
+![original](../images/ppi/original.png)
 
 如上图所示，在1英寸单位内面积内拥有的像素越多，密度越大，PPI值就越高。但像素密度的实际意义是什么？它表达的是什么？或高或低对设备显示来说有什么影响？
 
 一般来说，我们当然希望PPI值越高越好，因为更高的PPI意味着在同一实际尺寸的物理屏幕上能容纳更多的像素，能够展现更多的画面细节，也就意味着更平滑的画面。原理如下：
 
-![original](./images/ppi/original.jpg)
+![original](../images/ppi/original.jpg)
 
 ### 什么是Pixel
 
@@ -40,17 +40,17 @@ PPI全称为Pixel Per Inch，译为每英寸像素取值，更确切的说法应
 
 无论是早期的CRT显示器还是如今的LCD显示器，都是基于点阵的。也就是说通过一些列的小点排列成一个大的矩形，不同的小点通过显示不同的颜色来显示成图像。比如下图就是LCD显示器上一个6x6个小点排列成的矩阵：
 
-![Dots5](./images/ppi/Dots5.png)
+![Dots5](../images/ppi/Dots5.png)
 
 注意每一个像素（pixel，也可以称之为dot）又是由三个子像素(subpixel)红绿蓝组合而成。当需要显示图片信息时，它的工作原理可以如下图所示：
 
-![pixel_zoom_in](./images/ppi/pixel_zoom_in.jpg)
+![pixel_zoom_in](../images/ppi/pixel_zoom_in.jpg)
 
 上图中的左侧是放大之后我们能看到的像素，而右侧就是对应像素在显示器上的显示情况了。
 
 注意上图代表的仅是LCD显示器的物理像素情况，早期的CRT显示器的物理像素同样也是由独立的点组成。但是不存在subpixel的概念，情况如下图所示：
 
-![crt_pixel](./images/ppi/crt_pixel.jpg)
+![crt_pixel](../images/ppi/crt_pixel.jpg)
 
 上面描述的这些显示器上的像素我们就称之为物理像素(physical pixel)或者设备像素(device pixel)。
 
@@ -68,11 +68,11 @@ CSS像素有什么特别的地方？我们可以借用[quirksmode](http://www.qu
 
 CSS像素与屏幕像素1：1同样大小时：
 
-![origin_pixel](./images/ppi/csspixels_100.gif)
+![origin_pixel](../images/ppi/csspixels_100.gif)
 
 CSS像素(黑色边框)开始被拉伸，此时1个CSS像素大于1个屏幕像素
 
-![zoom_in_pixel](./images/ppi/csspixels_in.gif)
+![zoom_in_pixel](../images/ppi/csspixels_in.gif)
 
 也就是说默认情况下一个CSS像素应该是等于一个物理像素的宽度的，但是浏览器的放大操作让一个CSS像素等于了两个设备像素宽度。在后面你会看到更复杂的情况，在高PPI的设备上，CSS像素甚至在默认状态下就相当于多个物理像素的尺寸。
 
@@ -98,7 +98,7 @@ CSS像素(黑色边框)开始被拉伸，此时1个CSS像素大于1个屏幕像�
 
 那么PPI怎么计算呢？没错，就和你想的一模一样，用屏幕边的物理像素除以物理尺寸即可，以Samsung Galaxy S4为例：
 
-![samsung](./images/ppi/samsung.jpg)
+![samsung](../images/ppi/samsung.jpg)
 
 由此可见Galaxy S4的屏幕分辨率为441PPI。
 
@@ -106,7 +106,7 @@ CSS像素(黑色边框)开始被拉伸，此时1个CSS像素大于1个屏幕像�
 
 但PPI过高同样也会带来问题，相同的图片素材，在越高的设备上会显示的越小。以下是一个像素在不同PPI设备上的可见情况，随着PPI的增高可视度越来越小：
 
-![pixel-density-1](./images/ppi/pixel-density-1.png)
+![pixel-density-1](../images/ppi/pixel-density-1.png)
 
 那么可以预见一种很糟糕的情况是，同一尺寸的屏幕下假设PPI提高了一倍，很可能程序界面缩小了4倍（因为在屏幕尺寸不变的情况下物理像素点面积是原来的1/4）。
 
@@ -114,13 +114,13 @@ CSS像素(黑色边框)开始被拉伸，此时1个CSS像素大于1个屏幕像�
 
 解决方法是，Windows默认将所有的文本和素材（实际上就是分辨率像素）都放大了1.5倍（在“屏幕分辨率”-“放大或缩小文本和其他项”中进行了设置），原来是一个物理像素对应一个分辨率下的像素，现在则是1.5个物理像素对应一个分辨率下的像素，也就意味着分辨率下的像素变大了，实际分辨率降低了，已经变成了1440(2160/1.5)x900(1440/1.5)（此时如果你尝试用window.screen.width/window.screen.height去检测返回结果也会是1440x900）。这里留给读者一个问题，这样和直接将PC的分辨率调整为1440x900有什么区别呢？
 
-![microsoft_surface_pro_3_scaling_options](./images/ppi/microsoft_surface_pro_3_scaling_options.png)
+![microsoft_surface_pro_3_scaling_options](../images/ppi/microsoft_surface_pro_3_scaling_options.png)
 
 但把素材和文字放大就真的一劳永逸了吗？不，甚至还会带来副作用。放大素材对位图来说是非常危险的一件事。假设一款软件中的素材图片分辨率为32x32，但是为了配合整体界面的拉伸,它也必须被拉伸至原来的1.5倍等于为48x48。你一定有在Photoshop中把图片强制放大为原来几倍的效果的经验。 这样以来，图片素材就变得模糊了。同时因为Window使用的字体为点阵字体而非矢量字体，所以甚至在软件中的字体也会变得模糊。
 
 简单一点来说，采用这种技术需要将32x32的图片强制拉伸为48x48，多出来的像素如何凭空生成？计算机只有猜测了，通过线性插值算法。所以图片便会出现模糊。
 
-![enlarged](./images/ppi/enlarged.jpg)
+![enlarged](../images/ppi/enlarged.jpg)
 
 但位图可能会被拉伸的问题并非也是绝对的，假设软件需要显示的icon大小为32x32，但是图片素材大小为64x64，那么即使Windows的UI界面拉伸1.5倍，icon大小为48x48，因为原图片足够大，图片仍处于未拉伸的状态。那么也不会模糊。
 
@@ -135,7 +135,7 @@ Apple的Retina技术使用的也是上面相同的方案。以15.4寸的Retina�
 
 从上面我们得知，因为高像素密度设备下的UI会采用一定比例的缩放，所以CSS像素也会面临同样的问题：
 
-![css-device-bitmap-pixels](./images/ppi/css-device-bitmap-pixels.png)
+![css-device-bitmap-pixels](../images/ppi/css-device-bitmap-pixels.png)
 
 正如上图所示，左侧普通屏幕中，2x2的CSS像素真的只需要2x2的物理像素。但是右侧高清屏中，2x2的CSS像素却需要4x4的物理像素。
 
@@ -188,15 +188,15 @@ devicePixelRatio说白了就是手机的物理像素与实际使用像素的缩�
 
 W3C规定，把人眼能够辨别到的，距离自己一个手臂长度（约28英寸），像素密度为96dpi设备上的一个物理像素设为参考像素。所以我们可以算出眼睛看到参考像素的视野角度为0.0213度：
 
-![pxangles](./images/ppi/pxangles.png)
+![pxangles](../images/ppi/pxangles.png)
 
 有了这一系列参照，通过三角函数关系，我们可以算出同样一台设备在不同距离下CSS像素理想的大小。 当远离观察者时像素应该增大，当靠近观察者时像素应该减小：
 
-![pixel1](./images/ppi/pixel1.png)
+![pixel1](../images/ppi/pixel1.png)
 
 这么做的优势在于无论设备距离观察者距离是多少，也无论设备的像素密度和物理像素大小是多少，观察者看到的CSS像素是一致的，保证了用户体验的一致性：
 
-![Fig-03-CSS-Reference-Pixel](./images/ppi/Fig-03-CSS-Reference-Pixel.jpg)
+![Fig-03-CSS-Reference-Pixel](../images/ppi/Fig-03-CSS-Reference-Pixel.jpg)
 
 但问题是如何来实践这一标准呢？
 
@@ -218,7 +218,7 @@ OK，在于是我们得到了一个结论，html宽度是由viewport决定的，
 
 但这一套规则在手机则是无法被执行的。大部分手机的屏幕分辨率目测只有400px，如果页面上真的有某一个页面元素仅占10%，也就是40px的话，肉眼几乎是无法分辨的。实际情况应该会更糟糕，iPhone4的Safari默认是以980px来渲染网页的。如果你在Chrome以桌面版的方式访问stackoverflow，那么结果会是这样的:
 
-![iphone_stackoverflow](./images/ppi/iphone_stackoverflow.png)
+![iphone_stackoverflow](../images/ppi/iphone_stackoverflow.png)
 
 体验非常糟糕吧，所有的链接几乎都无法准确点击。那么如何解决这个问题？
 
@@ -226,24 +226,24 @@ OK，在于是我们得到了一个结论，html宽度是由viewport决定的，
 
 我们会很习惯的用手势去放大页面。但是要注意我们这里做的仅仅是放大页面，改变的是页面的缩放(scale)，效果与PC上浏览器的类似。但是没有改变页面的布局，此时用于渲染页面布局的layout仍然是980px
 
-![iphone_stackoverflow_zoomin](./images/ppi/iphone_stackoverflow_zoomin.png)
+![iphone_stackoverflow_zoomin](../images/ppi/iphone_stackoverflow_zoomin.png)
 
 第二个办法是，改变布局。
 比如下面一个页面上有一张320px宽的图片，如果我们以默认的980px去渲染的话，它会显得过于窄小：
 
-![vp980notspecified](./images/ppi/vp980notspecified.jpg)
+![vp980notspecified](../images/ppi/vp980notspecified.jpg)
 
 但如果我们可以将渲染它的布局设为320px的话，看上去就会好很多了，同时此时我们也未对页面进行缩放：
 
-![vp320width](./images/ppi/vp320width.jpg)
+![vp320width](../images/ppi/vp320width.jpg)
 
 当然你也可以结合上一步，同时对页面进行缩放：
 
-![vp320width150scale](./images/ppi/vp320width150scale.jpg)
+![vp320width150scale](../images/ppi/vp320width150scale.jpg)
 
 不仅仅是放大，即使是在320px的像素下，我们也可以进行缩小：
 
-![vp320width50scale](./images/ppi/vp320width50scale.jpg)
+![vp320width50scale](../images/ppi/vp320width50scale.jpg)
 
 回归到技术上，以上这些都可以通过viewport标签来解决，比如说上面的需求，把布局设定为320px，同时进行1.5倍的缩放：
 
@@ -261,12 +261,12 @@ OK，在于是我们得到了一个结论，html宽度是由viewport决定的，
 
 上面我们谈到viewport有个半专业的名词成为layout viewport，虽然它是一个非官方的词汇，但是非常多的文章都引用了这个概念。layout viewport专用于页面渲染的控制。还有一种viewport称之为visual viewport，可以译为可视窗口。两种viewport的区分如下：
 
-![mobile_layoutviewport](./images/ppi/mobile_layoutviewport.jpg)
-![mobile_visualviewport](./images/ppi/mobile_visualviewport.jpg)
+![mobile_layoutviewport](../images/ppi/mobile_layoutviewport.jpg)
+![mobile_visualviewport](../images/ppi/mobile_visualviewport.jpg)
 
 由此可以看出visual viewport就好比是浏览网页的一个窗口，网页正是这窗外的景色。当然我们还会遇见layout viewport与visual viewport大小相等的情况。比如像下面这样：
 
-![mobile_viewportzoomedout](./images/ppi/mobile_viewportzoomedout.jpg)
+![mobile_viewportzoomedout](../images/ppi/mobile_viewportzoomedout.jpg)
 
 这也就是我上面描述的`width=device-width`了。
 
@@ -278,7 +278,7 @@ OK，在于是我们得到了一个结论，html宽度是由viewport决定的，
 
 如果你去查看一张JPG图片的属性时，你会发现有横向或者纵向的以dpi为单位的属性或者在Phototshop新建一份文档时，要填写一个以ppi为单位的属性值：
 
-![photoshop-imagesize](./images/ppi/photoshop-imagesize.png)
+![photoshop-imagesize](../images/ppi/photoshop-imagesize.png)
 
 这里也存在被混用和混淆的地方。其实他们都表示打印时的分辨率值。意为在打印时每英寸上的像素（也就是跟接近PPI，但我们更常用DPI）。这里的英寸当然不再是屏幕像素了，而是纸张尺寸了。
 
@@ -292,15 +292,15 @@ PPI或者DPI对于图片来说意味着什么？准确来说什么都不意味�
 
 当一张显示器上的图片打印在图片上的时候，像素这个概念其实是我们想象出来的，更加实际的概念时是印刷设备的每一个“点”：
 
-![DPI_and_PPI](./images/ppi/DPI_and_PPI.png)
+![DPI_and_PPI](../images/ppi/DPI_and_PPI.png)
 
 当你尝试去用放大镜去查看彩色印刷物品上的图片时，从小到大你看到的结果应该是这样的：
 
-![zoom_pic](./images/ppi/zoom_pic.gif)
+![zoom_pic](../images/ppi/zoom_pic.gif)
 
 为什么会这样？简而言之，印刷的原理是通过半色调(halftone)技术，通过控制CMYK四种颜色点印刷时的每一个印刷点的大小，角度，间隙来模拟出一种颜色的感觉：
 
-![color-halftoning](./images/ppi/color-halftoning.png)
+![color-halftoning](../images/ppi/color-halftoning.png)
 
 比如当你以600DPI打印一张150PPI的图片时，每一个像素应该包含16个点(600dots / 150pixels = 4)。
 
