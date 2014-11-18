@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 移动开发的那些事（上）：
+title: 移动开发的那些事（上）：深入概念
 modified: 2014-10-14
 tags: [css, mobile, javascript]
 image:
