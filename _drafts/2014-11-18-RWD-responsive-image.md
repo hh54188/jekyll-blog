@@ -57,3 +57,13 @@
 ![art_direction](./images/art_direction.jpg)
 
 ## 按照响应式的设计如何？
+
+你的第一个疑问是，为什么响应式图片不就简简单单跟随页面响应式设计的断点(break points)就好？
+
+### 死循环
+
+```
+<img src="sample.png" srcset="cat_750px.jpg 1.5x, cat_1000px.jpg 2x">
+<img src="sample.png" srcset="cat_750px.jpg 700w, cat_1000px.jpg 1000w">
+```
+【上面的700w是min-width还是max-width?】
