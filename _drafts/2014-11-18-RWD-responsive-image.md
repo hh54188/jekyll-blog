@@ -56,14 +56,23 @@
 
 ![art_direction](./images/art_direction.jpg)
 
-## 按照响应式的设计如何？
+【
+	怎么来说接下去的问题？
+	从DPR引出srcset？
+		引出srcset语法？
 
-你的第一个疑问是，为什么响应式图片不就简简单单跟随页面响应式设计的断点(break points)就好？
+	引出viewport情况？
+	虽然和DPR情况一致，但是在这里存在min-width或者max-width的区别
+	引出srcset在w下的矛盾 **<----思想**
 
-### 死循环
+	姑且以mobile-first写出查询代码
+	发现非常的繁琐
+	于是引入sizes
 
-```
-<img src="sample.png" srcset="cat_750px.jpg 1.5x, cat_1000px.jpg 2x">
-<img src="sample.png" srcset="cat_750px.jpg 700w, cat_1000px.jpg 1000w">
-```
-【上面的700w是min-width还是max-width?】
+	解决了刚刚的那个问题，所有都交给了智能的浏览器来解决
+	但是要注意算法的问题，很多情况并非如我们所期望的 **<---思想**
+
+	！！！以上引入的的思想不多啊
+】
+
+
