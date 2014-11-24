@@ -67,15 +67,63 @@
 在这里我们先看更实用更复杂更多争议的后者。我们需要用到`picture`元素和`srcset`属性。
 
 为了展示srcset的用法，我们考虑一种最简单的情况。 我们要同一张图为iPhone 3gs与iPhone 4做适配。我们只需要为他们不同对策DPR做适配。
-在这种情况下，我们不用考虑屏幕的分辨率，不需要考虑viewport大小。只是两台尺寸同样大小的DPR不同罢了。那么我们需要用一张large.jpg的图片应付DPR为2.0的情况，用一张small.jpg的图片应付DPR为1.0的情况。使用srcset的语法应该如下：
+在这种情况下，我们不用考虑屏幕的分辨率，不需要考虑viewport大小。只是两台尺寸同样大小的DPR不同罢了。那么我们需要用一张large.jpg的图片应付DPR为2.0的情况，用一张small.jpg的图片应付DPR为1.0的情况。 使用srcset的语法应该如下：
 
 ```
-<img srcset="large.jpg 2x, small.jpg 1x">
+<img src="small.jpg" srcset="large.jpg 2x, small.jpg 1x">
 ```
 非常简单，一目了然。 只需要把图片和对应的设备参数匹配起来（比如上面用x为单位描述屏幕的DPI，也可以用w或者h描述viewport的宽度），再串成字符串用逗号间隔开。
-那么一旦浏览器发现了匹配的DPR参数，就加载响应的图片
+那么一旦浏览器发现了匹配的DPR参数，就加载响应的图片。`img`自带的src标签用于处理默认情况
 
-OK，那让我们把情况变得复杂一些。这次我们响应的不在是屏幕的DPR，而是viewport的宽度。
+OK，那让我们把情况变得复杂一些。这次我们响应的不再是屏幕的DPR，而是viewport的宽度。并且我们需要响应三种宽度，小于600px，600px至800px之间，大于800px。我们也用三张图片对应这三种宽度：small.jpg, medium.jpg, large.jpg。参照上面的DPR写法，你可能会想当然的参照上面DPR的写法：
+
+```
+<img src="large.jpg" srcset="medium.jpg 800w, small.jpg 600w">
+```
+ちょっと待（ま）って（等等），你真的确定吗？
+
+宽度与DPR不同的地方在于，如果你熟悉media query的话，DPR（x单位）描述的是精确值；而宽度(width)(w单位)描述的是边界值，但问题是最大边界(max-width)还是最小边界(min-width)呢。为了描述的更加清楚，我们可以以media query中的情况为例：
+
+A写法：
+
+```
+body {}
+
+@media screen and (min-width:480px) {}
+
+@media screen and (min-width:800px) {}
+```
+
+B写法
+
+```
+body {}
+
+@media screen and (max-width:800px) {}
+
+@media screen and (max-width:480px) {}
+```
+其实两种写法最终达成的目的并无不同，都将布局划分为三段式响应。
+
+A写法中总是取min-width为分界点，并且分界点逐渐递增。越往后所对应的样式为更宽的样式。这样的划分方法我们称之为移动布局优先（mobile first）
+B写法中总是取max-width为分界点，并且分界点逐渐递减。越往后所对应的样式为更窄的样式，这样的划分方法我们称之为桌面优先(desktop first)
+
+回到最上面的srcset关于宽度的写法，我们无法用语法准确的表达我们到底是希望mobile first或者desktop first。或者我们也无从知晓浏览器以为的是采用哪一种趋势。 你可能会建议我现在不如写一段代码来测试一下，但即使通过测试结果浏览器能够明确的表示采用何种趋势，但是对于另一种趋势来说是公平的吗？
+
+再退一步说，即使我们默认采用其中的某一种趋势，比如mobile first好了。并且为了兼容高DPR的情况。 我们的最终语法可能会是这个样子的：
+
+```
+【待续整理】
+```
+
+如何解决这个问题。我们来审视一下这个解决方案的症结所在。
+
+浏览器在加载的时候只知道关于“自己所处的环境”：屏幕的分辨率，DPR，viewport大小。mediaquery处理的机制就是在特定的环境下让浏览器做特定的事情。就类似于分支非常多的条件语句，比如：“当viewport宽度大于xxx时，显示侧边栏；否则隐藏侧边栏”。“当用户的屏幕是Retina时，选择这张高清图片；使用一张普通的图片”。
+
+这看似没有什么问题，但是一旦我们的分支情况比如多了之后，比如需要同时考虑像素密度，viewport宽度，假设分别都只有两种情况，那么我们也要写2x2=4条语句。如果这么说还不够感性的话，我们可以看一看下面这个例子：
+
+
+
 
 【
 	怎么来说接下去的问题？
@@ -96,6 +144,14 @@ OK，那让我们把情况变得复杂一些。这次我们响应的不在是屏
 	但是要注意算法的问题，很多情况并非如我们所期望的 **<---思想**
 
 	direction的解决方案有所不同，采用的是picture元素和source元素。虽然上面的sizes也是picture的语法
+
+	为什么srcset和<picture>没法互相替换？http://html5hub.com/the-src-n-responsive-image-solution/
+	srcset的局限在哪里？
+
+	1. 可维护性低，每当发现新的分辨率和新的DPR，都要手动的去修改代码
+	2. breakpoints不可见
+	3. 必须要手动算宽度和像素密度
+	4. 
 
 	srcset与preloader的矛盾 <---思想：		
 	picture的fallback问题 <---思想
