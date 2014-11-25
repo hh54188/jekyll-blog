@@ -112,6 +112,8 @@ B写法中总是取max-width为分界点，并且分界点逐渐递减。越往�
 
 再退一步说，即使我们默认采用其中的某一种趋势，比如mobile first好了。并且为了兼容高DPR的情况。 我们的最终语法可能会是这个样子的：
 
+http://jsfiddle.net/rgefayoL/
+
 ```
 【待续整理】
 ```
@@ -148,10 +150,12 @@ B写法中总是取max-width为分界点，并且分界点逐渐递减。越往�
 	为什么srcset和<picture>没法互相替换？http://html5hub.com/the-src-n-responsive-image-solution/
 	srcset的局限在哪里？
 
-	1. 可维护性低，每当发现新的分辨率和新的DPR，都要手动的去修改代码
-	2. breakpoints不可见
-	3. 必须要手动算宽度和像素密度
-	4. 
+	1. breakpoints变的不是那么清晰可见
+	2. 有大量的计算算出
+	3. 图片在不同viewport宽度下占用的宽度也不是清晰可见了
+	4. 缺少远见，只考虑到了1x, 2x的情况
+	5. 缺少可维护性，每次修改可能引发修改其他的片段
+
 
 	srcset与preloader的矛盾 <---思想：		
 	picture的fallback问题 <---思想
