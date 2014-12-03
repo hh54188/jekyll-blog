@@ -217,13 +217,21 @@ sizes="(max-width: 640px) 100vw,
 具体如何操作呢，让我们看一个简单的例子：
 
 ```
-<img sizes="(max-width: 320px) 100vw,
-			(max-width: 640px) 50vw,
-			calc(33vw - 20px)"
-	srcset="small.jpg 320w,
-			medium.jpg 640w"
+<img sizes="(max-width: 30em) 100vw,
+			(max-width: 50em) 50vw,
+			calc(33vw - 100px)"
+	srcset="swing-200.jpg 200w,
+			swing-400.jpg 400w,
+			swing-800.jpg 800w,
+			swing-1600.jpg 1600w"
 	src="swing-400.jpg" alt="Kettlebell Swing">
 ```
+假设当前浏览器的viewport大小为20em，同时也假设默认字体大小为16px，那么此时viewport的宽度为320px。那么此时浏览器选择的sizes值为`(max-width:30em) 100vw`，也就是说，图片宽度与viewport的宽度相同。当DPR为1时，浏览器就会选择比320px稍大的`swing-400.jpg`。当DPR为2时，图片宽度至少为640px，浏览器就会选择最接近的`swing-800.jpg`。
+
+当viewport宽度为40em时，浏览器选择的size是`(max-width:50em) 50vw`。对于1x的屏幕，浏览器会选择320px宽度的图片，对于2x的屏幕，浏览器会选择640px的图片。
+
+但是请注意，上面描述的情况仅仅是可能。你在srcset描述的图片信息，仅仅是告诉它我拥有这些资源。具体是否使用仍然要依照浏览器的算法决定。它考虑的会比开发者更多，比如网络延迟情况，用户的偏好等。 它才是决策者。
+
 
 【
 	怎么来说接下去的问题？
