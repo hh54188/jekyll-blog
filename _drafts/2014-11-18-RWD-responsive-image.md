@@ -118,11 +118,12 @@ B写法中总是取max-width为分界点，并且分界点逐渐递减。越往�
 2. 在最窄的布局中，图片宽度为viewport的100%
 3. 在稍宽一些的布局中，图片的宽度为viewport的50%
 4. 在最宽的页面布局中，图片的跨度为viewport的33%
-5. 现在我手头上有宽度分别为160px, 320px, 480px, 640px, 960px, 1280px, 1920px
+5. 现在我手头上有宽度分别为160px, 320px, 480px, 640px, 960px, 1280px, 1920px的图片
 
 通过计算得出的image的标签应该为：
 
 ```
+
 <img srcset="
   320.jpg .89x 400w, 480.jpg 1.33x 400w, 640.jpg 1.78x 400w,
   480.jpg 1.04x 520w, 640.jpg 1.39x 520w, 960.jpg 2.09x 520w,
@@ -134,6 +135,8 @@ B写法中总是取max-width为分界点，并且分界点逐渐递减。越往�
   480.jpg 0.86x 1920w, 640.jpg 1.14x 1920w, 960.jpg 1.71x 1920w, 1280 2.29x 1920w,
   640.jpg 0.86x, 960.jpg 1.29x, 1280 1.71x, 1920 2.57x
 ">
+
+
 ```
 
 我也不知道它是怎么算出来的，它本意为充分利用每一张图片，覆盖每一种宽度和DPR。简单的srcset语法与media query语法机制类似就是在特定的环境下让浏览器做特定的事情。就类似于分支非常多的条件语句，比如：“当viewport宽度大于xxx时，显示侧边栏；否则隐藏侧边栏”。“当用户的屏幕是Retina时，选择这张高清图片；否则使用一张普通的图片”。就像我们在javascript写分支语句一样，不得不覆盖尽可能多的情况
@@ -159,6 +162,7 @@ B写法中总是取max-width为分界点，并且分界点逐渐递减。越往�
 `sizes`出现了，救星出现了。我们先看看语法，以上面的例子为例，使用sizes的话我们可以这么写：
 
 ```
+
 <img sizes="(max-width: 640px) 100vw,
 			(max-width: 960px) 50vw
 			33vw" 
@@ -166,6 +170,7 @@ B写法中总是取max-width为分界点，并且分界点逐渐递减。越往�
 				640.jpg 640w, 960.jpg 960w, 1280.jpg 1280w
 				1920.jpg 1920w"
 />
+
 ```
 
 首先看sizes语法，类似于media query：
@@ -232,7 +237,68 @@ sizes="(max-width: 640px) 100vw,
 
 但是请注意，上面描述的情况仅仅是可能。你在srcset描述的图片信息，仅仅是告诉它我拥有这些资源。具体是否使用仍然要依照浏览器的算法决定。它考虑的会比开发者更多，比如网络延迟情况，用户的偏好等。 它才是决策者。
 
+srcset准确来说是picture标准的一部分。上面的所有例子解决的只是除srcset以外的问题，这些图片有一个共同的特点是，是同一张图片的不同尺寸而已。
 
+art direction的情况会复杂一些，图片需要切割。再在不同切割后图片的基础上实现多个版本：
+
+```
+<picture>
+   <source media="(min-width: 36em)"
+      srcset="large.jpg  1024w,
+         medium.jpg 640w,
+         small.jpg  320w"
+      sizes="33.3vw" />
+   <source srcset="cropped-large.jpg 2x,
+         cropped-small.jpg 1x" />
+   <img src="small.jpg" alt="A rad wolf" />
+</picture>
+```
+
+在上面的代码中，每一个source代表的就是独立的一类剪裁之后图片，再基于这类图片，制作成多个版本。也就是不同source中的srcset属性
+
+你可以给不同的source天机media query属性，这样浏览器首先会在picture元素中，根据不同的media query选择不同的source，再基于source的sizes和srcset属性，选择对应的图片。规则与picture中的类似，就不再赘述了
+
+## 除了srcset以外
+
+同时srcset也引发了一系列的连锁反应，即使我们把srcset设计的非常完美。也需要有浏览器的配套支持。如果支持的不够好，比如就会发生以下这些问题：
+
+### preloader矛盾
+
+从IE8开始，浏览器逐渐采用一种preloader的机制来提高浏览器加载速度与性能优化。举个栗子，比如下面代码的这样资源分布图：
+
+```
+<head>
+    <link rel="stylesheet" type="text/css" href="">
+    <script type="text/javascript"></script>
+</head>
+<body>
+    <img src="">
+    <img src="">
+    <img src="">
+    <img src="">
+    <img src="">
+    <img src="">
+    <img src="">
+    <img src="">
+    <script type="text/javascript"></script>
+    <script type="text/javascript"></script>
+    <script type="text/javascript"></script>
+</body>
+```
+
+但是你却可以看到网络资源的加载顺序是这样的：
+
+![preloader](./images/preloader.jpg)
+
+也就是说外链的script被提前了。
+
+并没有统一的标准规定这套机制应具备何种功能已经如何实现。但你可以大致这么理解：浏览器通常会准备两个页面解析器parser，一个(main parser)用于正常的页面解析，而另一个(preloader)则试图去文档中搜寻更多需要加载的资源，但这里的资源通常仅限于外链的js、stylesheet、image；不包括audio、video等。并且动态插入页面的资源无效。
+
+OK，那么问题来了，以一个img标签为例，我们通常在协商srcset或者sizes属性的时候，也会一并写在最原始的src属性，以兼容低版本的浏览器。那么在main parser还没有解析到图片的时候，pre parser就首先加载了图片的src属性。一旦main parser正式解析到img的时候，又会再次选择适合的图片，再一次加载。这样就引起了两次的加载。smashing magzine上有专门的一篇文章[How To Avoid Duplicate Downloads In Responsive Images](http://www.smashingmagazine.com/2013/05/10/how-to-avoid-duplicate-downloads-in-responsive-images/)来谈如何来解决这个问题。方法很多很广。
+
+## 结束
+
+上面说了那么多。我们不得不面对的显示是实现的了上面这些语法的浏览器屈指可数，无论是PC端还是移动端：http://caniuse.com/#search=picture 不过值得庆幸的是 RIG提供了polyfill的脚本来作为备选方案。
 【
 	怎么来说接下去的问题？
 	从DPR引出srcset？
