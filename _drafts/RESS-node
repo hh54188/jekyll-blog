@@ -1,0 +1,67 @@
+#使用node.js搭建简易的RESS架构服务
+
+上一节中我们谈论了很多有关RESS的主题：从我们反思了纯粹利用前端技术来解决响应式问题的局限性开始，接着我们着眼于这些局限开始思考如何解决这些问题。一路向前，我们把目光投向了后端，后端虽然不够灵活，但通过对后端技术和现状分析发现仍然有可取的地方。于是我们在后端上找到了答案，开始尝试把前后端结合来解决问题；最后我们开始设计，设计如何把前端的分量转移一部分到后端，思考后端能提供什么样的服务来满足前端响应式的需求。于是我们想到了我们需要device dectection，想到了Image Tailor，想到了一个灵活的Templater。
+
+但是上面一切的一切，我们都是在冥想。这一节我们要做的就是让梦想照进现实，用我们熟悉的Node.js来编写我们需要的服务，搭建一个Ress框架。
+
+如果你对前面几节谈论的内容都认同并且理解了。那么用什么样的方式编写并不重要，你用Python也好，C++也好，甚至使用第三方服务串联起来也没有关系。RESS并不是代指一个切切实实的框架，而是一种解决响应式问题的方式。
+
+## 从最简单的需求开始
+
+```
+var express = require("express");
+var device = require("deviceDetection");
+ 
+var app = express();
+app.use(express.static(path.join(__dirname)));
+app.listen(80);
+
+```
+
+首先还是让我们忘了RESS蓝图上各式的模块和复杂的关系，清空大脑。让我们用代码来解决第一件事，为不同的设备的提供不同模板的页面：
+
+![tiny title](./images/ress/tpl-tiny-title.jpg)
+![big title](./images/ress/tpl-big-title.jpg)
+
+假设上图是为移动设备提供的页面，而下图是为PC设备提供的页面。很明显蓝底内容部分是一致的，。但是导航栏部分有明显的不同。忘掉media query，假设这就是直接通过后台渲染生成的页面，那么可以想象页面的模板的结构可以是这样的：
+
+```
+<body>
+	<% if (isMobile) {%>
+		<% include header_mobile %>
+	<% } else { %>
+		<% include header_desktop %>
+	<% } %>
+	<% include content %>
+</body>
+```
+根据之前的描述存在两个不同样式的导航栏莫开，OK，那么接下来我们就需要根据不同设备类型来选择不同的header进行渲染。假设我们已经准备好了两个导航栏模板，分别为`header_mobile`,`header_desktop`，那么在后台接收到请求后，我们首先需要对发出请求的设备类型进行判断，再把设备类型传递给模板，让它自行判断应该选用什么样的头模板文件
+
+```
+app.on("/", function (req, res) {
+	var isMobile = device.isMobile;
+	var renderResult = ejs.render("index.ejs", {
+		'isMobile': isMobile
+	});
+});
+```
+
+Done!我们的第一个需求就完成了！没错，就是这么简单。我们可以说成功的把渲染页面的任务和media query的代码转移到了后端。
+
+## 事情可能会变得复杂了一些
+
+
+我们来继续减轻前端样式和html代码的负担。假设我们的响应式页面上需要用视频更生动的表达，那么为了各种兼容，代码一定是像这个样子的：
+
+```
+<video>
+ 	<source src="sample.mp4" type="video/mp4">
+ 	<source src="sample.webm" type="video/webm">
+ 	<source src="sample.ogg" type="video/ogg" />
+	<object data="sample.mp4" width="320" height="240">
+		<embed src="sample.swf" width="320" height="240" />
+	</object>
+</video>
+```
+
+没错，为了兼容不同平台和不同浏览器的视频格式，太多的累赘代码
