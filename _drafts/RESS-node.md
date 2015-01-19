@@ -64,4 +64,25 @@ Done!我们的第一个需求就完成了！没错，就是这么简单。我们
 </video>
 ```
 
-没错，为了兼容不同平台和不同浏览器的视频格式，太多的累赘代码
+没错，为了兼容不同平台和不同浏览器的视频格式，太多的累赘代码。因为我们不知道浏览器会支持什么样的视频格式，所以为了兼容必须统统写上。
+
+假设我们能够知道浏览器支持的视频格式该多好，不仅仅是有关视频格式的支持，最好还能支持其他的一切特性，比如音频的支持格式，是否支持CSS3动画等。上一节我们再说device dectection。这一节我们希望更细化，做feature dectection。
+
+对于markup来说，specifically，如果我们知道了浏览器对视频的支持情况，那么在渲染模板时，只渲染和支持该视频格式有关的部分就好了：
+
+```
+<video>
+	<% if (videoFormatSupport == 'mp4') { %>
+		<source src="/video/sample.mp4" type="video/mp4">
+	<% } else if (videoFormatSupport == 'webm') { %>
+ 		<source src="/video/sample.webm" type="video/webm">
+ 	<% } else if (videoFormatSupport == 'ogg') { %>
+ 		<source src="/video/sample.ogg" type="video/webm">
+ 	<% } else { %>
+ 		<object type="application/x-shockwave-flash" data="/assets/video/sample.swf">
+ 		</object>
+ 	<% } %>
+</video>
+```
+
+仅仅是makrup吗？more than that.通常我们
