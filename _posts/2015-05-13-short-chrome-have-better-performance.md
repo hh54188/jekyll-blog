@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 【短篇：发现】不知不觉,Chrome又做了一个优化
+title: 【短篇·发现】不知不觉,Chrome又做了一个优化
 modified: 2015-05-13
 tags: [css, mobile, javascript, chrome, performance, short]
 image:
