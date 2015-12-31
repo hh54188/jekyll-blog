@@ -4,7 +4,9 @@ description:      A responsive Jekyll theme with modern tendencies from designer
 disqus_shortname: qingbob
 #Comment out url when working locally to resolve base urls correctly
 url:              http://qingbob.com
-
+gems: [jekyll-paginate] #
+paginate: 10 #
+paginate_path: "page:num" #
 # Owner/author information
 owner:
   name:           光毅
@@ -47,7 +49,8 @@ links:
 # http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 timezone:    Asia/Shanghai
 future:      true
-pygments:    true
+# pygments:    true #
+highlighter: pygments #
 markdown:    kramdown
 
 # https://github.com/mojombo/jekyll/wiki/Permalinks
@@ -61,7 +64,8 @@ kramdown:
   footnote_nr: 1
   entity_output: as_char
   toc_levels: 1..6
-  use_coderay: true
+  # use_coderay: true #
+  enable_coderay: true #
 
   coderay:
     coderay_line_numbers: nil
