@@ -302,6 +302,8 @@ module.exports = {
 
 ### Kraken:
 
+https://github.com/lmarkus/Kraken_Example_Shopping_Cart/blob/master/controllers/index.js
+
 `./controller/products/index.js`:
 
 ```
