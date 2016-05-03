@@ -72,13 +72,31 @@ phonecatApp.config(['$routeProvider',
 }]);
 ```
 
-- 更重要的事情是，controller是有业务逻辑的。虽然在MVC中我们强调"fat model, skinny controller"(业务逻辑应尽量放在Model层，Controller只应该作为View与Model的接口)，但skinny并不代表none，controller中还是有与业务相关的逻辑来决定将如何转发用户的请求，最典型的决定是转发到哪个Model层。
+- controller是有业务逻辑的。虽然在MVC中我们强调"fat model, skinny controller"(业务逻辑应尽量放在Model层，Controller只应该作为View与Model的接口)，但skinny并不代表none，controller中还是有与业务相关的逻辑来决定将如何转发用户的请求，最典型的决定是转发到哪个Model层。
 
 - Model应该被更准确的称为Domain Model(领域模型)，它不代表具体的Class或者Object，也不是单纯的databse。而是一个“层”的概念：数据在Model里得到存储，Model提供方法操作数据(Model的行为)。所以Model代码可以有业务逻辑，甚至可以有数据的存储操作的底层服务代码。
 
-### MVC的问题
+- MVC中的数据流是双向的，模型通知视图数据已经更新，视图直接查询模型中的数据。
 
+### MVC的局限
 
-在2014年的Facebook举办的F8(Facebook Developer Conference)大会上上
+上小节单组MVC(View、Model、Controller是1:1:1的关系)只是一种理想状态。现实中的程序往往是多视图，多模型。更严重的是视图与模型之间还可以是多对多的关系。也就是说，单个视图的数据可以来自多个模型，单个模型更新是需要通知多个视图，用户在视图上的操作可以对多个模型造成影响。可以想象最致命的后果是，视图与模型之间相互更新的死循环。
+
+这样一来，View与Model与Controller之间的关系就成一团乱麻了，如下两幅图所示：
+
+![mvc-complex](./images/mvc-vs-flux/mvc-complex.png)
+![mvc-diagram](./images/mvc-vs-flux/mvc-diagram.png)
+
+在2014年Facebook举办的F8(Facebook Developer Conference)大会上其中的[Hacker Way: Rethinking Web App Development at Facebook](https://www.youtube.com/watch?v=nYkdrAPrdcw)单元里，Facebook的工程师Jing Chen对于MVC的评价是，MVC非常适合于小型应用，但是当许许多多的Model和与之对应的View被加入到一个系统中，情况就会变得如下图所示：
+
+![flux-react-mvc](./images/mvc-vs-flux/mvc-diagram.png)
+
+需要注意的是，她想表达的意思其实和上述两幅图是相同的，但她在大会上演示的这幅图对MVC的架构描述是有欠缺的。她的这番言论和不准确的图片同时也在[Reddit上也引起了非常多的讨论](https://www.reddit.com/r/programming/comments/25nrb5/facebook_mvc_does_not_scale_use_flux_instead/)，甚至是负面的评价。最后她的回复如下
+
+>Yeah, that was a tricky slide [the one with multiple models and views and bidirectional data flow], partly because there's not a lot of consensus for what MVC is exactly - lots of people have different ideas about what it is. What we're really arguing against is bi-directional data flow, where one change can loop back and have cascading effects.
+
+她承认演示中的图片确实投机取巧了。但其实大部分人对MVC的见解也并不相同，它们真正想表达的是这种双向的数据流架构会产生一定的负面效应。
+
+## Flux
 
 
