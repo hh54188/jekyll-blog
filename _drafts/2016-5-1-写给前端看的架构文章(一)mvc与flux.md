@@ -99,4 +99,29 @@ phonecatApp.config(['$routeProvider',
 
 ## Flux
 
+我们首先总结一下，flux架构下一共有四类模块角色，按照交互顺序依次是：
+
+- Component/View: 你可以把组件(Component)理解为View与Controller的结合，它既展现数据，同时也处理用户的交互请求。不同于MVC的Controller直接调用模型层业务逻辑处理接口，flux上来自用户的操作或者请求最终会映射为对应的Action，交由Action进行下一步处理。另一点需要注意的是Component同时也监听着Store中数据的更改事件，一旦发生更改则重新请求数据。
+
+- Action：描述组件触发的操作，包括名称和数据，比如`{ 'actionType': 'delete', 'data': item}`
+
+- Dispatcher: flux的中央枢纽(central hub)，所有的Action都会交由Dispatcher进行处理。Dispatcher在接收到Action之后，调用Store注册在Action上的回调函数。需要注意与MVC中Controller不同的是，Dispatcher是不包含业务逻辑的，它机械的像一座桥，一个路由器，所以它能被别的程序复用当然也能被别的Dispatcher替换。
+
+- Store：包含程序的数据与业务逻辑。和MVC的Model比较，相似之处是Store也同样包含领域模型和业务逻辑；不同之处是，Store包含的近乎是整个程序的数据和状态，但它并不对外直接提供操作数据的接口(但是提供查询数据的接口)，而是根据Action执行业务逻辑(通过在Action上注册回调函数)。
+
+一个简单的flux流程图如下所示：
+
+![flux-simple](./images/mvc-vs-flux/flux-simple.png)
+
+当有多个Store和View被添加后，复杂的flux流程图如下图所示
+
+![flux-complex](./images/mvc-vs-flux/flux-complex.png)
+
+与复杂的MVC架构流程图相比，复杂的flux架构流程图仍然井然有序。我们能辨别出程序流程在以单向环形的方式进行。
+
+
+
+
+
+
 
