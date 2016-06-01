@@ -6,13 +6,9 @@
 
 React.js组件化的思维方式确实让人耳目一新，但是还不够好。直到读懂背后懂得flux架构，直到把flux与mvc进行优劣比较，才发现React.js确实有可取之处。但flux架构并非新事物，如果你拥有后端开发背景的话，flux架构一定会让你联想到CQRS(Command-Query Responsibility Segregation)、EDA(Event-Driven Architecture)、DDD(Domain-Driven Design)等概念。至于这些概念具体是什么，和flux有什么关系，咱们以后再说。今天我们聊flux与mvc比较之下它的创新之处在哪。
 
-如果你还完全没有接触过React.js，下一节会首先带你做简单了解。如果你已经有所了解，可以跳过下节继续阅读
+如果你还完全没有接触过React.js也不太要紧。这一篇的内容主要集中于用图解和文字来讲解架构之间的差异，代码部分简单通俗易懂。
 
-## React.js简单入门
-
-## MVC(Model-View-Controller)
-
-### MVC简介
+## MVC简介
 
 MVC架构讲程序划分为三个角色，从上到下依次为：
 - View: 视图，用户数据展示，同时接受用户输入
