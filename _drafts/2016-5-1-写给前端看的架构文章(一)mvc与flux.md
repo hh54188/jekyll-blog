@@ -4,6 +4,8 @@
 
 在学习React.js的过程中，曾经最让我苦恼的事情是，我需要给自己一个使用这个框架的理由。因为随着学习经验的和工作经验的增长，你会发现类似的技术总是会此消彼长的出现，如果这只是另一个轮子怎么办？加之学习的成本、项目改造的成本甚至周围人来适应你的成本，一味的追逐最新最流行的技术并非是一件好事。
 
+当谈React.js时有必要把它一分为二来谈。
+
 React.js组件化的思维方式确实让人耳目一新，但是还不够好。直到读懂背后懂得flux架构，直到把flux与mvc进行优劣比较，才发现React.js确实有可取之处。但flux架构并非新事物，如果你拥有后端开发背景的话，flux架构一定会让你联想到CQRS(Command-Query Responsibility Segregation)、EDA(Event-Driven Architecture)、DDD(Domain-Driven Design)等概念。至于这些概念具体是什么，和flux有什么关系，咱们以后再说。今天我们聊flux与mvc比较之下它的创新之处在哪。
 
 如果你还完全没有接触过React.js也不太要紧。这一篇的内容主要集中于用图解和文字来讲解架构之间的差异，代码部分简单通俗易懂。
@@ -76,12 +78,14 @@ phonecatApp.config(['$routeProvider',
 
 ### MVC的局限
 
-上小节单组MVC(View、Model、Controller是1:1:1的关系)只是一种理想状态。现实中的程序往往是多视图，多模型。更严重的是视图与模型之间还可以是多对多的关系。也就是说，单个视图的数据可以来自多个模型，单个模型更新是需要通知多个视图，用户在视图上的操作可以对多个模型造成影响。可以想象最致命的后果是，视图与模型之间相互更新的死循环。
+上小节单组MVC(View、Model、Controller是1:1:1的关系)只是一种理想状态。现实中的程序往往是**多视图**，**多模型**。更严重的是视图与模型之间还可以是**多对多**的关系。也就是说，单个视图的数据可以来自多个模型，单个模型更新是需要通知多个视图，用户在视图上的操作可以对多个模型造成影响。可以想象最致命的后果是，视图与模型之间相互更新的死循环。
 
 这样一来，View与Model与Controller之间的关系就成一团乱麻了，如下两幅图所示：
 
 ![mvc-complex](./images/mvc-vs-flux/mvc-complex.png)
 ![mvc-diagram](./images/mvc-vs-flux/mvc-diagram.png)
+
+如此的混乱会产生很多的问题，比如调试代码。假设在一个复杂的MVC的架构中，有多个controller可以修改model，而开发时model的数据产出并非如你所愿，则你很难判断出是哪个controller出的错，只能使用控制变量法进行调试。
 
 在2014年Facebook举办的F8(Facebook Developer Conference)大会上其中的[Hacker Way: Rethinking Web App Development at Facebook](https://www.youtube.com/watch?v=nYkdrAPrdcw)单元里，Facebook的工程师Jing Chen对于MVC的评价是，MVC非常适合于小型应用，但是当许许多多的Model和与之对应的View被加入到一个系统中，情况就会变得如下图所示：
 
@@ -95,7 +99,11 @@ phonecatApp.config(['$routeProvider',
 
 ## Flux
 
-我们首先总结一下，flux架构下一共有四类模块角色，按照交互顺序依次是：
+一个简单的flux流程图如下所示：
+
+![flux-simple](./images/mvc-vs-flux/flux-simple.png)
+
+参照上面的图示，我们首先总结一下，flux架构下一共有四类模块角色，按照交互顺序依次是：
 
 - Component/View: 你可以把组件(Component)理解为View与Controller的结合，它既展现数据，同时也处理用户的交互请求。不同于MVC的Controller直接调用模型层业务逻辑处理接口，flux上来自用户的操作或者请求最终会映射为对应的Action，交由Action进行下一步处理。另一点需要注意的是Component同时也监听着Store中数据的更改事件，一旦发生更改则重新请求数据。
 
@@ -105,15 +113,21 @@ phonecatApp.config(['$routeProvider',
 
 - Store：包含程序的数据与业务逻辑。和MVC的Model比较，相似之处是Store也同样包含领域模型和业务逻辑；不同之处是，Store包含的近乎是整个程序的数据和状态，但它并不对外直接提供操作数据的接口(但是提供查询数据的接口)，而是根据Action执行业务逻辑(通过在Action上注册回调函数)。
 
-一个简单的flux流程图如下所示：
-
-![flux-simple](./images/mvc-vs-flux/flux-simple.png)
+一个简单的flux流程我们可以这么描述：用户在View上的操作最终会映射为一类Action，Action传递给Dispatcher，再由Dispatcher执行注册在指定Action上的回调函数。最终完成对Store的操作。如果Store中的数据发生了更改，则触发数据更改的事件，View监听着这些时间，并对这些事件做出反应（比如重新查询数据）。
 
 当有多个Store和View被添加后，复杂的flux流程图如下图所示
 
 ![flux-complex](./images/mvc-vs-flux/flux-complex.png)
 
-与复杂的MVC架构流程图相比，复杂的flux架构流程图仍然井然有序。我们能辨别出程序流程在以单向环形的方式进行。
+如果上图还是让你感觉到复杂的话，我们继续抽象flux流程如下：
+
+![flux-complex-abstract](./images/mvc-vs-flux/flux-abstract.png)
+
+由此可见即使是复杂的flux应用，它的数据流和程序的运作过程仍然是清晰可辨的。
+
+
+
+
 
 
 
