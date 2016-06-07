@@ -4,9 +4,11 @@
 
 在学习React.js的过程中，曾经最让我苦恼的事情是，我需要给自己一个使用这个框架的理由。因为随着学习经验的和工作经验的增长，你会发现类似的技术总是会此消彼长的出现，如果这只是另一个轮子怎么办？加之学习的成本、项目改造的成本甚至周围人来适应你的成本，一味的追逐最新最流行的技术并非是一件好事。
 
-当谈React.js时有必要把它一分为二来谈。
+当谈React.js时有必要把它一分为二来讲解。首先要明确的是它只是一个用于视图层的类库(lib)，你能把它当作模板引擎来用(**React.js并不是模板引擎**)，输出html，定义组件。但是你没法仅用React.js类库就搭建一个完整的前端app。之所以要强调这么一点是因为很多人会拿React.js与Angular做比较，这是不公平的，因为angular的定位是一个框架(framework)。angular自带模板引擎，路由引擎，有健全的数据双向绑定机制，内置Ajax请求功能，还能够定义Model。而React.js类库只能用于定义视图组件。
 
-React.js组件化的思维方式确实让人耳目一新，但是还不够好。直到读懂背后懂得flux架构，直到把flux与mvc进行优劣比较，才发现React.js确实有可取之处。但flux架构并非新事物，如果你拥有后端开发背景的话，flux架构一定会让你联想到CQRS(Command-Query Responsibility Segregation)、EDA(Event-Driven Architecture)、DDD(Domain-Driven Design)等概念。至于这些概念具体是什么，和flux有什么关系，咱们以后再说。今天我们聊flux与mvc比较之下它的创新之处在哪。
+React.js的另一面是它背后的flux架构，这是我们这篇文章着重要谈的。但正如上一段所说，React.js仅依靠自己没法成型一个flux框架，基于React.js的flux框架要么是手动补全了框架中其他角色的代码，要么引入了其他的第三方类库。flux架构也并非是React.js的专利，市面上已经有非常多的独立于React.js的开源框架供使用。
+
+这篇文章的目的就是让你读懂flux架构，我们会直接把flux与mvc比较，来彰显它的优劣。flux架构并非新事物，如果你拥有后端开发背景的话，flux架构一定会让你联想到CQRS(Command-Query Responsibility Segregation)、EDA(Event-Driven Architecture)、DDD(Domain-Driven Design)等概念。至于这些概念具体是什么，和flux有什么关系，会在下一篇中介绍。今天我们聊flux与mvc比较之下它的创新之处在哪。
 
 如果你还完全没有接触过React.js也不太要紧。这一篇的内容主要集中于用图解和文字来讲解架构之间的差异，代码部分简单通俗易懂。
 
@@ -105,13 +107,13 @@ phonecatApp.config(['$routeProvider',
 
 参照上面的图示，我们首先总结一下，flux架构下一共有四类模块角色，按照交互顺序依次是：
 
-- Component/View: 你可以把组件(Component)理解为View与Controller的结合，它既展现数据，同时也处理用户的交互请求。不同于MVC的Controller直接调用模型层业务逻辑处理接口，flux上来自用户的操作或者请求最终会映射为对应的Action，交由Action进行下一步处理。另一点需要注意的是Component同时也监听着Store中数据的更改事件，一旦发生更改则重新请求数据。
+- Component/View: 你可以把组件(Component)理解为View与Controller的结合，它既展现数据，同时也处理用户的交互请求。不同于MVC的Controller直接调用模型层业务逻辑处理接口，flux上来自用户的操作或者请求最终会映射为对应的Action，交由Action进行下一步处理。另一点需要注意的是View同时也监听着Store中数据的更改事件，一旦发生更改则重新请求数据。
 
 - Action：描述组件触发的操作，包括名称和数据，比如`{ 'actionType': 'delete', 'data': item}`
 
 - Dispatcher: flux的中央枢纽(central hub)，所有的Action都会交由Dispatcher进行处理。Dispatcher在接收到Action之后，调用Store注册在Action上的回调函数。需要注意与MVC中Controller不同的是，Dispatcher是不包含业务逻辑的，它机械的像一座桥，一个路由器，所以它能被别的程序复用当然也能被别的Dispatcher替换。
 
-- Store：包含程序的数据与业务逻辑。和MVC的Model比较，相似之处是Store也同样包含领域模型和业务逻辑；不同之处是，Store包含的近乎是整个程序的数据和状态，但它并不对外直接提供操作数据的接口(但是提供查询数据的接口)，而是根据Action执行业务逻辑(通过在Action上注册回调函数)。
+- Store：包含程序的数据与业务逻辑。和MVC的Model比较，Store有一些不易被察觉但又非常重要的差异：MVC中的每一个model即对应着一个领域模型；而flux中的一个Store自己并不是一个领域模型，而是可能包含多个模型。**最重要的是**，只有store自己知道如何修改数据，它并不对外直接提供操作数据的接口(但是提供查询数据的接口)，action和dispatcher没法操作store.
 
 一个简单的flux流程我们可以这么描述：用户在View上的操作最终会映射为一类Action，Action传递给Dispatcher，再由Dispatcher执行注册在指定Action上的回调函数。最终完成对Store的操作。如果Store中的数据发生了更改，则触发数据更改的事件，View监听着这些时间，并对这些事件做出反应（比如重新查询数据）。
 
@@ -125,6 +127,117 @@ phonecatApp.config(['$routeProvider',
 
 由此可见即使是复杂的flux应用，它的数据流和程序的运作过程仍然是清晰可辨的。
 
+### Flux代码
+
+最后这一小节，是用代码来演示flux的简易实现。如果你阅读本文的目的只是想对flux原理稍加了解，则可以略过这小节内容。
+
+#### View
+
+我们从最简单的场景出发，假设页面上只有一个按钮，我们通过这个按钮向store里添加一条数据。这里视图我们通过Reactjs实现：
+
+```
+var View = React.createClass({  
+    addNewItem: function (event) {
+        Dispatcher.dispatch({
+          action: 'add_item',
+          data: {date: +new Date}        
+        });
+    },
+    render: function(){
+        return (
+            <button onClick={this.addNewItem}>Add Item</button>
+        )
+    }
+});
+```
+
+在按钮的点击事件中我们触发了`add_item`事件。只不过触发事件是直接通过调用`Dispatcher`来实现。
+
+#### Actions
+
+在上面的视图代码中，我们直接调用了Dispatcher的方法。但这样的代码耦合太强了。View其实无需感知Dispatcher，这里我们更是直接把Dispatcher的细节暴露给了View，同时action也没有被抽象出来。
+
+接下来我们把Action抽象出来
+
+```
+var Actions = {
+  add: function (item) {
+      Dispatcher.dispatch({
+          action: 'add_item',
+          data: item        
+      });   
+  }
+}
+```
+此时的View也要修改为：
+
+```
+var View = React.createClass({  
+    addNewItem: function (event) {
+        Actions.add({
+            date: +new Date
+        });
+    },
+    render: function(){
+        return (
+            <button onClick={this.addNewItem}>Add Item</button>
+        )
+    }
+});
+```
+
+#### Store
+
+Store负责存储并更新数据，它需要监听Dispatcher上触发的action并做出响应：
+
+```
+var Store = {
+    items: []
+}
+
+Dispatcher.register(function(payload) {
+    switch(payload.action) {
+        case 'add_item':
+            // 当事件名为“添加”时，向仓库里添加数据
+            Store.items.push(payload.data);
+            // 同时触发“数据已更改”的事件
+            Store.triggerEvent('change');
+            break;
+    }
+}); 
+```
+
+当Store更新完数据之后，它还需要触发一个数据更新的事件，以告知那些关注这些数据的人。如果我们的视图需要在数据更改后时时更新数据，则还需要在Store注册数据更改事件的回调函数
+
+```
+var View = React.createClass({
+    update: function () {
+        // TODO
+    }, 
+    componentDidMount: function() {  
+        Store.bind('change', this.update);
+    },  
+    addNewItem: function (event) {
+        Actions.add({
+            date: +new Date
+        });
+    },
+    render: function(){
+        return (
+            <button onClick={this.addNewItem}>Add Item</button>
+        )
+    }
+});
+```
+
+参考文章：
+
+[ReactJS For Stupid People](http://blog.andrewray.me/reactjs-for-stupid-people/)
+[Flux For Stupid People](http://blog.andrewray.me/flux-for-stupid-people/)
+[What the Flux? (On Flux, DDD, and CQRS)](http://jaysoo.ca/2015/02/06/what-the-flux/)
+[Facebook: MVC Does Not Scale, Use Flux Instead [Updated]](https://www.infoq.com/news/2014/05/facebook-mvc-flux)
+[What is Flux?](http://fluxxor.com/what-is-flux.html)
+[Flux vs. MVC (Design Patterns)](https://medium.com/hacking-and-gonzo/flux-vs-mvc-design-patterns-57b28c0f71b7#.2uqupqv13)
 
 
 
