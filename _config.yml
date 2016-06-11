@@ -41,6 +41,9 @@ bing_verify:
 # Links to include in top navigation
 # For external links add external: true
 links:
+  - title: 购买《高性能响应式Web开发实战》
+    external: true
+    url: http://www.epubit.com.cn/book/details/4156
   - title: 项目
     url: /project
   - title: 订阅
