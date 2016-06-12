@@ -2,7 +2,7 @@
 layout: post
 title: 写给前端看的架构文章(1)：MVC VS Flux
 description: "Just about everything you'll need to style in the theme: headings, paragraphs, blockquotes, tables, code blocks, and more."
-modified: 2016-01-23
+modified: 2016-05-01
 tags: [javascript, front-end, xss, safety]
 image:
   feature: abstract-3.jpg
