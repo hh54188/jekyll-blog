@@ -1,76 +1,74 @@
----
-layout: post-index
-description: "Describe this nonsense."
-tags: [Jekyll, theme, themes, responsive, blog, modern]
-image:
-  feature: abstract-1.jpg
-  credit: dargadgetz
-  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
----
-
-{% for post in paginator.posts %}
-<article class="hentry">
-  <header>
-    <div class="entry-meta">
-      <span class="entry-date date published updated">
-        <time datetime="{{ post.date | date_to_xmlschema }}">
-          <a href="{{ site.url }}{{ post.url }}">{{ post.date | date: "%Y年%m月%d日" }}</a>
-        </time>
-      </span>
-      <!--<span class="author vcard">
-        <span class="fn">
-          <a href="{{ site.url }}/about/" title="About {{ site.owner.name }}">{{ site.owner.name }}</a>
-        </span>
-      </span>
-      {% if site.disqus_shortname and post.comments %}&nbsp; &bull; &nbsp;
-        <span class="entry-comments">
-          <a href="{{ site.url }}{{ post.url }}#disqus_thread">Comment</a>
-        </span>
-      {% endif %}-->
-    </div><!-- /.entry-meta -->
-    {% if post.link %}
-      <h1 class="entry-title"><a href="{{ site.url }}{{ post.url }}" rel="bookmark" title="{{ post.title }}"><i class="icon-double-angle-right"></i></a> <a href="{{ post.link }}">{{ post.title }}</a></h1>
-    {% else %}
-      <h1 class="entry-title"><a href="{{ site.url }}{{ post.url }}" rel="bookmark" title="{{ post.title }}" itemprop="url">{{ post.title }}</a></h1>
-    {% endif %}
-  </header>
-  <!--<div class="entry-content">
-    {{ post.description }}
-  </div>--><!-- /.entry-content -->
-</article><!-- /.hentry -->
-{% endfor %}
-
-<div class="pagination">
-  {% if paginator.previous_page %}
-    {% if paginator.previous_page == 1 %}
-      <a href="{{ site.url }}" class="btn">上一页</a>
-    {% else %}
-      <a href="{{ site.url }}/page{{ paginator.上一页_page }}" class="btn">上一页</a>
-    {% endif %}
-  {% else %}
-    上一页
-  {% endif %}
-  <ul class="inline-list">
-    <li>
-      {% if paginator.page == 1 %}
-        <span class="current-page">1</span>
-      {% else %}
-        <a href="{{ site.url }}">1</a>
-      {% endif %}
-    </li>
-    {% for count in (2..paginator.total_pages) %}
-      <li>
-        {% if count == paginator.page %}
-          <span class="current-page">{{ count }}</span>
-        {% else %}
-          <a href="{{ site.url }}/page{{ count }}">{{ count }}</a>
-        {% endif %}
-      </li>
-    {% endfor %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="/assets/book/style.min.css">
+  <script type="text/javascript" src="/assets/book/modernizr-custom.js"></script>
+  <!--[if lt IE 9]>
+  <script type="text/javascript" src="/assets/book/html5shiv.min.js"></script>
+  <script type="text/javascript" src="/assets/book/respond.min.js"></script>
+  <![endif]-->  
+</head>
+<body>
+<nav>   
+  <div class="menu-btn">
+    <button class="menu-btn-icon menu-btn-expand icon-img-menu"></button>
+    <button class="menu-btn-icon menu-btn-collapse icon-img-cross"></button>
+  </div>
+  <ul class="nav-container-list">
+    <li class="nav-list-item"><a href="/posts">文章</a></li>
+    <li class="nav-list-item"><a href="/about">关于我</a></li>
+    <li class="nav-list-item"><a href="/project">开源项目</a></li>
+    <li class="nav-list-item"><a href="/feed.xml">订阅</a></li>     
   </ul>
-  {% if paginator.next_page %}
-    <a href="{{ site.url }}/page{{ paginator.next_page }}" class="btn">下一页</a>
-  {% else %}
-    下一页
-  {% endif %}
-</div><!-- /.pagination -->
+</nav>
+<header>
+  <div class="header-text-container">
+    <h1 class="header-article_title">谢谢购买!</h1>
+    <time class="header-article_pub">2016年6月12日</time>
+  </div>    
+</header>
+<main>
+  <article>
+    <p>或许有的人看到上面的标题会非常的奇怪，请允许我解释一下。去年一年(2015 - 2016)的时间博客几乎没有更新，因为所有的时间都拿来写了一本书：<a target="_blank" href="http://www.epubit.com.cn/book/details/4156">《高性能响应式Web开发实战》</a>，而你现在看到的这个页面就是书中用于讲解技术使用的DEMO页面。所以访问这个站点的人有一部分会是购买了书的读者，所以我要首先谢谢他们购买了这本图书。</p>
+    <p>如果想继续阅读我博客的文章，请点击左上角的“文章”链接。下面是对这本书做的一些说明。</p>
+    <p>对于购买了本书的读者，你们现在看到的页面样子和书中的截图不一样，但没有关系，只是颜色搭配和样式做了细小的修改，页面的布局、架构、代码编写思路都是与书中保持一致的。之所以不同是因为在书稿交付出版社后持续对代码做了一些改进，总体来说变得更好了，如果对于这些修改有任何疑惑的地方可以通过下面的方式联络我。你现在看到的是一个线上版本，通过查看源代码会发现代码进行了压缩或者根据浏览器特性选择性的进行了加载。想了解源代码(包括书中的源码)的话可以访问<a target="_blank" href="https://github.com/hh54188/responsive-web-design-tutorial">本书托管在github上的源码仓库</a></p>
+    <p>如果对于本书有任何的意见或者建议，可以访问<a target="_blank" href="http://www.epubit.com.cn/book/details/4156">本书在异步社区上的页面</a>提交评论或者提交勘误。也可以直接邮箱我<a href="mailto:cocept@hotmail.com">cocept@hotmail.com</a>。</p>
+    <p>谢谢。</p>
+  </article>
+</main>
+<script type="text/javascript">
+  if (Modernizr.flexbox) {
+    var externalStyle = document.createElement('link');
+    externalStyle.setAttribute('rel', 'stylesheet');
+    externalStyle.setAttribute('type', 'text/css');
+    externalStyle.setAttribute('href', '/assets/book/flexbox.css');
+
+    var head = document.querySelector('head');
+    head.appendChild(externalStyle);
+
+    var header = document.querySelector('header');
+    header.classList.add('flex-enable', 'flex-column', 'flex-justify-space-around');
+  } else {
+    document.documentElement.classList.add('flexbox-unavailable');
+  }
+</script>
+<!-- Asynchronous Google Analytics snippet -->
+<script>
+  var _gaq = _gaq || [];
+  var pluginUrl = 
+  '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-38061225-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+</body>
+</html>
