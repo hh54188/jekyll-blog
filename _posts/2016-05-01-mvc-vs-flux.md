@@ -39,7 +39,7 @@ MVC架构讲程序划分为三个角色，从上到下依次为：
 
 如果上面的流程图还过于抽象的话，我们可以看一段MVC项目的代码，比如基于Nodejs的Kraken框架的[Shopping_Cart](https://github.com/lmarkus/Kraken_Example_Shopping_Cart)示例项目中的controller`controllers/index.js`：
 
-{% highlight html %}
+{% highlight javascript %}
 var Product = require('../models/productModel');
 
 module.exports = function (server) {
@@ -66,7 +66,7 @@ module.exports = function (server) {
 
 - 通常View和Controller的关系是一一对应的，比如首页index.html有自己的controller`controllers/index.js`，查询页面search.html有自己的controller`controllers/search.js`。从下面这段[angular的路由代码](https://docs.angularjs.org/tutorial/step_07#the-app-module)就是很典型的示例：
 
-{% highlight html %}
+{% highlight javascript %}
 phonecatApp.config(['$routeProvider',
   	function($routeProvider) {
     	$routeProvider.
@@ -147,7 +147,7 @@ phonecatApp.config(['$routeProvider',
 
 我们从最简单的场景出发，假设页面上只有一个按钮，我们通过这个按钮向store里添加一条数据。这里视图我们通过Reactjs实现：
 
-{% highlight html %}
+{% highlight javascript %}
 var View = React.createClass({  
     addNewItem: function (event) {
         Dispatcher.dispatch({
@@ -171,7 +171,7 @@ var View = React.createClass({
 
 接下来我们把Action抽象出来
 
-{% highlight html %}
+{% highlight javascript %}
 var Actions = {
   add: function (item) {
       Dispatcher.dispatch({
@@ -184,7 +184,7 @@ var Actions = {
 
 此时的View也要修改为：
 
-{% highlight html %}
+{% highlight javascript %}
 var View = React.createClass({  
     addNewItem: function (event) {
         Actions.add({
@@ -203,7 +203,7 @@ var View = React.createClass({
 
 Store负责存储并更新数据，它需要监听Dispatcher上触发的action并做出响应：
 
-{% highlight html %}
+{% highlight javasciprt %}
 var Store = {
     items: []
 }
@@ -222,7 +222,7 @@ Dispatcher.register(function(payload) {
 
 当Store更新完数据之后，它还需要触发一个数据更新的事件，以告知那些关注这些数据的人。如果我们的视图需要在数据更改后时时更新数据，则还需要在Store注册数据更改事件的回调函数
 
-{% highlight html %}
+{% highlight javascript %}
 var View = React.createClass({
     update: function () {
         // TODO
