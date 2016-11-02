@@ -21,31 +21,34 @@ EDUCATION:
 	(M.S., Interactive Design)
 
 SKILL:
+	- Comprehensive knowledge of Javascript, HTML5, CSS3
+	- Ability to develop with familiar framework, like AngularJS, React, Redux, etc.
+	- Experience of back end developing in Node.js, Python. C#.Net 
+	- Skillful at javascipt performance optimize
+	- Understanding of Design Patterns, Frameworks and Architecture.
+	- Keeping up to date with emerging web technologies through relevant blogs, publications.
 
 
 PERSONAL:
 	- Adaptable and able to quickly pick up new techniques.
-	- Excellent communication and personal-interaction skills.
 	- Clear and effective communication skills.
-	- Communicating ideas clearly to both technical and non-technical audiences.
-	- Able to work in a multi-disciplined team that includes designers, developers, consultants, and Project Managers.
 	- Working well as part of a multi-disciplinary team.
 
 
 WORK EXPERIENCE:
 	2012.3 - 2013.4, Yippee Arts, Beijing
 	Font End Developer
-	- Desgining and developing e-book editor tool (jQuery/jQuery/Backbone.js)
+	- Desgining and developing internal e-book editor tool (jQuery/jQuery/Backbone.js)
 	- Building and maintaining product gallary website 
 	- Developing asset manage system in both front end and back end (Bootstrap/Node.js/MongoDB)
 
 	2013.4 - 2014.6, iQiyi, Beijing
 	Font End Developer
 	- Maintaining the front end functionality of websites
-	- Developing reusable font end javascript component
-	- Analysing and solving website performance issue, make suggestions for improvements in performance
+	- Developing reusable javascript component
+	- Identifying and analysing website performance issue, optimizing website performance
 
 	2014.7 - Present
-	Baidu,
-	Programmatic Ads Platform Enigineering Division Software Engineer
-	- 
+	Baidu, Programmatic Ads Platform Enigineering Division Software Engineer
+	- Modifing and maintaing advertisement product template and script
+	- Developing functionality on Advertisement Render Service system (Node.js/MySql)
