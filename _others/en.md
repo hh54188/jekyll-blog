@@ -8,8 +8,9 @@
 （邮件标题怎么写？ Software enginer job apply）
 (书名号，附上中文)
 (怎么说单证，或者在职)
+(日期写数字还是英文？)
 
-creative, high resuable, high stable 
+creative, high resuable, high stable, robust and reliable 
 
 LiGuangyi
 
