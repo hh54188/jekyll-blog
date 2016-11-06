@@ -9,6 +9,7 @@
 (书名号，附上中文)
 (怎么说单证，或者在职)
 (日期写数字还是英文？)
+(分支方向怎么描述？)
 
 creative, high resuable, high stable, robust and reliable, Involved, Participate in, Establishing 
 Supporting, Creating quality
@@ -20,7 +21,7 @@ EDUCATION:
 
 	September, 2012 - Present
 	Beijing University of Aeronautics and Astronautics
-	Master of Interactive Design
+	Master of Software Engineering (Interactive Design)
 
 	September, 2008 - June, 2012
 	Jiangxi Normal University
@@ -31,37 +32,37 @@ SKILL:
 	
 	PROFESSIONAL:
 	- Proficient in Javascript, HTML5, CSS3
-	- Comprehensive knowledge of responsive web design and develop
-	- Ability to develop with popular javascript framework such as AngularJS, React.js, etc.
-	- Experience of back end developing in Node.js, Python, ASP.NET
-	- Skillful at website performance optimize
-	- Understanding of design patterns, architecture and coding best practices.
-	- Keeping up to date with emerging web technologies through relevant blogs, publications.
+	- Comprehensive knowledge of responsive web design and development
+	- Capable of developing with popular javascript framework such as AngularJS, React.js, etc.
+	- Experienced in back end developing in Node.js, Python, ASP.NET
+	- Skillful at optimizing website performance
+	- Well understanding of design patterns, architecture and best coding practices.
+	- Keeping updated to emerging web technologies through relevant blogs, publications.
 
 
 	PERSONAL:
 	- Adaptable and able to quickly pick up new techniques
-	- Clear and effective communication skills
+	- Effective communication skills
 	- Working well as part of a multi-disciplinary team
-	- Willingness to take ownership of projects and integrate best practices on developing process. 
+	- Willing to take ownership of projects and integrate best practices in developing process. 
 
 
 WORK EXPERIENCE:
 	
 
 	July, 2014 - Present
-	Baidu, Beijing 
+	Baidu.com Times Technology (Beijing) Co., Ltd., Beijing 
 	Programmatic Ads Platform Engineering Division Software Engineer
-	- Performed maintenance and updates to existing advertise template and script for business requirements.
-	- Participate in new functionality design and develop on Advertise Render Service, particular responsible for MySql storage module in Node.js and advertise preview tool based on React.js and Semantic-UI. Accomplish benchmark script, creating interface and functionality test suit for improving robust and reliable of the service.
+	- Providing maintenance and updates to existed advertise template and script for business requirements.
+	- Participate in design and development of new function in Advertise Render Service. Especially for the Mysql storage module and ADs Preview tool, which were written based on Node.js, React.js and Semantic-UI respectively. Improving robustness and reliability of the services by programming benchmark scripts, interfaces and functional-related test suit.
 
 
 
 	April, 2013 - June, 2014, 
 	iQiyi, Beijing
 	Research and Develop Engineer
-	- Served as a core team member in maintaining and enhancing the front end functionality of website, meanwhile developing reusable and creative javascript component and taking responsibility for javascript trouble shooting and online bug fixing
-	- Identifying and analysing website performance issue, devising optimize strategies based around collected and quantized performance index, implementing innovative optimize solution by taking modern techniques and even on experimental browser features, aim at improving user experience and conversions rates.
+	- Served as a core team member in maintaining and enhancing the front end function of website, meanwhile developing reusable and extensible javascript component and taking responsibility for javascript trouble shooting and online bug fixing
+	- Optimized websites performance through identifying and analyzing the collected and quantified performance index. Implementing innovative and optimized solutions by adopting new techniques and experimental browser features to promote user experiences and conversions rates.
 
 	
 
@@ -69,13 +70,13 @@ WORK EXPERIENCE:
 	March, 2012 - April, 2013,
 	Yippee Arts, Beijing
 	Font End Developer
-	- Responsible for designing and developing high usability internal e-book editor visualize tool as single page application form, build in MVC architecture based upon jQuery, jQuery UI, Backbone.js and HTML5/CSS3 features
-	- Independently fast develop asset manage system in both front end and back end, feature on taking Node.js as server program language and using MongoDB for data storage
+	- Taking advantages of MVC architecture to design and develop internal e-book editor tool as a single page application form, by using jQuery, jQuery UI, Backbone.js and HTML5/CSS3 features
+	- Developed asset manage system in both front end and back end parts independently by adopting Node.js as server program language and MongoDB as data storage
 	- Building and maintaining product gallery website	
 
 
 
 OTHER ACHIEVEMENT:
 
-	Book published: "High performance Responsive Web Development", ISBN: 9787115422163
+	Book published: "High performance Responsive Web Development", Post & Telecom Press, ISBN: 9787115422163
 	Patent in application: "Control system based on kinetic sensing device", application number: 201410730143.8
