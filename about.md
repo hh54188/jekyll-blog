@@ -20,4 +20,4 @@ share: true
 
 乐于分享
 
-联系方式：juststayinvegas#gmail.com 把#换成@
+联系方式：liguangyi08#gmail.com 把#换成@
