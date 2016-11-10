@@ -20,16 +20,18 @@ class LoginCommand
 let loginCommand = new LoginCommand('liguangyi', '123456');
 ```
 
-这个登陆指令只说了三件事：1.我要登陆，2.用户名是liguangyi，3.密码是123456 。它并没有包含任何有关登陆方法，登陆函数等技术信息。
+这个登陆指令只说了三件事：1.我要登陆，2.用户名是liguangyi，3.密码是123456 。它并没有包含任何有关登陆调用方法，登陆函数等技术信息。
 
-很明显，系统中除了发出指令的一方，还需要接受并且处理指令的一方，这个接收方我们就称之为command bus，command bus有一个handle函数用于处理指令。所以，发出指令到接收指令的处理流程应该是：
+很明显，系统中除了发出指令的一方，还需要接受并且处理指令的一方，这个接收方就是我们的主人公command bus，command bus有一个handle函数用于处理指令。所以，发出指令到接收指令的处理流程应该是：
 
 ```
 let loginCommand = new LoginCommand('liguangyi', '123456');
-commandBus.handler(loginCommand);
+commandBus.handle(loginCommand);
 ```
 
-不如我们为这段代码补充一些上下文，假设当前代码运行在一个MVC架构的程序中，这个MVC框架我们取用Node.js的Kraken，很明显当前代码应该是运行在controller部分中。那么代码可以是：
+注意command bus与command是一一对应的关系，而非所有的command都交由统一的command bus处理。
+
+为了更准确的说明，不如我们为这段代码补充一些上下文，假设当前代码运行在一个MVC架构的程序中，这个MVC框架我们取用Node.js的Kraken，很明显当前代码应该是运行在controller角色的脚本中，用于转发用户的请求。那么代码可以是：
 
 ```
 module.exports.loginController = function (req, res, next) {
@@ -41,9 +43,30 @@ module.exports.loginController = function (req, res, next) {
 };
 ```
 
+然而commandBus.handle究竟做了哪些事情，这也很容易推敲出来，最简单的情境是，首先对用户的输入进行验证，验证通过之后进行登录操作。类似传统代码的编写方式应该是这样的：
+
+```
+module.exports.loginController = function (req, res, next) {
+	UserModel.validate(req.body.username, req.body.password);
+	UserModel.login(req.body.username, req.body.password);
+};
+```
+
 ### Command有什么好处？
 
-1. 指令可以在任意处创建，然后只要把它交给command bus就好了
-2. controller不再包含登陆逻辑
+我们从以上代码中至少能总结出以下几点：
 
-controller不再包含过多的业务逻辑了，它只要把http请求翻译成指令对象，交给command bus去处理
+1. 职责划分更加明确
+
+在上面举例的传统代码方式中，`loginController` 是包含登录逻辑的。而通常在设计中我们推崇的是fat model, skinny controller，也就是业务逻辑尽可能的封装在Model层中，Controller只负责转发来自View的请求。如果你对MVC有所了解的话，View与Controller其实是一一对应的关系，有点勉强的说，这样的代码实际上我们把业务职责嫁接给了View层，或者说是污染了View层。因为仔细想想，登录这件事和用户操作界面一点关系都没有，无论是网页还是WebForm还是命令行。
+
+显而易见的是如果使用command bus的方式对业务进行封装，Controller就变得更纯粹了一些，当然如果想修改登录逻辑时，我们不必去打扰View，不必去Controller里查找，而是去command bus里修改。
+
+2. 复用性更好
+
+当我们把command抽象为一个类时，就意味着这个类可以任意处复用，command可以在任意处创建。发出登录指令这件事不仅限于网页的Controller中，可以来自命令行，也可以来自API，只要是能创建command实例的地方都行。
+
+同理，对于command bus来说，代码也可以在多处复用。但更重要的是command bus无需再关心它外面的世界，它不用关心自己身在何处，也不用关心传递的指令来自何处。
+
+关于Command Bus我们就谈到这里，更多有关Command Bus的实现就不说了，有兴趣的同学可以参考文章最后的参考文献。
+
