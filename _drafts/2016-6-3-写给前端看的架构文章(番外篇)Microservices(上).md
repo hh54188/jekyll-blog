@@ -1,3 +1,5 @@
+martinfowler.com/articles/microservices.html
+
 ## 前言
 
 在上一篇谈SOA的时候觉得有必要拿SOA与microservices做一个比较。Microservices也是
