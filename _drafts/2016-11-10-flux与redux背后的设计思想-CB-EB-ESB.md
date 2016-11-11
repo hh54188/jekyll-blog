@@ -80,9 +80,57 @@ Event Bus机制很好理解，它就是普通事件机制（设计模式中观�
 
 前端开发者对事件一定不陌生，例如 `document.addEventListener("click", clickHandler)`，表示我们订阅了doucment上的点击click事件，如果该事件发生，调用clickHandler回调函数；或者以Node.js为例，`process.on("message", messageHandler)`，表示当前子进程在等待父进程传递来的消息，一旦有消息传到，就会触发message事件，调用messageHandler函数处理消息。
 
-如果说在浏览器或者Node.js中使用事件是被迫基于浏览器（引擎）决定的。那么在Java平台使用Event Bus则是完全自愿的为了解决通信问题。
+如果说在浏览器或者Node.js中使用事件是迫于浏览器（引擎）决定的，因为前端程序天生就是EOA（Event-driven Architecture）架构。那么在Java平台使用Event Bus则是完全处于自愿，为了解决通信问题。
 
-Event Bus把事件机制上升到了一个系统级别的高度，让事件成为不同组件或者服务之间通信的必要渠道。任何一方都可以是事件的发布者也可以是订阅者
+Event Bus的升级之处在于，把事件机制上升到了一个全局的、系统级别的高度，让事件成为不同组件或者服务之间通信的必要渠道。任何一方都可以是事件的发布者也可以是订阅者。实现一个Event Bus非常简单：
+
+```
+let EventBus = {
+	publish: function (eventName, eventInfo) {}, // 也可以取名fire/trigger
+	subscribe: function (eventName, eventHandler) {} // 可以取名 on/listen
+	// unsubscribe // 取消订阅
+	// subscribeOnce // 只订阅一次
+}
+```
+
+如此以来，任何服务或者组件都能通过`EventBus.publish`发布事件，通过`EventBus.subscribe`订阅事件。
+
+我们对事件机制如此的熟悉，但却很少去想事件机制带来的益处 简单总结几点如下：
+
+1. 解耦。拥有事件之后，组件或者服务之间不必产生直接引用，免去了依赖。这使得不同部分之间更加独立，维护起来更加方便。
+2. 事件甚至能解决不同机器之间的通信问题。事件的实现既可以是基于本地也可以是基于网络的，但使用事件的两方都不用关心实现细节，基于EventBus提供的接口编程即可。这里我们可以参考Socket.IO编程
+
+当然EventBus的缺点也很明显：
+
+1. 单点故障(Single point of failure)，一旦EventBus服务自己出现问题，这个系统都岌岌可危
+2. 对基于事件机制的系统进行调试和测试永远都是个难题
+
+## Command Bus VS Event Bus
+
+Command Bus和Event Bus其实有点像，有时候会让人产生混淆，他们给人的感觉都是，一方发出请求，另一方用Handler处理请求。
+
+但是首先在定义概念上，两者就有很大的不同：
+
+- Command是指令，指示去即将完成一件事，比如“为我预订一个房间”
+- Event是通知，告诉你已经发生了什么，比如“房间已经预订好了”。并且Event是不可改变(immutable)的，发生了就是发生了
+
+从技术上来说：
+
+- Command是显示的调用，调用结果可以预见，并且接收者唯一，即对应的Commnd Bus
+- Event发布是无目的的，调用结果不可预见，订阅事件方可以多人
+
+## (Enterprise) Service Bus
+
+ESB与Command Bus和Event Bus没有太大关系，但因为同属Bus，在这里还是普及一下
+
+ESB是SOA(Service-oriented Architecture)架构的一部分，在其中它扮演者中间件(middleware)的角色。如果你对什么是SOA和middleware还没有任何概念的话没有关系，在之后的文章中我会再把本文中涉及的EDA、SOA、middleware都梳理一遍。在这里你只需要理解：ESB只服务于特定的架构系统中。
+
+ESB的作用是为不同应用和服务提供相互间的通信功能。这好像是句不痛不痒的话，毕竟Command Bus和Event Bus也是干这个的。但ESB比他们更抽象、更庞大。你可以把ESB想象成SOA系统中的互联网，来自不同语言、不同协议编写的服务和应用，都能接入这个网络中，每个角色既接受并处理请求，同时也发出请求。
+
+可以想象从技术层面上来说，ESB就更复杂了，如上所说除了基本的消息转发，还包括协议转换，日志记录，还有背负安全职责等。
+
+![ESB](./images/entservbus.gif)
+
 
 
 
@@ -92,3 +140,6 @@ Event Bus把事件机制上升到了一个系统级别的高度，让事件成�
 - [Towards CQRS, Command Bus](https://gnugat.github.io/2016/05/11/towards-cqrs-command-bus.html)
 - [What is an Eventbus?](http://www.rribbit.org/eventbus.html)
 - [Why people use message/event buses in their code?](http://stackoverflow.com/questions/3987391/why-people-use-message-event-buses-in-their-code)
+- [Reference 6: A Saga on Sagas](https://msdn.microsoft.com/en-us/library/jj591569.aspx)
+- [What is an ESB and what is it good for?](http://stackoverflow.com/questions/597397/what-is-an-esb-and-what-is-it-good-for)
+- [What is a servicebus and when do I need one?](http://stackoverflow.com/questions/2724816/what-is-a-servicebus-and-when-do-i-need-one)
