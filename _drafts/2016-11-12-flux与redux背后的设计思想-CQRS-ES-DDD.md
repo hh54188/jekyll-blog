@@ -66,6 +66,8 @@ CQRS全称为Command Query Responsibility Segregation，顾名思义“命令与
 
 ## Event Sourcing
 
+Event Sourcing是一种通过记录应用，来记录当前状态的一种方式
+
 在介绍Event Sourcing之前，我们先好好了解一下什么是Event。在上一篇关于Event Bus的文章中，我们把Event与Command做了比较，总结出了事件(Event)的几个特征。现在请让我们继续补充完整这些特征：
 
 - 事件发生在过去。比如“用户把商品添加进购物车”，就是一件已经发生的事情
