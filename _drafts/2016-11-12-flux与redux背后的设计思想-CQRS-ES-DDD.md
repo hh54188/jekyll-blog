@@ -1,3 +1,9 @@
+Flux和CQRS很像，Redux与CQRS很像，Flux也与Redux很像。我不确定Flux是否受到了CRQS的启发，但Redux作者在Redux.js的官方文档[Motivation](http://redux.js.org/docs/introduction/Motivation.html)一章里，在最后一段很明确的坦白到：
+
+>**Following in the steps of Flux, CQRS, and Event Sourcing**, Redux attempts to make state mutations predictable by imposing certain restrictions on how and when updates can happen.
+
+我们已经知道了什么是Flux，但关于CQRS和Event Sourcing，以及与它们俩相关的概念，都将在这一篇中得到普及。
+
 ##  Model & ORM(Object-Relational Mapping)
 
 虽然Model和ORM不是这篇的主角，但它们是会涉及到的两个概念，所以提前进行介绍。
@@ -43,6 +49,27 @@ CQRS全称为Command Query Responsibility Segregation，顾名思义“命令与
 1. 在许多业务场景中，数据的读和写的次数是不平衡，可能上千次的读操作才对应一次写操作，比如机票余票信息的查询和更新。所以把读和写操作分开能够有针对性的分别优化它们。；例如提高程序的scalability，scalability意味着我们能够在部署程序时，给读操作和写操作部署不同数量的线上实例来满足实际的需求。
 
 2. 通常来说，“写”操作比“读”操作更加复杂，无论是业务逻辑方面还是技术方面。例如写操作首先要验证数据的合法性和完整性，存储中会涉及事务，存储过程，同时还要考虑数据冗余，数据同步；而读操作则完全没有类似的要求。把读和写分离相当于隔离了复杂操作，分离便于我们更好的独立维护它们，
+
+至于CQRS的实现，则参考下图：
+
+![CQRS](./images/CQRS.png)
+
+图正如上文描述所说，所有的写操作请求都转发给write side, 而视图则从read side查询数据。从这里你可以看到Flux架构的影子：当数据在write side发生更改时，一个更新事件会被推送到read side，通过绑定事件的回调，read side得知数据已更新，可以选择是否重新读取数据。下面这张Flux流程图或许能够帮你回忆起Flux：
+
+![flux-data-flow](./images/flux-data-flow.png)
+
+这里我们要辨别一点Flux与CQRS流程图中的不同点。在CQRS中，write side和read side分属于两个不同的domain model，各自的逻辑封装和隔离在各自的Model中。而在Flux里，业务逻辑都统一封装在Store中。
+
+另有一点关于CQRS流程图中非常重要的是，请求到了Model里终究还是要转化为对数据的操作，既然读和写的业务逻辑都独立开了，那么被读和被写的数据也需要隔离开吗？独立的数据库当然会有更好的性能，但随之而来的是数据延迟和数据同步的问题。这些都是关于技术实现，就不深究了。
+
+更多关于CQRS的深入概念，会放在本文最后一节关于Domain-driven Design中。
+
+## Event Sourcing
+
+在介绍Event Sourcing之前，我们先好好了解一下什么是Event。在上一篇关于Event Bus的文章中，我们把Event与Command做了比较，总结出了Event的几个特征。现在请让我们继续补充完整这些特征：
+
+- 
+
 
 [What's the difference between data model and object model?](http://stackoverflow.com/questions/2446002/whats-the-difference-between-data-model-and-object-model)
 [What is an ORM and where can I learn more about it?](http://stackoverflow.com/questions/1279613/what-is-an-orm-and-where-can-i-learn-more-about-it)
