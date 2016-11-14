@@ -1,8 +1,8 @@
-Flux和CQRS很像，Redux与CQRS很像，Flux也与Redux很像。我不确定Flux是否受到了CRQS的启发，但Redux作者在Redux.js的官方文档[Motivation](http://redux.js.org/docs/introduction/Motivation.html)一章里，在最后一段很明确的坦白到：
+Flux和CQRS很像，Redux与CQRS很像，Flux也与Redux很像。我不确定Flux是否受到了CRQS的启发，但Redux作者在Redux.js官方文档的[Motivation](http://redux.js.org/docs/introduction/Motivation.html)一章里，在最后一段很明确的总结到：
 
 >**Following in the steps of Flux, CQRS, and Event Sourcing**, Redux attempts to make state mutations predictable by imposing certain restrictions on how and when updates can happen.
 
-我们已经知道了什么是Flux，但关于CQRS和Event Sourcing，以及与它们俩相关的概念，都将在这一篇中得到普及。
+我们已经知道了什么是Flux，但关于CQRS和Event Sourcing或许大部分人并不了解。其实DDD/CQRS/ES是形影不离的三个概念，通常在谈论其一时也会覆盖其二。在这篇文章里都会统一做一次扫盲，并看看Redux或者Flux是如何借鉴它们的。
 
 ##  Model & ORM(Object-Relational Mapping)
 
@@ -66,9 +66,13 @@ CQRS全称为Command Query Responsibility Segregation，顾名思义“命令与
 
 ## Event Sourcing
 
-在介绍Event Sourcing之前，我们先好好了解一下什么是Event。在上一篇关于Event Bus的文章中，我们把Event与Command做了比较，总结出了Event的几个特征。现在请让我们继续补充完整这些特征：
+在介绍Event Sourcing之前，我们先好好了解一下什么是Event。在上一篇关于Event Bus的文章中，我们把Event与Command做了比较，总结出了事件(Event)的几个特征。现在请让我们继续补充完整这些特征：
 
-- 
+- 事件发生在过去。比如“用户把商品添加进购物车”，就是一件已经发生的事情
+- 事件是不可以更改的。因为它已经发生了，你没法更改或者撤销
+- 事件是单向的消息。事件的发布源只有可能是一个，而事件的订阅者则可以有很多
+- 事件发布时会附上与事件有关的信息。例如“ID为123用户的把ID为456的商品添加进了购物车”
+- 最后，事件在Event Sourcing的场景中，一定是用于表达业务目的。例如上面的“ID为123用户的把ID为456的商品添加进了购物车”，意味着我们要检查库存，更新用户订单数据。
 
 
 [What's the difference between data model and object model?](http://stackoverflow.com/questions/2446002/whats-the-difference-between-data-model-and-object-model)
