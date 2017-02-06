@@ -1,3 +1,16 @@
+---
+layout: post
+title: 关于Node.js后端架构的一点后知后觉
+modified: 2017-01-25
+tags: [Node.js]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
+
 ## 前言
 
 上周有幸和淘宝前端团队的七念老师做了一些NodeJS方面上的交流（实际情况其实是他电话面试了我╮(╯-╰)╭），我们主要聊到了我参与维护的一个线上NodeJS服务，关于它的现状和当下的不足。他向我提出的一些问题带给了我很大启发，尽管回答的不是很好。问题大意是，对于你意识到的这些不足，你将尝试怎样去改进它们？甚至，如果给你一个机会来重新设计这个系统服务，你将如何做？相比现在有什么的改进？
@@ -27,7 +40,7 @@
 
 按照书中的说法，拓展性划分为三类，如下图所示：
 
-![type of scalability](./images/something-about-nodejs-architecture/type-of-scale.png)
+![type of scalability](../images/something-about-nodejs-architecture/type-of-scale.png)
 
 - X轴方向：纯粹的对服务实例进行拓展，例如为了响应更多的请求
 - y轴方向：为服务添加新的功能，功能性拓展
@@ -47,7 +60,7 @@
 
 下图就是对以上所说多进程模式原理的图解：
 
-![cluster](./images/something-about-nodejs-architecture/cluster.png)
+![cluster](../images/something-about-nodejs-architecture/cluster.png)
 
 简单来说，首先我们有一个主进程master，但master主进程并不实际的处理业务逻辑，但除了业务逻辑以外事情它都做：它是manager，负责启动子进程，管理子进程（如果子进程挂了要及时重启），它也扮演router，也就是对该程序的访问请求首先到达主进程，再由主进程分配请求给子进程worker。而子进程才负责处理业务逻辑。
 
@@ -60,19 +73,19 @@
 
 另一个问题是状态共享问题，假如某个用户第一次访问该服务时是分配给了线程A上的实例A处理，并且用户在这个实例上进行了登陆，而没有过几秒钟之后当用户第二次访问时分配给了线程B上的实例B处理，如果此时用户在A上的登陆状态没有共享给其他实例的话，那么用户不得不重新登陆一次，这样的用户体验是无法接受的。如下图所示
 
-![session-share-problem](./images/something-about-nodejs-architecture/session-share-problem.png)
+![session-share-problem](../images/something-about-nodejs-architecture/session-share-problem.png)
 
 这个问题的解决办法是把状态进行共享：
 
-![session-share-solution01](./images/something-about-nodejs-architecture/session-share-solution01.png)
+![session-share-solution01](../images/something-about-nodejs-architecture/session-share-solution01.png)
 
 也可以新增一个模块用于记录用户第一次访问的实例，并在之后当用户访问服务时始终访问该实例
 
-![session-share-solution02](./images/something-about-nodejs-architecture/session-share-solution02.png)
+![session-share-solution02](../images/something-about-nodejs-architecture/session-share-solution02.png)
 
 主进程-子进程的模式思路不仅适用于纵向拓展，还适用于横向拓展。当单台机器已经无法满足你需求的时候，你可以把单实例子进程的概念拓展为单台机器：我们将在多台机器上部署多个进行实例，用户的访问请求也并非直接到达它们，而是先到达前方的代理机器，它也是负责负载均衡的机器，负责将请求转发给部署了应用实例的机器。这样的模式我们也通常称为反向代理模式：
 
-![reverse-proxy](./images/something-about-nodejs-architecture/reverse-proxy.png)
+![reverse-proxy](../images/something-about-nodejs-architecture/reverse-proxy.png)
 
 我们仍然能对这个模式持续改进，例如动态的启动或者关闭机器上的实例用于节省资源，甚至想办法移除负载平衡这一环节用于提高通讯的效率。在这里就不延伸开了去了，具体可以参考Node.js design patterns这本书中的内容。
 
@@ -102,7 +115,7 @@
 
 微服务说到底还是解耦思想的实践。从这个意义上来说，React下的Flux架构某种意义上也属于微服务。如果你了解Flux的起源的话，Flux架构其实来源于后端的CQRS，即Command Query Responsibility Segregation，命令与查询职责分离，也就是将数据的读操作和写操作分离开。这么设计的理由有很多，举例说一点：在许多业务场景中，数据的读和写的次数是不平衡，可能上千次的读操作才对应一次写操作，比如机票余票信息的查询和更新。所以把读和写操作分开能够有针对性的分别优化它们。例如提高程序的scalability，scalability意味着我们能够在部署程序时，给读操作和写操作部署不同数量的线上实例来满足实际的需求。
 
-![CQRS](./images/something-about-nodejs-architecture/CQRS.png)
+![CQRS](../images/something-about-nodejs-architecture/CQRS.png)
 
 如果你也有Unity编程经验的话会对解耦更有感触，在Unity中我们已经不能称之为解耦，而是自治，这是Unity的设计模式。举个例子，屏幕上少则可能有十几个游戏元素，例如玩家、敌人还有子弹。你必须为它们编写“死亡”的规则，“诞生”的规则，交互的规则。因为你根本无法预料玩家在何时何种位置发射出子弹，也无法预料子弹何时在什么位置碰撞上什么状态敌人。所以你只能让它们在规则下自由发挥。这和微服务有异曲同工之妙：独立，隔离，自治。
 
