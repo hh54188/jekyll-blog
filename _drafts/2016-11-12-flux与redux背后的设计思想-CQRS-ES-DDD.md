@@ -1,3 +1,5 @@
+在阅读这篇文章之前你要对前端的Flux架构和Redux架构有所了解，如果还不清楚它们是什么，请通过百度查询一些科普资料了解。因为这篇文章就是谈Flux架构和Redux架构的起源和背后的设计思想。
+
 Flux和CQRS很像，Redux与CQRS很像，Flux也与Redux很像。我不确定Flux是否受到了CRQS的启发，但Redux作者在Redux.js官方文档的[Motivation](http://redux.js.org/docs/introduction/Motivation.html)一章里，在最后一段很明确的总结到：
 
 >**Following in the steps of Flux, CQRS, and Event Sourcing**, Redux attempts to make state mutations predictable by imposing certain restrictions on how and when updates can happen.
@@ -8,7 +10,7 @@ Flux和CQRS很像，Redux与CQRS很像，Flux也与Redux很像。我不确定Flu
 
 虽然Model和ORM不是这篇的主角，但它们是会涉及到的两个概念，所以提前进行介绍。
 
-Model，译为模型，是对业务逻辑中涉及到的概念的抽象。比如我们需要开发一个“客户管理系统”，那么“客户”概念就可以抽象为一个模型，有关客户的种种行为，例如创建客户，注销客户，查看客户都可以在模型中得以体现,也就是业务逻辑封装在模型中。MVC中的Model即是如此，例如在系统界面上查看客户信息，就需要调用客户模型的查看方法，用户信息视图的Controller会这么写：
+Model，译为模型，是对业务逻辑中涉及到的概念的抽象。比如我们需要开发一个“客户管理系统”，那么“客户”概念就可以抽象为一个模型，有关客户的种种行为，例如创建客户，注销客户，查看客户等操作都可以在模型中得以体现，也就是业务逻辑封装在模型中。MVC中的Model即是如此，例如在系统界面上查看客户信息，就需要调用客户模型的查看方法，用户信息视图的Controller会这么写：
 
 ```
 var CustomInfoController = function (req, res) {
@@ -16,14 +18,16 @@ var CustomInfoController = function (req, res) {
 }
 ```
 
-模型和它对应的数据之间的关系却不简单，我们有“客户”这个模型或者说是概念，但真正关于客户的数据或许存放在多个数据库表中，甚至很跨多个物理服务器，或者`showInfoById`这个方法使用了事务，使用了存储过程。也就是说，通常我们在使用“模型”这个字眼时，我们不考虑它的底层是如何存储的，表示如何设计的，接口是如何实现的。模型是一个工具，它告诉我们系统由什么组成，是如何工作的，还有不同部分之间如何通信，依赖，协作等信息。这一类Model可以称之为Business Model, Domain Model，但不一定是Object Model。Object Model意味着每一个模型都可以以面向对象编程中类的形式体现出来，但在DDD(Domain-driven design，另一个与CQRS相关的概念，放在最后介绍)的概念中，不是每一个模型都适合用类去表达（虽然代码实现中我们或许别无选择）。
+模型和它对应的数据之间的关系却不简单，我们有“客户”这个模型或者说是概念，但真正关于客户的数据或许存放在多个数据库表中，甚至很跨多个物理服务器，或者`showInfoById`这个方法使用了事务，使用了存储过程。也就是说，通常我们在使用“模型”这个字眼时，我们不考虑它的底层是如何存储，表如何设计，接口是如何实现的。模型是一个工具，它告诉我们系统由什么组成，是如何工作的，还有不同部分之间如何通信，依赖，协作等信息。这一类Model可以称之为Business Model或者Domain Model，但不一定是Object Model。Object Model意味着每一个模型都可以以面向对象编程中类的形式体现出来，但在DDD(Domain-driven design，另一个与CQRS相关的概念，放在最后介绍)的概念中，不是每一个模型都适合用类去表达（虽然代码实现中我们或许别无选择）。
 
 另一种Model我们可以称之为Data Model，如果说Domain Model是对现实概念的映射，那么Data Model则是对数据库的映射。这种映射可以用一个更专业的词汇体现出来，就是ORM(Object-Relational Mapping)，即把数据库的表结构(Schema)映射为面向对象中的类。
 
-当我们想通过数据库查询用户信息时，原来代码通常是这么写的：
+当我们想通过数据库查询用户信息时，代码通常是这么写的：
 
 ```
+// 创建数据库连接
 var connection = mysqljs.createConnection(mysqlStr);
+// 执行查询语句
 connection.query('SELECT * FROM custom JOIN (address, avatar) ON (cutsom.id = address.id AND address.id = avatar.id) WHERE custom.id=' + userId, function (err, results) {
 	
 })
@@ -40,9 +44,9 @@ Custom.get({
 
 ## CQRS
 
-CQRS全称为Command Query Responsibility Segregation，顾名思义“命令与查询职责分离”。“职责分离”我们理解，但怎么划分“命令”与“查询”，他们的职责又分别是什么？
+CQRS全称为Command Query Responsibility Segregation，顾名思义“命令与查询职责分离”。“职责分离”我们理解，但怎么区分“命令”与“查询”，他们的职责又分别是什么？
 
-命令与查询的根本区别在于，是否改变数据的状态。例如增、删、改操作即归属于“命令”。查询操作只求返回结果，并不修改数据，所以归属于“查询”（查询归属于“查询”，好吧，听上去像废话）。另一个区别在于，“命令”操作不需要返回值（当然我们在编码时需要有返回来告诉我们修改是否成功），而“查询”需要。
+命令与查询的根本区别在于，是否改变数据的状态。例如增、删、改操作即归属于“命令”，因为这些操作会导致数据被修改；而查询操作只求返回结果，并不修改数据，所以归属于“查询”（查询归属于“查询”，好吧，听上去像废话）。另一个区别在于，“命令”操作不需要返回值（当然我们在编码时需要有返回来告诉我们修改是否成功），而“查询”需要。
 
 简单来说，CQRS作用在于把数据的读和写分离。读写操当然是隔离的，这里的分离相对的是传统编程中一视同仁的编写CRUD(Create, Read, Update, Delete，增删改查)接口代码。CQRS主张对“读”和“写”的接口做不同的设计，编码和优化。而之所以要做这样的分离，原因有以下两点：
 
