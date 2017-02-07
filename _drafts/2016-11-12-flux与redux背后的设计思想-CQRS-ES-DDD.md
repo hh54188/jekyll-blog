@@ -70,17 +70,35 @@ CQRS全称为Command Query Responsibility Segregation，顾名思义“命令与
 
 ## Event Sourcing
 
-Event Sourcing是一种通过记录改变状态的历史事件，来持久化当前状态的方式。
-
 在介绍Event Sourcing之前，我们先好好了解一下什么是Event。在上一篇关于Event Bus的文章中，我们把Event与Command做了比较，总结出了事件(Event)的几个特征。现在请让我们继续补充完整这些特征：
 
 - 事件发生在过去。比如“用户把商品添加进购物车”，就是一件已经发生的事情
 - 事件是不可以更改的。因为它已经发生了，你没法更改或者撤销
 - 事件是单向的消息。事件的发布源只有可能是一个，而事件的订阅者则可以有很多
 - 事件发布时会附上与事件有关的信息。例如“ID为123用户的把ID为456的商品添加进了购物车”
-- 最后，事件在Event Sourcing的场景中，一定是用于表达业务目的。例如上面的“ID为123用户的把ID为456的商品添加进了购物车”，意味着我们要检查库存，更新用户订单数据。
+- 最后，事件在Event Sourcing的场景中，一定是用于表达业务目的。例如上面的“ID为123用户的把ID为456的商品添加进了购物车”，意味着我们要检查库存，更新用户订单数据；而并非表达一般的技术事件，比如点击动作，组件通信等。
+
+数据存储大致可以划分为两种方式，一种是直接存储数据结果，例如商品的库存，我们只关心还剩下多少件，所以存储结果是一个数值；另一种是存储每一次的更改，好比记账，我们要存储每次支出多少，每次收入多少，所以记录的是一连串数值。这种情况下我们不太在意最终结果，但是当需要最终结果时，只要把每次的差异累加即可。Event Sourcing就是指后面这种存储方式。用专业术语描述就是：Event Sourcing是一种通过记录“数据发生改变的历史事件”，来持久化当前状态的方式。
+
+为什么我们要使用Event Sourcing？我们可以找到以下优点：
+
+- 高性能：事件是不可更改的，存储的时候并且只做插入操作，也可以设计成独立，简单的对象。所以存储事件的成本较低额且效率较高，扩展起来也非常方便。
+- 简化存储：事件用于描述系统内发生的事情。我们可以考虑用事件存储代替复杂的关系存储。
+- 溯源: 正因为事件是不可更改的，并且记录了所有系统内发生的事情，我们能用它来跟踪问题，重现错误，甚至做备份和还原
+- 被其他系统使用：上一篇文章说到事件可以作为不同服务间的通信方式，所以事件也可以被推送到自他的系统中被二次利用
+- 附加价值：我们能把事件历史作为大数据的数据源，从中统计出有价值的信息
+
+但最终还是要回归理性，毕竟以结果为导向的数据存储和以过程为导向的数据存储适用的业务场景是不同的。Event Sourcing只是为我们将来设计系统时多提供了一种可能性，最终还是需要具体问题具体分析。
+
+说到这里，你一定会想起Redux。Redux强调的就是应用的“状态”，状态之间是独立的，这与Event Sourcing中的事件的独立和序列化不谋而合。
+
+
+## DDD
+
+
 
 
 [What's the difference between data model and object model?](http://stackoverflow.com/questions/2446002/whats-the-difference-between-data-model-and-object-model)
 [What is an ORM and where can I learn more about it?](http://stackoverflow.com/questions/1279613/what-is-an-orm-and-where-can-i-learn-more-about-it)
 [What is an Object-Relational Mapping Framework?](http://stackoverflow.com/questions/1152299/what-is-an-object-relational-mapping-framework)
+[Reference 3: Introducing Event Sourcing](https://msdn.microsoft.com/en-us/library/jj591559.aspx)
