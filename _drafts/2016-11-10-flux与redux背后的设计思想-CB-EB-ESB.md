@@ -124,6 +124,8 @@ Command Bus和Event Bus其实有点像，有时候会让人产生混淆，它们
 - Command是显示的调用，调用结果可以预见，并且接收者唯一，即对应的Commnd Bus
 - Event发布是无目的的，调用结果不可预见，订阅事件方可以多人
 
+当了解完毕Command Bus和Event Bus之后，回过头看Flux和Redux，是否觉得有似曾相识之处？在个人看来，单独审视action的话看上去它像command，因为它有着明确的业务目的；而action-dispatch的配置更像是事件架构，通常我们在实现Flux架构时，也会采用事件相关的类库来实现这一机制。所以还是仁者见仁智者见智吧。
+
 ## (Enterprise) Service Bus
 
 ESB与Command Bus和Event Bus没有太大关系，但因为同属Bus，在这里还是普及一下
@@ -138,11 +140,6 @@ ESB的作用是为不同应用和服务提供相互间的通信功能。这好�
 
 所以直观上看，你会对这个东西又爱又恨，爱它是因为它功能丰富，为你解决了一大堆问题。恨它是因为可以预见维护和开发这样一个中间件是成本高昂的。
 
-## 总结
-
-
-
-
 
 - [A wave of command buses](http://php-and-symfony.matthiasnoback.nl/2015/01/a-wave-of-command-buses/)
 - [Responsibilities of the command bus](http://php-and-symfony.matthiasnoback.nl/2015/01/responsibilities-of-the-command-bus/)
@@ -152,3 +149,4 @@ ESB的作用是为不同应用和服务提供相互间的通信功能。这好�
 - [Reference 6: A Saga on Sagas](https://msdn.microsoft.com/en-us/library/jj591569.aspx)
 - [What is an ESB and what is it good for?](http://stackoverflow.com/questions/597397/what-is-an-esb-and-what-is-it-good-for)
 - [What is a servicebus and when do I need one?](http://stackoverflow.com/questions/2724816/what-is-a-servicebus-and-when-do-i-need-one)
+- [Redux and it's relation to CQRS (and other things) ](https://github.com/reactjs/redux/issues/351)
