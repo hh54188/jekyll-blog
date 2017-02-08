@@ -80,6 +80,14 @@ CQRS全称为Command Query Responsibility Segregation，顾名思义“命令与
 
 数据存储大致可以划分为两种方式，一种是直接存储数据结果，例如商品的库存，我们只关心还剩下多少件，所以存储结果是一个数值；另一种是存储每一次的更改，好比记账，我们要存储每次支出多少，每次收入多少，所以记录的是一连串数值。这种情况下我们不太在意最终结果，但是当需要最终结果时，只要把每次的差异累加即可。Event Sourcing就是指后面这种存储方式。用专业术语描述就是：Event Sourcing是一种通过记录“数据发生改变的历史事件”，来持久化当前状态的方式。
 
+常规存储：
+
+![regular storage](./images/store-regular.png)
+
+Event Sourcing 存储:
+
+![Event sourcing](./images/store-es.png)
+
 为什么我们要使用Event Sourcing？我们可以找到以下优点：
 
 - 高性能：事件是不可更改的，存储的时候并且只做插入操作，也可以设计成独立，简单的对象。所以存储事件的成本较低额且效率较高，扩展起来也非常方便。
@@ -90,10 +98,38 @@ CQRS全称为Command Query Responsibility Segregation，顾名思义“命令与
 
 但最终还是要回归理性，毕竟以结果为导向的数据存储和以过程为导向的数据存储适用的业务场景是不同的。Event Sourcing只是为我们将来设计系统时多提供了一种可能性，最终还是需要具体问题具体分析。
 
-说到这里，你一定会想起Redux。Redux强调的就是应用的“状态”，状态之间是独立的，这与Event Sourcing中的事件的独立和序列化不谋而合。
+说到这里，你一定会觉得在Redux中似曾相识。Redux强调的是应用的“状态”，状态之间是独立的、连续的但无关联的，这与Event Sourcing中的事件的独立和序列化不谋而合；另一个不同之处在于，Redux中的每一次产生的状态都是完整的，而Event Soucing中事件记录的是状态之间的差值。
 
 
-## DDD
+## DDD（ Domain-Driven Design）
+
+就像文章开头说的，DDD 和Flux与Redux并没有直接的联系，但是当你谈到CQRS时，你不得不提DDD（虽然我也不知道为什么，文章总是拿他们放在一起比较）。
+
+这一小节当然没法完全展现DDD的全貌。而如果你又没有兴趣读完560页的完整版的[Domain-Driven Design: Tackling Complexity in the Heart of Software](https://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215/ref=sr_1_1?s=books&ie=UTF8&qid=1486519284&sr=1-1&keywords=Domain-Driven+Design)的话，可以尝试快速版的[domain driven design quickly](https://www.infoq.com/minibooks/domain-driven-design-quickly)。建议阅读英文原版，中文版的体验比较糟糕。以下的部分内容也都摘自这个快速版。
+
+个人的理解，DDD是一套关于软件设计的方法论，简单来说就是它教你怎么设计软件：例如告诉你可以把软件划分为哪些部分，为什么这样划分，以及不同的部分应该如果秉承什么样的理念进行开发，同时还要顾虑到哪些禁忌等等。这些都是概念理论上的，与具体的开发语言无关。
+
+我不是传统软件行业出身，虽然在大学时候编写过ASP.NET和WinForm代码，但也没有太多深刻的体会，相信大部分人也是如此。但只要你编写过稍复杂的程序，后端服务也好，前端MVC也好，相信在你阅读DDD的时候还是会深有感触，会认可书中提出的观念和解决方案。
+
+Domain-Driven Design，这个名字已经告诉你它的重点，即Domain Driven——业务驱动。在书的开头，他首先强调的就是业务的重要性：
+
+>You cannot create a banking software system unless you have a good understanding of what banking is all about, one must understand the domain of banking
+
+>Is it possible to create complex banking software without good domain knowledge? No way. Never.
+
+如果你想开发银行的业务系统，你首先要了解银行的所有业务是如何运作的，你甚至要比银行的柜台人员还要熟悉他们的业务，因为他们可能在表达需求时会有遗漏，会表达有误。
+
+接下来需要对业务进行抽象，抽象为业务模型，也就是本文开头说的(Domain) Model。Model非常重要，它是软件工程师和提出需求业务人员交流的基础。软件设计师，程序员和业务人员需要一门通用语言（Ubiquitous Language）来进行业务上的交流，虽然对于程序员来说我们有面向对象，有UML语言，有各种图例辅助我们表达和理解需求，但业务人员对这些一无所知。而无论这门通用语言具体形式如何，它都必定是基于Model的。
+
+当我们借助于Model把需求确定下来之后，接下来的任务就是考虑如何把Model翻译为代码。原则上我们应该使得软件的架构设计和Model保持一致，那么当业务发生修改时，改动就能直观的反馈到代码中。
+
+
+
+
+## 结束语
+
+
+
 
 
 
@@ -102,3 +138,5 @@ CQRS全称为Command Query Responsibility Segregation，顾名思义“命令与
 [What is an ORM and where can I learn more about it?](http://stackoverflow.com/questions/1279613/what-is-an-orm-and-where-can-i-learn-more-about-it)
 [What is an Object-Relational Mapping Framework?](http://stackoverflow.com/questions/1152299/what-is-an-object-relational-mapping-framework)
 [Reference 3: Introducing Event Sourcing](https://msdn.microsoft.com/en-us/library/jj591559.aspx)
+[Domain Driven Design Quickly](https://www.infoq.com/minibooks/domain-driven-design-quickly)
+[DDD/CQRS/ES/Architecture videos](https://gist.github.com/SzymonPobiega/5220595)
