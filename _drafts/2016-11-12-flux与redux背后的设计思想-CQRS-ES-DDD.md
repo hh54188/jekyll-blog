@@ -56,11 +56,11 @@ CQRS全称为Command Query Responsibility Segregation，顾名思义“命令与
 
 至于CQRS的实现，则参考下图：
 
-![CQRS](./images/CQRS.png)
+![CQRS](./images/design-philosophy-behind-flux-and-redux/CQRS.png)
 
 图正如上文描述所说，所有的写操作请求都转发给write side, 而视图则从read side查询数据。从这里你可以看到Flux架构的影子：当数据在write side发生更改时，一个更新事件会被推送到read side，通过绑定事件的回调，read side得知数据已更新，可以选择是否重新读取数据。下面这张Flux流程图或许能够帮你回忆起Flux：
 
-![flux-data-flow](./images/flux-data-flow.png)
+![flux-data-flow](./images/design-philosophy-behind-flux-and-redux/flux-data-flow.png)
 
 这里我们要辨别一点Flux与CQRS流程图中的不同点。在CQRS中，write side和read side分属于两个不同的domain model，各自的逻辑封装和隔离在各自的Model中。而在Flux里，业务逻辑都统一封装在Store中。
 
@@ -82,11 +82,11 @@ CQRS全称为Command Query Responsibility Segregation，顾名思义“命令与
 
 常规存储：
 
-![regular storage](./images/store-regular.png)
+![regular storage](./images/design-philosophy-behind-flux-and-redux/store-regular.png)
 
 Event Sourcing 存储:
 
-![Event sourcing](./images/store-es.png)
+![Event sourcing](./images/design-philosophy-behind-flux-and-redux/store-es.png)
 
 为什么我们要使用Event Sourcing？我们可以找到以下优点：
 
@@ -121,17 +121,23 @@ Domain-Driven Design，这个名字已经告诉你它的重点，即Domain Drive
 
 接下来需要对业务进行抽象，抽象为业务模型，也就是本文开头说的(Domain) Model。Model非常重要，它是软件工程师和提出需求业务人员交流的基础。软件设计师，程序员和业务人员需要一门通用语言（Ubiquitous Language）来进行业务上的交流，虽然对于程序员来说我们有面向对象，有UML语言，有各种图例辅助我们表达和理解需求，但业务人员对这些一无所知。而无论这门通用语言具体形式如何，它都必定是基于Model的。
 
-当我们借助于Model把需求确定下来之后，接下来的任务就是考虑如何把Model翻译为代码。原则上我们应该使得软件的架构设计和Model保持一致，那么当业务发生修改时，改动就能直观的反馈到代码中。
+当我们借助于Model把需求确定下来之后，接下来的任务就是考虑如何把Model翻译为代码。原则上我们应该使得软件的架构设计和Model保持一致，那么当业务发生修改时，改动就能直观的反馈到代码中。而在把Model翻译为代码的过程中，存在一些常见的模式，例如它总结了软件中常见的一些组件或者概念：
 
+![ddd diagram](./images/design-philosophy-behind-flux-and-redux/ddd-diagram.png)
 
+- 实体（Entities）：具有身份标识的对象。比如银行的个人账户信息，如果我们把账户信息抽象为一个对象的话，那么这些对象都有唯一的id用于标识它们。实体的特点就是具有身份标识（identity）。
+- 值对象（Value Object）：虽然对象可以是实体，但不是每一个对象都必须是实体。有时候我们不关心它具体是谁，我们关心的是它附带的属性值，比如消息。值对象通常可以被共享，销毁，复制。
+- 服务（Services）：业务模型中总存在一些行为或者操作不属于任何对象或者类。例如当我们把钱从一个账户转到另一个账户，转账这个行为究竟是属于发出方还是接收方？一旦发现这样的行为，最好把它定义为“服务”。服务有以下特征：
+	- 服务提供的操作是一个业务概念，不属于任何实体或者值对象
+	- 执行操作会影响到业务模型中的其他对象
+	- 服务操作是没有状态的
+- 工厂（Factories）：假设对象A想创建对象B，常规情况下只要调用B的构造函数并且传入参数就可以了。但是当创建对象B的流程变得复杂之后，例如创建时可能需要传入其他的对象，其它的对象之间又互有依赖。那么这实际上我们把B的细节暴露给了A，这是一个坏的设计。所以我们应该把创建复杂对象的职责转移到一个独立的对象中，这就是“工厂”。虽然工厂通常在业务模型中没有明确的职责，但仍然属于软件设计的一部分。
 
+以上只是常见模式的一部分。模式的好处在于，当你想把业务模型翻译为代码时，你可以把业务模型中的概念，根据它们的特征、职责套入这些模式中。这会为你节省下不少的时间。这不仅仅是“模式”的优势，还是整个DDD的优势。DDD像是一个架构模板，告诉你不同的业务在代码层面应该如何组织，如何通信，如何划分层级。以及在完成之后，如何持续的改进。
 
 ## 结束语
 
-
-
-
-
+关于设计思想这一专题，这里就告于段落。这两篇只是对很多概念做了简短和入门的介绍。这一专题的目的不在于教大家如何掌握和运用这些技术，而是做一次科普，或者说是分享。相信对大家理解Flux和Redux有不少的帮助。同时也为大家今后解决技术上的问题增添一些思路。
 
 
 [What's the difference between data model and object model?](http://stackoverflow.com/questions/2446002/whats-the-difference-between-data-model-and-object-model)

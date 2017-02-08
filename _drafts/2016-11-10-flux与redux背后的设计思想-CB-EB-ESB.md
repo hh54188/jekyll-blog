@@ -136,7 +136,7 @@ ESB的作用是为不同应用和服务提供相互间的通信功能。这好�
 
 可以想象从技术层面上来说，ESB就更复杂了，如上所说除了基本的消息转发，还包括协议转换，日志记录，还有背负安全职责等。
 
-![ESB](./images/entservbus.gif)
+![ESB](./images/design-philosophy-behind-flux-and-redux/entservbus.gif)
 
 所以直观上看，你会对这个东西又爱又恨，爱它是因为它功能丰富，为你解决了一大堆问题。恨它是因为可以预见维护和开发这样一个中间件是成本高昂的。
 
