@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Flux与Redux背后的设计思想：Command Bus, Event Bus, Service Bus
+title: Flux与Redux背后的设计思想(一)：Command Bus, Event Bus, Service Bus
 modified: 2017-02-13
 tags: [Javascript, Flux, Redux]
 image:
