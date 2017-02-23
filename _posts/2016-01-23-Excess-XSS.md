@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 【译文】了解XSS攻击
+title: #译文#了解XSS攻击
 description: "Just about everything you'll need to style in the theme: headings, paragraphs, blockquotes, tables, code blocks, and more."
 modified: 2016-01-23
 tags: [javascript, front-end, xss, safety]

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 【短篇·问题】小心字符串中的转义字符
+title: #短篇#小心字符串中的转义字符
 modified: 2016-12-27
 tags: [javascript, short]
 image:
