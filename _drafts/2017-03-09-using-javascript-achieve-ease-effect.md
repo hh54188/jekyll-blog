@@ -47,3 +47,15 @@ function progress(time, begin, end, duration) {
     return begin + (end - begin) * factor(time / duration);
 }
 ```
+根据上述公式，时间进度和移动进度的关系图如下图所示（横向为时间，纵向为位移）：
+
+![linear](./images/using-javascript-achieve-ease-effect/linear.png)
+
+没错，是一条直线。CSS中transition-timing-function属性的可选值linear就是这个意思。随着时间的推移，值变化是平均的。
+
+## 变化的系数
+
+
+
+
+
