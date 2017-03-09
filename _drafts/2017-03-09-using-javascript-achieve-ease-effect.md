@@ -44,16 +44,86 @@ function factor(time, duration) {
 }
 
 function progress(time, begin, end, duration) {
-    return begin + (end - begin) * factor(time / duration);
+    return begin + (end - begin) * factor(time, duration);
 }
 ```
 根据上述公式，时间进度和移动进度的关系图如下图所示（横向为时间，纵向为位移）：
 
 ![linear](./images/using-javascript-achieve-ease-effect/linear.png)
 
-没错，是一条直线。CSS中transition-timing-function属性的可选值linear就是这个意思。随着时间的推移，值变化是平均的。
+没错，是一条直线。CSS中transition-timing-function属性的可选值linear就是这个意思：随着时间的推移，值变化是平均的。
 
-## 变化的系数
+## 系数的秘密
+
+然而缓动效果除了linear以外，还有ease-in，ease-out，ease-in-out等等。所有这些特效的奥秘都在于上一小节所说的“系数”里。
+
+在linear特效中，系数的产生是线性的:`time / duration`。如果我们把系数公式改为`Math.pow(time / duration, 2)`，而progress函数不变。则时间和位移的坐标图趋势则会变得如下图所示：
+
+![ease-in](./images/using-javascript-achieve-ease-effect/ease-in.png)
+
+没错，正如图的标题所示，这就变成了ease-in的缓动特效。物体的运动状况与纵坐标相同，由慢逐渐加快。
+
+我们可以继续把系数公式抽象，我们将继续改变`Math.pow(time / duration, 2)`中的平方系数2，改为3、4甚至5。借助可视化函数工具 www.mathway.com/Graph，我们可以把x^2, x^3, x^4，x^5的坐标图分别绘制出来：
+
+![math-pow](./images/using-javascript-achieve-ease-effect/math-pow-graph.png)
+
+如果你对这几个图片感到眼熟的话那就没错了，因为这四个函数分别对应于以下四种缓动效果：
+
+![ease](./images/using-javascript-achieve-ease-effect/ease-total.png)
+
+注意这四种缓动效果的名称，虽然前面都是以ease-in开头，但后缀都不相同。后缀分别是Quad, Cubic, Quart, Quint。ease-in缓动效果虽说总体上是加速效果，但在此基础上四种后缀代表了四种加速的激烈程度，激烈程度由低到高：Quad最接近平缓（接近线性），Quint变化最为剧烈。四个后缀分别就对应了`Math.pow`函数的第二个参数次方系数。Quint等于2，Cubic等于3，Quart等于4，Quint等于5。
+
+**在这里我可以给出你一个结论了，缓动效果其实就是关于运行时间（进度）的函数。**
+
+你可能会纳闷，上面的位移函数`progress`不是和起始值和终点值相关吗？难道`factor`函数就决定了一切？
+
+我凭借着我对高中数学的记忆，针对数学函数做一个解释（如果有误请见谅请纠正我:P）：例数学函数`y = x^2`为例，下面的其他三个函数和对应的曲线图是基于这个函数的“变种”：
+
+![math](./images/using-javascript-achieve-ease-effect/math-compare.png)
+
+- 左一和左二图对比，相差的只是纵坐标的位移，图中曲线趋势完全一致
+- 左二和左三图对比，不同的是平方项前的系数，影响的是曲线的“开口大小”
+- 左三和左四图对比，不同的是次方数，此时曲线的“形状”已经完全改变。
+
+而缓动效果最大的差异，在于曲线的“形状”不同。所以真正起作用的只会是进度函数`factor`。
+
+除了Quad，Cubic，Quart，Quint外，还有其它级别的缓动程度，比如Expo，Back，Bounce等，不同之处也仅仅在于函数中处理进度的方式不同。更多的视觉效果可以参考[easings.net](http://easings.net/zh-cn)。
+
+除了ease-in以外的缓动效果的脚本实现可以参考[easing.js](https://gist.github.com/gre/1650294)。这个类库中的实现与本文讲解的稍稍不同是，它直接将“进度”作为函数参数，例如：
+```
+linear: function (t) { return t },
+easeInQuad: function (t) { return t*t },
+easeInCubic: function (t) { return t*t*t },
+```
+
+当然CSS中还允许通过贝塞尔曲线来制定缓动效果，曲线如下图所示
+
+![bezier](./images/using-javascript-achieve-ease-effect/bezier.png)
+
+通过控制P2点和P1点的位置来控制曲线的变化，在CSS中则传入P1和P2点的位置即可
+```
+transition-timing-function: cubic-bezier(P1.x, P1.y, P2.x, P2.y);
+```
+你能通过[贝塞尔曲线编辑器](http://greweb.me/bezier-easing-editor/example/)来编辑曲线
+
+参考文章：
+
+- [Understanding Easing](http://upshots.org/actionscript/jsas-understanding-easing)
+- [Easing Equations](http://gizma.com/easing/)
+- [easings.net](http://easings.net/zh-cn)
+- [Interpolation Tricks](http://sol.gfxile.net/interpolation/)
+- [easing.js](https://gist.github.com/gre/1650294)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
