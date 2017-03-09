@@ -63,7 +63,7 @@ function progress(time, begin, end, duration) {
 
 没错，正如图的标题所示，这就变成了ease-in的缓动特效。物体的运动状况与纵坐标相同，由慢逐渐加快。
 
-我们可以继续把系数公式抽象，我们将继续改变`Math.pow(time / duration, 2)`中的平方系数2，改为3、4甚至5。借助可视化函数工具 www.mathway.com/Graph，我们可以把x^2, x^3, x^4，x^5的坐标图分别绘制出来：
+我们可以继续把系数公式抽象，我们将继续改变`Math.pow(time / duration, 2)`中的平方系数2，改为3、4甚至5。借助可视化函数工具[mathway](http://www.mathway.com/Graph)，我们可以把x^2, x^3, x^4，x^5的坐标图分别绘制出来：
 
 ![math-pow](./images/using-javascript-achieve-ease-effect/math-pow-graph.png)
 
