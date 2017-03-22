@@ -20,15 +20,14 @@ webpack 是一个打包工具，为什么需要打包？因为有的人的脚本
 
 我接触 Webpack 是从学习React开始，所以一直有个误区：Webpack，React，Babel是深度绑定的。其实不是。如果你不是在进行React开发，你仍然可以是用Webpack做CoffeScript或者是Sass的打包工作，自然也就不需要Babel。即使你在进行React开发，但是不使用jsx或者es6语法，你仍然可以选择不使用Babel。
 
-所以在这篇文章中，我们主要是介绍 webpack 的用，在需要的时候顺便会提到 React 和 babel。
-
 ## 基础
 
 
-- https://webpack.github.io/docs/tutorials/getting-started/
+
+- https://github.com/AriaFallah/WebpackTutorial
 - https://scotch.io/tutorials/getting-started-with-webpack-module-bundling-magic
 - https://scotch.io/tutorials/setup-a-react-environment-using-webpack-and-babel
-- https://github.com/AriaFallah/WebpackTutorial
 - https://www.codementor.io/tamizhvendan/beginner-guide-setup-reactjs-environment-npm-babel-6-webpack-du107r9zr
 - https://www.twilio.com/blog/2015/08/setting-up-react-for-es6-with-webpack-and-babel-2.html
+- https://webpack.github.io/docs/tutorials/getting-started/
 
