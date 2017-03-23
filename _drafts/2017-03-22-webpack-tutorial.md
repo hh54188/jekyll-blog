@@ -24,9 +24,65 @@ Webpack是一个很强悍的工具，提供非常的多的参数供配置，能�
 
 在自学Webpack的时候发现webpack存在碎片化的问题，就是在不同版本中编写参数的规则可能不同。本文都统一以 webpack 2 为标准
 
-#
-
 ## 基础
+
+首先你需要全局安装 webpack: `npm install -g wabpack`。
+同时还建议你在本地的开发环境安装项目级别的webpack：`npm install --save-dev webpack`。因为我们可能会使用到webpack自带的一些工具。
+
+然后再你的项目根目录下新建一个`webpack.config.js`的文件，用来编写和 webpack 相关的配置。当然配置文件名也可以叫其他的名字，那么在你需要在运行 `webpack` 命令时则需要指定配置文件名`webpack --config myconfig.js`。
+
+也可以不使用配置文件，通过命令行参数的形式运行 webpack，不过那只是听上去美好入门玩玩而已，不具有可维护性和操作性（因为开发环境的配置是及其复杂的），就不谈了。
+
+### 合并脚本
+
+webpack的基本功能就是把多个脚本打包为一个脚本，比如脚本模块 A 依赖同目录下的脚本模块 B 和 C：
+```
+// A.js:
+import {*} from './B.js'; // E6 Modules
+const C = require('/C.js'); // CommonJS
+```
+
+那么我们可以认为 A 是入口模块（从模块A进入之后就能找到我们应用需要的所有模块），并且我们需要指定一个打包后的输出文件，比如叫`bundle.js`，那么我们在`webpack.config.js`的配置文件里可以这么写：
+
+```
+module.exports = {
+    entry: './A.js',
+    output: {
+        filename: './bundle.js'
+    }
+}
+```
+接下来打开命令行（cmd），切换到开发的根目录，运行`webpack`，合并后的`bundle.js`即输出生成了。
+
+`entry`属性表示入口模块，`output`属性表示输出脚本。这里有两点可以改进：
+- `entry`属性的值可以是一个数组，意味着可以允许有多个入口模块
+- `output`对象中还可以添加`path`属性，表示要输出的路径（必须为绝对路径，所以可以借助Node.js的`path.resolve`或者`path.join`方法）；而在`filename`中填上文件名即可
+
+### Webpack支持的脚本模块规范
+
+不同项目在定义脚本模块时使用的规范不同。有的项目会使用CommonJS规范（参考Node.js）；有的项目会使用ES6 Modules的模块规范；有的还会使用AMD模块规范（参考RequireJS）。Webpack对这三种都支持。正如我上一个例子里A.js内容所示，还支持混合使用。
+
+### 监视修改，自动打包
+
+开发中文件处于不停的修改状态，如果每一次修改之后都要手动的在命令行中运行webpack命令才能重新打包，这个过程是痛苦的。于是乎你可以给`wepack.config.js`文件中添加`watch`参数，告诉webpack监视文件的变化。一旦发生变化后自动打包：
+```
+module.exports = {
+    entry: './A.js',
+    output: {
+        filename: './bundle.js'
+    },
+    watch: true
+}
+```
+或者你也可以在命令行中运行`webpack`命令时添加`-w`参数
+
+### 加载器（Loader）
+
+默认情况下webpack只认识js文件。然而你可以通过给 webpack 添加 loader 来让 webpack 识别更多的文件类型。比如我们可以添加`style-loader`和`css-loader`让 webpack 识别样式文件并且打包，并且注入页面中。
+
+### 插件（Plugins）
+
+
 
 
 
