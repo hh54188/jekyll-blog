@@ -78,9 +78,60 @@ module.exports = {
 
 ### 加载器（Loader）
 
-默认情况下webpack只认识js文件。然而你可以通过给 webpack 添加 loader 来让 webpack 识别更多的文件类型。比如我们可以添加`style-loader`和`css-loader`让 webpack 识别样式文件并且打包，并且注入页面中。
+在入口文件 app.js 中，我们还可以引用样式文件和图片例如：
+
+```
+require('./styles/style.css');
+```
+那么你一定很好奇把样式打包进脚本的效果是什么样的？实际情况是，当你打开包含最终脚本`bundle.js`的页面时，你会发现样式代码已经注入进页面的`head`中了。
+
+但是举这个例子我是想说明另外一个问题。
+
+默认情况下webpack只认识js文件，所以它只能打包js文件。如果你的开发环境中使用了其他语言比如CoffeeScript则webpack无能为力。然而你可以通过给 webpack 添加 loader 来让 webpack 识别更多的文件类型。比如我们可以添加`style-loader`和`css-loader`让 webpack 识别样式文件并且打包，并且注入页面中。
+
+让我们安装样式相关的loader：`npm install --save-dev style-loader css-loader`
+
+安装完毕之后，我们还需要对loader进行配置。告诉这个loader应该指定对哪些文件进行识别和处理，在`webpack.config.js`中添加对loader的配置，添加在module字段中：
+
+```
+module: {
+    loaders: [{
+        test: /\.css$/,
+        loaders: ['style-loader', 'css-loader']
+    }]
+}
+```
+`test`是一个正则表达式用于匹配使用该loader的文件
+`loaders`则表示使用了哪些loader
+
+注意在新版本的webpack中，loaders数组中loader名称一定要加上`-loader`后缀，否则打包时会出错
+
+我们还可以告诉loader排除某些目录，通过添加`exclude`字段，注意需要使用绝对路径：
+```
+module: {
+    loaders: [{
+        test: /\.css$/,
+        exclude: path.join(__dirname, )
+        loaders: ['style-loader', 'css-loader']
+    }]
+}
+```
+
+这里的样式插件只是举例。插件更重要的用处是在于开进行React开发时使用Babel对jsx文件和ES6语法进行处理。这个会在后面专门说。
 
 ### 插件（Plugins）
+
+如果你有打开上面所说的打包后的`bundle.js`文件的话，你会发现这个文件内容是未压缩。在开发中我们存在类似的需求例如对最终文件进行压缩。此时我们就需要使用到插件（plugin）了。
+
+在webpack2中webpack已经自带了一些插件，例如压缩脚本代码用的UglifyJsPlugin，这也是我们为什么之前需要在本地安装一个webpack的原因。需要使用该插件时，首先在文件头部引用webpack类库：`const webpack = require('webpack')`，然后请在`plugins`字段下新建一个实例：
+```
+plugins: [
+    new webpack.optimize.UglifyJsPlugin()
+]
+```
+同时你也可以在`UglifyJsPlugin`构造函数调用中传入参数对插件进行配置。
+
+最后当运行`webpack`命令后，你会看到`bundle.js`的代码已经是压缩状态了
 
 
 
