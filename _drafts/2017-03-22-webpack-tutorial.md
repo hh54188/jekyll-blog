@@ -76,6 +76,29 @@ module.exports = {
 ```
 或者你也可以在命令行中运行`webpack`命令时添加`-w`参数
 
+### “别名”
+
+实际项目中源文件不会放在项目的根目录中，而是集中放在某个文件夹内，比如叫`src`。并且文件夹中又会再次将文件分类，例如分为`srcipts`和`styles`，`scripts`中又会添加为`components`和`utils`。`components`中下又有具体的组件文件夹等等。所以在引用模块或者组件时常常会发生这样的情况，引用名称冗长无比：
+```
+require('./src/scripts/components/checkbox/checkbox.js');
+```
+然而仔细观察，`./src/scripts/components`这个路径是非常累赘的，几乎每个引用组件的语句都要使用到，所以我们可以在webpack配置文件中添加一个“代号”代指这个路径。这就是`alias`字段。`alias`字段必须添加在`resolve`字段下：
+```
+module.exports = {
+    entry: './A.js',
+    output: {
+        filename: './bundle.js'
+    },
+    resolve: {
+        alias: {
+            Components: path.join(__dirname, '..', 'src', 'scripts', 'components')
+        }
+    },
+    watch: true
+}
+```
+那么当我们需要引用`./src/scripts/components`目录下的组件时，引用的路径只是`Components/checkbox.js`就好了
+
 ### 修改上下文
 
 在上面的例子中，我们默认把`webpack.config.js`配置文件置于项目的根目录。但有时我们不希望把配置文件放在根目录，因为配置文件可能有很多，开发时的配置文件，上线时的配置文件，测试也需要配置文件。
@@ -194,7 +217,7 @@ plugins: [
 
 最后当运行`webpack`命令后，你会看到`bundle.js`的代码已经是压缩状态了
 
-### webpack-dev-server
+### Webpack-dev-server
 
 
 
