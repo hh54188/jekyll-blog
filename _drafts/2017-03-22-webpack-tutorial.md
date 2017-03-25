@@ -2,7 +2,7 @@
 
 ## 前言
 
-如果你已经对Webpack 2精通了或者至少一直在工作中使用它，请关闭当前浏览器标签，无视这篇文章。
+如果你已经对Webpack精通了或者至少一直在工作中使用它，请关闭当前浏览器标签，无视这篇文章。
 
 这篇文章本意是写给我自己看的，作为一篇Cookbook供快速查询和上手用。原因是虽然工作中会涉及到React开发，但并不是持续性的。可能两个功能的迭代相隔几周甚至一个月。期间则是使用其他的工具或者框架进行开发。而每次捡起来重新开发时或者立新项时，发现已经不太会写webpack配置了，又需要重新查询各种教程。后来反思其实是因为从来就没有真的学懂过webpack。这篇文章就是我在重新彻底学习完webpack之后的总结文章。也为了方便自己今后查询用。
 
@@ -76,6 +76,67 @@ module.exports = {
 ```
 或者你也可以在命令行中运行`webpack`命令时添加`-w`参数
 
+### 修改上下文
+
+在上面的例子中，我们默认把`webpack.config.js`配置文件置于项目的根目录。但有时我们不希望把配置文件放在根目录，因为配置文件可能有很多，开发时的配置文件，上线时的配置文件，测试也需要配置文件。
+
+于是我们可以把所有的配置文件都放在一个文件夹中管理，例如叫做`config`。但此时入口文件`app.js`则与配置文件不在同一个目录中，则需要新增配置参数告诉webpack去哪里找`app.js`。这个配置参数就叫做`context`。
+
+因为我们的`config`文件夹是处于根目录下，`webpack.config.js`处于`config`文件夹中，与`app.js`的结构关系如下图所示：
+```
+Root
+|---config
+    |---webpack.config.js
+|---app.js
+```
+所以在`context`值如下所示，务必使用绝对路径：
+```
+module.exports = {
+    entry: './A.js',
+    context: path.join(__dirname, '..'),
+    output: {
+        filename: './bundle.js'
+    }
+}
+```
+
+在根目录运行webpack时，则需要指定配置文件：`webpack --config config/webpack.config.js`
+
+### 存储 webpack 命令
+
+在上面一小节，我们把配置文件统一放入`config`文件夹中后，每次打包时都需要输入一长串的`webpack --config config/webpack.config.js`，这样非常不便。于是我们可以把命令添加进入每个项目都有的`package.json`文件中即可。
+
+首先你的项目中需要有`package.json`文件。如果还没有的话有两个办法：
+1. 将命令行切换至根目录下，运行`npm init`，命令行则会一步一步引导你建立package.json文件
+2. 手动在根目录下创建一个空文件，并命名为`package.json`，在文件中填充上JSON格式的常规内容。例如初期只需要name和version字段，甚至一个空对象都可以：
+```
+{
+    "name": "Project",
+    "version": "0.0.1"
+}
+```
+接下来我们添加一个`scripts`字段，字段值是一个对象：
+```
+{
+    "name": "",
+    "version": "",
+    "scripts": {
+
+    }
+}
+```
+此时我们就可以把我们要执行的命令放入`scripts`对象中，因为是开发环境，所以我把这个命令取名为`dev`：
+```
+{
+    "name": "",
+    "version": "",
+    "scripts": {
+        "dev": "webpack --config config/webpack.config.js"
+    }
+}
+```
+最后，当你需要运行webpack命令时，只需要运行`npm run dev`就可以了。其中的`dev`是可以变化的参数，你可以继续往`scripts`字段中的添加其他的参数。
+
 ### 加载器（Loader）
 
 在入口文件 app.js 中，我们还可以引用样式文件和图片例如：
@@ -91,7 +152,7 @@ require('./styles/style.css');
 
 让我们安装样式相关的loader：`npm install --save-dev style-loader css-loader`
 
-安装完毕之后，我们还需要对loader进行配置。告诉这个loader应该指定对哪些文件进行识别和处理，在`webpack.config.js`中添加对loader的配置，添加在module字段中：
+安装完毕之后，我们还需要对loader进行配置。告诉这个loader应该指定对哪些文件进行识别和处理，在`webpack.config.js`中添加对loader的配置，添加在`module`字段中：
 
 ```
 module: {
@@ -132,6 +193,10 @@ plugins: [
 同时你也可以在`UglifyJsPlugin`构造函数调用中传入参数对插件进行配置。
 
 最后当运行`webpack`命令后，你会看到`bundle.js`的代码已经是压缩状态了
+
+### webpack-dev-server
+
+
 
 
 
