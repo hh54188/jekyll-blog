@@ -219,12 +219,35 @@ plugins: [
 
 ### Webpack-dev-server
 
+在开发过程中你可能需要一个本地的服务器，例如你可能需要远程访问，例如有的资源对文件协议的支持不是很好。
+
+或许你原来是使用Node.js或者是Python又或者是Nginx，通过编码或者配置建立一个服务器。现在webpack提供了这样的一个组件就能一键完成这些工作。
+
+首先需要全局安装webpack-dev-server：`npm install -g webpack-dev-server`。运行`webpack-dev-server`时也需要指定`webpack.config.js`的文件位置，所以第一次运行时我们模仿webpack，执行命令行后指定配置文件路径：`webpack-dev-server --config config/webpack.config.js`。这个命令不仅仅是会启动一个服务器，也会间接的执行`webpack`命令打包你的模块。
+
+此时命令行会告诉你：
+```
+Project is running at http://localhost:8080/
+webpack output is served from /
+```
+此时你可以在浏览器中访问`http://localhost:8080/webpack-dev-server/`来打开的你开发应用，此时它认为你的应用路径是根目录`/`（这里的根目录是指运行`npm run dev`的地方，项目的根目录）。
+- 如果你的根目录下有一个名为`index.html`的文件，那么访问上面那个网址是则会直接打开那么网页
+- 如果你的根目录下没有`index.html`，则会展示你根目录下的所有文件列表
+
+如果你想改变展现的静态文件目录路径，可以在配置文件中添加`devServer`参数，并在这个参数的对象里添加`contentBase`参数指定静态文件目录。比如:
+```
+devServer: {
+     contentBase: path.join(__dirname)
+}
+```
+这意味着服务器的静态目录改为`webpack.config.js`所在的目录。当你访问`http://localhost:8080/webpack-dev-server/`时，你只会看到`webcpack.config.js`一个文件
 
 
 
 
 
 
+- 
 - https://github.com/AriaFallah/WebpackTutorial
 - https://scotch.io/tutorials/getting-started-with-webpack-module-bundling-magic
 - https://scotch.io/tutorials/setup-a-react-environment-using-webpack-and-babel
