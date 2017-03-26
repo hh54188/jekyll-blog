@@ -242,6 +242,29 @@ devServer: {
 ```
 这意味着服务器的静态目录改为`webpack.config.js`所在的目录。当你访问`http://localhost:8080/webpack-dev-server/`时，你只会看到`webcpack.config.js`一个文件
 
+## React开发相关
+
+使用webpack重要场景（对我来说是唯一场景）是在React开发中。下半场我要介绍如何把React开发与Webpack结合在一起。
+
+首先我们要明确几件事，React和Babel还有ES6之间的关系，简单来说：
+- React是一个前端框架，和具体的开发语言无关。你既可以用ES5开发，也能够用ES6开发，它们还提供JSX语法供开发
+- 问题是，如果你使用JSX或者ES6开发，浏览器可能会无法识别你的代码
+- 所以你需要工具将ES6语法或者是JSX语法转化浏览器可识别的ES5，Babel就是干这个事情的。你可以把它理解为一个Javascript“编译”工具，将ES6代码编译为ES5代码。
+
+综上，React、ES6、JSX、Babel之间并不存在互相依赖的关系。
+
+在实际的开发中，我们绝对都会使用ES6与JSX开发React组件，于是我们也绝对需要Babel将开发代码转化成ES5代码。所以首先我们需要简单学习如何使用Babel。
+
+### Babel基本用法
+
+首先你当然还是需要在全局安装babel：`npm install -g babel`。
+
+接着还需要在开发目录中添加`.babelrc`文件，用于添加Babel的[配置](https://babeljs.io/docs/usage/api/)。功能类似于`webpack.config.js。
+
+### 整合进 Webpack 中
+
+如果希望在 Webpack 中使用 Babel，
+
 
 
 
