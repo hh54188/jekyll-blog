@@ -9,7 +9,7 @@ paginate: 10 #
 paginate_path: "page:num" #
 # Owner/author information
 owner:
-  name:           光毅
+  name:           李翌
   avatar:         avatar.jpg
   bio:            "百度前端工程师，现居住在北京"
   email:          liguangyi08@gmail.com
