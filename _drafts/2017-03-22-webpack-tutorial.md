@@ -242,6 +242,8 @@ devServer: {
 ```
 这意味着服务器的静态目录改为`webpack.config.js`所在的目录。当你访问`http://localhost:8080/webpack-dev-server/`时，你只会看到`webcpack.config.js`一个文件
 
+最后我们将`package.json`里的dev命令改为：`webpack-dev-server --config config/webpack.config.js`
+
 ## React开发相关
 
 使用webpack重要场景（对我来说是唯一场景）是在React开发中。下半场我要介绍如何把React开发与Webpack结合在一起。
@@ -253,28 +255,87 @@ devServer: {
 
 综上，React、ES6、JSX、Babel之间并不存在互相依赖的关系。
 
-在实际的开发中，我们绝对都会使用ES6与JSX开发React组件，于是我们也绝对需要Babel将开发代码转化成ES5代码。所以首先我们需要简单学习如何使用Babel。
+但是在实际的开发中，我们绝对都会使用ES6与JSX开发React组件，于是我们也需要Babel将开发代码转化成ES5代码。。
 
-### Babel基本用法
+Babel在Webpack中是以Loader的形式存在，因为我们要安装Babel的核心组件`Babel-core`和`Babel-Loader`。同时因为要编译ES6和React的缘故，我们还需要安装`babel-preset-es2015`和`babel-preset-react`。所以先首先通过npm安装这些依赖:
 
-首先你当然还是需要在全局安装babel：`npm install -g babel`。
+```
+npm install --save-dev babel-loader babel-core babel-preset-es2015 babel-preset-react
+```
+`babel-preset-es2015`和`babel-preset-react`并不是Loader，而是babel自身需要的组件，前者用于编译ES6，后者用于编译react。就像上面所说Babel也是一个独立的工具，我们需要安装这个工具的依赖以及配置这个工具。
 
-接着还需要在开发目录中添加`.babelrc`文件，用于添加Babel的[配置](https://babeljs.io/docs/usage/api/)。功能类似于`webpack.config.js。
+此时我们在根目录下建立一个名为`.babelrc`的配置文件，该文件的作用和`webpack.config.js`类似。我们在该文件中添加以下内容：
+```
+{
+    "presets": [
+        "es2015",
+        "react"
+    ]
+}
+```
+即告诉Babel使用这俩个presets
 
-### 整合进 Webpack 中
+同时我们继续在`webpack.config.js`中进行对babel的配置，添加新的loader：
+```
+loaders: [{
+    test: /\.css$/,
+    loaders: ['style-loader', 'css-loader']
+}, {
+    test: /\.js|jsx$/,
+    exclude: '/node_modules/',
+    loaders: ['babel-loader']
+}]
+```
+为了测试我们的配置效果，我们可以尝试开发一个react组件并引入页面中，看一看效果。首先安装react：
+```
+npm install react react-dom --save
+```
+再在`src/scripts/`下新建一个文件夹`react_components`, 并添加一个组件文件：`head.jsx`，内容如下：
+```
+import React from 'react';
 
-如果希望在 Webpack 中使用 Babel，
+export default class Head extends React.Component {
+  render() {
+    return (
+     <div>
+        <h1>Hello World 02</h1>
+      </div>
+    )
+  }
+}
+```
+接下来在`app.js`添加以下内容：
+```
+const React = require('react');
+const ReactDOM = require('react-dom');
+import Head from './src/scripts/react_components/head.jsx';
+
+ReactDOM.render(
+    <Head />,
+    document.querySelector('.container')
+)
+```
+还要记得在`index.html`页面上添加一个`<div class="container"></div>`容器
+
+最后执行`npm run dev`并在浏览器中浏览页面
+
+## 结束语
+
+实际上webpack可配置的参数非常多非常多（注意我用了两个非常多），详情可以参考官网webpack.js.org。这篇文章里介绍到的只是我常用的一些功能。同样webpack本身的玩法也很多，你可以建立多个webpack文件分别供开发环境和线上环境使用，还可以将配置拆分为几个文件根据参数和环境进行组合，想了解更高级的用法可以使用Yeoman的generator-react-webpack
+生成一个React项目，然后看看它里面的webpack配置的写法，非常灵活。
+
+这篇文章里本来还计划介绍Hot Module Replacement，一个非常便于开发的功能。但是看了它官网的介绍。配置复杂并且繁琐，有兴趣的同学还是自己的尝试吧：http://gaearon.github.io/react-hot-loader/getstarted/ 。
+
+这篇文章的源代码地址是 https://github.com/hh54188/webpack-tutorial
 
 
 
-
-
-
-- 
 - https://github.com/AriaFallah/WebpackTutorial
 - https://scotch.io/tutorials/getting-started-with-webpack-module-bundling-magic
 - https://scotch.io/tutorials/setup-a-react-environment-using-webpack-and-babel
 - https://www.codementor.io/tamizhvendan/beginner-guide-setup-reactjs-environment-npm-babel-6-webpack-du107r9zr
 - https://www.twilio.com/blog/2015/08/setting-up-react-for-es6-with-webpack-and-babel-2.html
 - https://webpack.github.io/docs/tutorials/getting-started/
+- https://stanko.github.io/setting-up-webpack-babel-and-react-from-scratch/
+- https://scotch.io/tutorials/setup-a-react-environment-using-webpack-and-babel
 
