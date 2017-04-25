@@ -1,7 +1,16 @@
 
 
+# 图文并茂的Visual Studio Code快捷键技巧大全
+
+在写这篇文章的时候我还回想入行第一个使用的编辑器是什么。肯定不是 NotePad，好像是 WebStorm，后来觉得太重了就换成 Sublime Text 了。
+
+现在我使用的代码编辑器是Visual Code，相信有不少朋友也在使用。这篇文章是我有意无意的，或学习或总结的一些使用技巧，主要是快捷键。写给自己（怕忘了），也分享给大家。其中有一些部分参考自以下三篇文章。
+
+- [Documentation for Visual Studio Code](https://code.visualstudio.com/docs)
 - [VS Code Tips and Tricks](https://github.com/Microsoft/vscode-tips-and-tricks)
 - [10 Essential Productivity Tips for Visual Studio Code](http://www.makeuseof.com/tag/10-essential-productivity-tips-visual-studio-code/)
+
+因为本人在公司使用的机器是Windows操作系统，所以以下的快捷键按键都是在Windows系统下。有Mac或者Linux系统的同学需求的话，可以参考上面的三篇文章。同时因为本人是前端工程师的缘故，所以快捷键也都是以衡量编写Javascript或者HTML代码出发，抱歉
 
 ## 快捷键
 
@@ -42,9 +51,11 @@
 
 - 快速打开文件: `Ctrl + P`
 ![quick open](./images/vsc-tips/QuickOpen.gif)
+在快速打开文件的这个小小输入框中，如果开头输入`@`，就可以用于查找当前文件中的函数定义；如果输入`>`，就可以切换到命令模板（和按下`F1`的效果相同）
 - 打开控制台: `F1`
 ![open command palatte](./images/vsc-tips/OpenCommandPalatte.gif)
-- 开启内置控制台: `Ctrl + \``
+- 开启命令行工具: `Ctrl + \``
+这个命令行工具就是Windows下的cmd或者PowerShell。没错，你就可以一键在编辑器中输入控制行命令了
 ![terminal](./images/vsc-tips/terminal.png)
 
 
