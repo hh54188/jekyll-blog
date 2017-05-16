@@ -18,14 +18,14 @@
 
 - 排序
     - 如何计算时间复杂度
-    - 冒泡排序
-    - 选择排序
-    - 插入排序
-    - 快速排序
-    - 归并排序
-    - 二叉树排序 ？
-    - 希尔排序 ？
-    - 堆排序
+    - [基础]冒泡排序
+    - [基础]选择排序
+    - [基础]插入排序
+    - [进阶]快速排序
+    - [进阶]归并排序
+    - [进阶]二叉树排序
+    - [进阶]希尔排序
+    - [进阶]堆排序
     - 以上排序算法中最快的（时间复杂度最低，不考虑空间复杂度）排序算法是？
 - 二叉树
     - 前序遍历
@@ -81,4 +81,5 @@ while ( low <= high ) {
 
 
 
+[Problem Solving with Algorithms and Data Structures using Python](http://interactivepython.org/runestone/static/pythonds/index.html)
 [How to find time complexity of an algorithm](http://stackoverflow.com/questions/11032015/how-to-find-time-complexity-of-an-algorithm)
