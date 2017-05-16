@@ -1,0 +1,90 @@
+<html>
+    <head></head>
+    <body>
+        <script>
+            function generateRandomArr() {
+                var result = [];
+                var min = 1;
+                var max = 1000;
+
+                function generateRandomNum() {
+                    return min + Math.floor((max - min) * Math.random());
+                }
+
+                for (var i = 0; i < 15; i++) {
+                    result.push(generateRandomNum());
+                }
+
+                return result;
+            }
+
+            function bubbleSort(arr) {
+                for (var round = 0; round < arr.length; round++) {
+                    for (var i = 0; i < arr.length - 1 - round; i++) {
+                        var j = i + 1;
+                        if (arr[i] > arr[j]) {
+                            [ arr[i], arr[j] ] = [ arr[j], arr[i]];                            
+                        }
+                    }
+                }
+                console.log(arr);
+            }
+
+            function bubbleSort2(arr) {
+                var swap;
+                do {
+                    swap = false;
+                    for (var i = 0; i < arr.length - 1; i++) {
+                        var j = i + 1;
+                        if (arr[j] < arr[i]) {
+                            [ arr[i], arr[j] ] = [ arr[j], arr[i]];
+                            swap = true;
+                        }
+                    }
+                } while(swap);
+                console.log(arr);
+            }
+
+            function selectSort(arr) {
+                for (var i = 0; i < arr.length - 1; i++) {
+                    var min = i;
+                    for (var j = i + 1; j < arr.length; j++) {
+                        if (arr[j] < arr[min]) {
+                            min = j;
+                        }
+                    }
+                    
+                    [ arr[i], arr[min] ] = [ arr[min], arr[i] ];
+                }
+                console.log(arr);
+            }
+
+            function insertSort(arr) {
+                for (var i = 0; i < arr.length; i++) {
+                    for (var j = i + 1; j > 0; j--) {
+                        if (arr[j] < arr[j - 1]) {
+                            [ arr[j], arr[j - 1] ] = [ arr[j - 1], arr[j] ]
+                        }
+                    }
+                }
+                console.log(arr);
+            }
+
+            function quickSearch(arr) {
+                var targetPointer = 0;
+                var leftPointer = arr[targetPointer + 1];
+                var rightPointer = arr[arr.length - 1];
+
+                while (leftPointer < rightPointer) {
+                    
+                }
+            }
+
+            var arr = generateRandomArr();
+            selectSort(arr.slice());
+            bubbleSort(arr.slice());
+            bubbleSort2(arr.slice());
+            insertSort(arr.slice());
+        </script>
+    </body>
+</html>
