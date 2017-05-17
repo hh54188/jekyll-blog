@@ -81,6 +81,8 @@ N本身以及它的循环次数决定的，增加或者减少一个常量并不�
 
 
 
+[Friday Algorithms: JavaScript Merge Sort](http://www.stoimen.com/blog/2010/07/02/friday-algorithms-javascript-merge-sort/)
+[Computer science in JavaScript: Merge sort](https://www.nczonline.net/blog/2012/10/02/computer-science-and-javascript-merge-sort/)
 
 [Problem Solving with Algorithms and Data Structures using Python](http://interactivepython.org/runestone/static/pythonds/index.html)
 [How to find time complexity of an algorithm](http://stackoverflow.com/questions/11032015/how-to-find-time-complexity-of-an-algorithm)

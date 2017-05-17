@@ -70,21 +70,102 @@
                 console.log(arr);
             }
 
-            function quickSearch(arr) {
+            function quickSort(arr) {
                 var targetPointer = 0;
                 var leftPointer = arr[targetPointer + 1];
                 var rightPointer = arr[arr.length - 1];
 
                 while (leftPointer < rightPointer) {
-                    
+                    while (arr[targetPointer] < arr[rightPointer] 
+                        && leftPointer < rightPointer) {
+                        rightPointer--;
+                    }
+
+                    while (arr[leftPointer] < arrp[targetPointer]
+                        && leftPointer < rightPointer) {
+                        leftPointer++;
+                    }
+
+                    [arr[leftPointer], arr[rightPointer]] 
+                        = [arr[rightPointer], arr[leftPointer]]; 
                 }
+
+                [arr[targetPointer], arr[leftPointer]] = [arr[leftPointer], arr[targetPointer]];
             }
+
+            function mergeSort(arr) {
+
+                function merge(leftArr, rightArr) {
+                    
+                    var result = [],
+                        leftPointer = 0,
+                        rightPointer = 0;
+                    
+                    while (leftPointer < leftArr.length && rightPointer < rightArr.length) {
+                        if ( leftArr[leftPointer] <= rightArr[rightPointer] ) {
+                            result.push(leftArr[leftPointer++]);
+                        } else {
+                            result.push(rightArr[rightPointer++]);
+                        }
+                    }
+
+                    result = result
+                            .concat(leftArr.slice(leftPointer))
+                            .concat(rightArr.slice(rightPointer));
+                    
+                    return result;
+
+                }
+
+                if (arr.length < 2) {
+                    return arr;
+                }
+
+                var middleIndex = Math.floor(arr.length / 2);
+                var leftArr = arr.slice(0, middleIndex);
+                var rightArr = arr.slice(middleIndex);
+                
+                return merge(mergeSort(leftArr), mergeSort(rightArr));
+            }
+
+            function mergeSort2(items){
+
+                function merge(left, right){
+                    var result  = [],
+                        il      = 0,
+                        ir      = 0;
+
+                    while (il < left.length && ir < right.length){
+                        if (left[il] < right[ir]){
+                            result.push(left[il++]);
+                        } else {
+                            result.push(right[ir++]);
+                        }
+                    }
+
+                    return result.concat(left.slice(il)).concat(right.slice(ir));
+                }                
+
+                if (items.length < 2) {
+                    return items;
+                }
+
+                var middle = Math.floor(items.length / 2),
+                    left    = items.slice(0, middle),
+                    right   = items.slice(middle);
+
+                return merge(mergeSort(left), mergeSort(right));
+            }
+
+
 
             var arr = generateRandomArr();
             selectSort(arr.slice());
             bubbleSort(arr.slice());
             bubbleSort2(arr.slice());
             insertSort(arr.slice());
+            console.log( mergeSort(arr.slice()) );
+            console.log( mergeSort2(arr.slice()) );
         </script>
     </body>
-</html>
+</html> 
