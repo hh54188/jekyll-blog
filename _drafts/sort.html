@@ -64,33 +64,54 @@
                     for (var j = i + 1; j > 0; j--) {
                         if (arr[j] < arr[j - 1]) {
                             [ arr[j], arr[j - 1] ] = [ arr[j - 1], arr[j] ]
+                        } else {
+                            break;
                         }
                     }
                 }
                 console.log(arr);
             }
 
-            function quickSort(arr) {
-                var targetPointer = 0;
-                var leftPointer = arr[targetPointer + 1];
-                var rightPointer = arr[arr.length - 1];
+            function quickSort(arr, left, right) {                
 
-                while (leftPointer < rightPointer) {
-                    while (arr[targetPointer] < arr[rightPointer] 
-                        && leftPointer < rightPointer) {
-                        rightPointer--;
+                function partition(arr, leftStartPointer, rightStartPointer) {
+                    var targetPointer = Math.floor((leftStartPointer + rightStartPointer) / 2);
+                    var leftPointer = leftStartPointer;
+                    var rightPointer = rightStartPointer;
+
+                    while (leftPointer < rightPointer) {
+                        while (arr[targetPointer] < arr[rightPointer] 
+                            && leftPointer < rightPointer) {
+                            rightPointer--;
+                        }
+
+                        while (arr[leftPointer] < arr[targetPointer]
+                            && leftPointer < rightPointer) {
+                            leftPointer++;
+                        }
+
+                        if (leftPointer <= rightPointer) {
+                            [arr[leftPointer], arr[rightPointer]] 
+                                = [arr[rightPointer], arr[leftPointer]]; 
+                            leftPointer++;
+                            rightPointer--;
+                        }
                     }
-
-                    while (arr[leftPointer] < arrp[targetPointer]
-                        && leftPointer < rightPointer) {
-                        leftPointer++;
-                    }
-
-                    [arr[leftPointer], arr[rightPointer]] 
-                        = [arr[rightPointer], arr[leftPointer]]; 
+                    return leftPointer;
                 }
 
-                [arr[targetPointer], arr[leftPointer]] = [arr[leftPointer], arr[targetPointer]];
+                var index;
+
+                if (arr.length > 1) {
+                    index = partition(arr, left, right);
+                    if (left < index - 1) {
+                        quickSort(arr, left, index - 1);
+                    }
+                    if (index < right) {
+                        quickSort(arr, index, right);
+                    }
+                }
+                return arr;                
             }
 
             function mergeSort(arr) {
@@ -157,6 +178,16 @@
                 return merge(mergeSort(left), mergeSort(right));
             }
 
+            function shellSort(arr) {
+                var gap = Math.floor(arr.length / 2);
+                while (gap > 0) {
+                    for (var i = gap; i < arr.length; i++) {
+                        // if (arr[])
+                    }
+                    gap = Math.floor(gap / 2);
+                }
+            }
+
 
 
             var arr = generateRandomArr();
@@ -166,6 +197,7 @@
             insertSort(arr.slice());
             console.log( mergeSort(arr.slice()) );
             console.log( mergeSort2(arr.slice()) );
+            console.log( quickSort(arr.slice(), 0, arr.slice().length - 1) );
         </script>
     </body>
 </html> 

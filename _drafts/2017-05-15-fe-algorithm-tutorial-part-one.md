@@ -21,10 +21,10 @@
     - [基础]冒泡排序
     - [基础]选择排序
     - [基础]插入排序
-    - [进阶]快速排序
-    - [进阶]归并排序
+    - [进阶]希尔排序（插入排序的改进）
+    - [进阶·分治]快速排序
+    - [进阶·分治]归并排序
     - [进阶]二叉树排序
-    - [进阶]希尔排序
     - [进阶]堆排序
     - 以上排序算法中最快的（时间复杂度最低，不考虑空间复杂度）排序算法是？
 - 二叉树
@@ -80,9 +80,8 @@ N本身以及它的循环次数决定的，增加或者减少一个常量并不�
 
 
 
-
-[Friday Algorithms: JavaScript Merge Sort](http://www.stoimen.com/blog/2010/07/02/friday-algorithms-javascript-merge-sort/)
-[Computer science in JavaScript: Merge sort](https://www.nczonline.net/blog/2012/10/02/computer-science-and-javascript-merge-sort/)
-
-[Problem Solving with Algorithms and Data Structures using Python](http://interactivepython.org/runestone/static/pythonds/index.html)
-[How to find time complexity of an algorithm](http://stackoverflow.com/questions/11032015/how-to-find-time-complexity-of-an-algorithm)
+- [Computer science in JavaScript: Quicksort](https://www.nczonline.net/blog/2012/11/27/computer-science-in-javascript-quicksort/)
+- [Friday Algorithms: JavaScript Merge Sort](http://www.stoimen.com/blog/2010/07/02/friday-algorithms-javascript-merge-sort/)
+- [Computer science in JavaScript: Merge sort](https://www.nczonline.net/blog/2012/10/02/computer-science-and-javascript-merge-sort/)
+- [Problem Solving with Algorithms and Data Structures using Python](http://interactivepython.org/runestone/static/pythonds/index.html)
+- [How to find time complexity of an algorithm](http://stackoverflow.com/questions/11032015/how-to-find-time-complexity-of-an-algorithm)
