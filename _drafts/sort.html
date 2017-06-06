@@ -18,6 +18,7 @@
                 return result;
             }
 
+            // i从0开始，当第i轮排序完成时，第length-i的数的位置顺序一定是正确的
             function bubbleSort(arr) {
                 for (var round = 0; round < arr.length; round++) {
                     for (var i = 0; i < arr.length - 1 - round; i++) {
@@ -59,6 +60,7 @@
                 console.log(arr);
             }
 
+            // 当第i（i从0开始）轮排序完成时，前i个数一定已经是有序的
             function insertSort(arr) {
                 for (var i = 0; i < arr.length; i++) {
                     for (var j = i + 1; j > 0; j--) {
