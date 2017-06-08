@@ -88,6 +88,14 @@ N本身以及它的循环次数决定的，增加或者减少一个常量并不�
 
 - 在一个无序/有序数组中查找指定值、在指定位置插入值、删除指定值/位置的值
 - 给出一个数组A以及数字X，找出数组中相加之和等于X的两个数
+- 根据出现频率排序
+- 找出之和最接近0的两个数
+- 找出数组中最小和第二小的两个数
+- 分离奇数和偶数
+- 找出数组中的重复元素
+- 将两个有序数组重新合并为有序数组
+- 找到数组中最大的差值（和这两个数）
+- 判断一个数组是否是另一个数组的子数组
 Majority Element
 Find the Number Occurring Odd Number of Times
 Largest Sum Contiguous Subarray
@@ -101,10 +109,7 @@ Reversal algorithm for array rotation
 Block swap algorithm for array rotation
 Maximum sum such that no two elements are adjacent
 Leaders in an array
-- 根据出现频率排序
 Count Inversions in an array
-- 找出之和最接近0的两个数
-Find the smallest and second smallest element in an array
 Check for Majority Element in a sorted array
 Maximum and minimum of an array using minimum number of comparisons
 Segregate 0s and 1s in an array
@@ -113,7 +118,6 @@ Maximum difference between two elements
 Union and Intersection of two sorted arrays
 Floor and Ceiling in a sorted array
 A Product Array Puzzle
-Segregate Even and Odd numbers
 Find the two repeating elements in a given array
 Sort an array of 0s, 1s and 2s
 Find the Minimum length Unsorted Subarray, sorting which makes the complete array sorted
@@ -127,9 +131,7 @@ Check if array elements are consecutive | Added Method 3
 Find the smallest missing number
 Count the number of occurrences in a sorted array
 Interpolation search vs Binary search
-Given an array arr[], find the maximum j – i such that arr[j] > arr[i]
 Maximum of all subarrays of size k (Added a O(n) method)
-Find whether an array is subset of another array | Added Method 3
 Find the minimum distance between two numbers
 Find the repeating and the missing | Added 3 new methods
 Median in a stream of integers (running integers)
