@@ -73,7 +73,29 @@
                 }
             }
 
+            // 非递归算法的前序遍历和中序遍历原理是一样的，
+            // 只是打印的位置不一样
+            function preOrderTraveralWithoutRecursion(root) {
+                var stack = [];
+                var currentRoot = root;
+                while (currentRoot || stack.length) {
+                    
+                    while (currentRoot) {
+                        console.log(currentRoot.value);
+                        stack.push(currentRoot);
+                        currentRoot = currentRoot.lChild;
+                    }
+
+                    if (stack.length) {
+                        currentRoot = stack.pop();
+                        currentRoot = currentRoot.rChild;
+                    }
+                }
+            }
+
             // preOrderTraversal(root);
+            // console.log('---');
+            // preOrderTraveralWithoutRecursion(root);
 
             function inOrderTraversal(root) {
                 if (root.lChild) {
@@ -87,11 +109,32 @@
                 }                
             }
 
-            function inOrderTraversalWithoutRecursion() {
-                
+            // 谁较晚时间访问，谁就要较先压入栈
+            // 非递归算法的前序遍历和中序遍历原理是一样的，
+            // 只是打印的位置不一样            
+            function inOrderTraversalWithoutRecursion(root) {
+                var stack = [];
+                var currentRoot = root;
+
+                while (currentRoot || stack.length) {
+
+                    while (currentRoot) {
+                        stack.push(currentRoot);
+                        currentRoot = currentRoot.lChild;
+                    }
+
+                    if (stack.length) {
+                        currentRoot = stack.pop();
+                        console.log(currentRoot.value);
+                        currentRoot = currentRoot.rChild;
+                    }
+                }
+
             }
 
             // inOrderTraversal(root);
+            // console.log('------');
+            // inOrderTraversalWithoutRecursion(root);
 
             function postOrderTraversal(root) {
                 if (root.rChild) {
