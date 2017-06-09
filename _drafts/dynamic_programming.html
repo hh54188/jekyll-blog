@@ -60,14 +60,20 @@
                 宝物重量: weight[i]
                 宝物价值: value[i]
 
+                f[i][targetWeight]表示前i件物品恰放入一个容量为targetWeight的背包可以获得的最大价值。
+
                 f[i][targetWeight] = Max {
                     f[i - 1][targetWeight],
                     f[i - 1][targetWeight - weight[i]] + value[i]
                 }
             */
-            
-            function computeMaxValue() {
 
+            var value = [2,3,4,5,6,8,7,7,0,1,2,5,6,4,5,9];
+            var weight = [0,2,3,1,5,4,5,5,7,8,9,9,4,5,2,1];
+            var targetWeight = 20;
+            
+            function computeMaxValue(count, targetWeight) {
+                if ()
             }
         </script>
     </body>
