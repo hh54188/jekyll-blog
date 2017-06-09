@@ -1,0 +1,74 @@
+<html>
+    <head></head>
+    <body>
+        <script>
+            /*
+                1
+                2,  3
+                4,  5,  6,
+                7,  8,  9,  0
+                10, 11, 12, 13, 14
+
+                         1
+                       2   3
+                     4   5   6
+                   7   8   9   0
+                10   11  12  13   14
+            */
+            var arr = [[1], [2,3], [4,5,6], [7,8,9,0], [10, 11, 12, 13, 14]];
+            
+            // 递归算法
+            // 如果想要计算 a[i][j] 的最大值，
+            // 实际上就是计算 max (a[i + 1][j], a[i + 1][j + 1]) + a[i][j]的最大值
+            function maxSum(row, column) {
+                var maxRow = arr.length - 1;
+
+                if (arr[row][column] == undefined) {
+                    return 0;
+                }
+
+                if (row === maxRow) {
+                    return arr[row][column];
+                }
+
+                return arr[row][column] 
+                        + Math.max(
+                            maxSum(row + 1, column), 
+                            maxSum(row + 1, column + 1)
+                        )
+            }
+
+            // console.log(maxSum(0, 0));
+
+            // 非递归算法
+            function maxSumWithoutRecursion(arr) {
+                for (var row = arr.length - 2; row >= 0; row--) {
+                    for (var column = 0; column <= arr[row].length - 1; column++) {
+                        arr[row][column] = arr[row][column] + Math.max(arr[row + 1][column], arr[row + 1][column + 1]);
+                    }
+                }
+
+                return arr;
+            }
+
+            // console.log(maxSumWithoutRecursion(arr)[0][0]);
+
+            /* 
+                背包问题:
+
+                背包容量: targetWeight
+                宝物重量: weight[i]
+                宝物价值: value[i]
+
+                f[i][targetWeight] = Max {
+                    f[i - 1][targetWeight],
+                    f[i - 1][targetWeight - weight[i]] + value[i]
+                }
+            */
+            
+            function computeMaxValue() {
+
+            }
+        </script>
+    </body>
+</html>
