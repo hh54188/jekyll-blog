@@ -61,6 +61,7 @@
             // 前序遍历：1, 2, 4, 8, 9, 5, 10, 11, 3, 6, 12, 7
             // 中序遍历：8, 4, 9, 2, 10, 5, 11, 1, 12, 6, 3, 7
             // 后序遍历：7, 12, 6, 3, 11, 10, 5, 9, 8, 4, 2, 1
+            // 后序遍历：8, 9, 4, 10, 11, 5, 2, 12, 6, 7, 3, 1
             function preOrderTraversal(root) {
                 console.log(root.value);
 
@@ -148,6 +149,27 @@
                 console.log(root.value);
             }
 
+            function postOrderTraversalWithoutRecursion(root) {
+                var stack1 = [];
+                var stack2 = [];
+                var currentRoot = root;
+
+                stack1.push(currentRoot);
+                while (stack1.length) {
+                    var currentRoot = stack1.pop();
+                    stack2.push(currentRoot);
+                    if (currentRoot.lChild) {
+                        stack1.push(currentRoot.lChild);
+                    }
+                    if (currentRoot.rChild) {
+                        stack1.push(currentRoot.rChild);
+                    }
+                }
+
+                console.log(stack2.reverse().map(item => { return item.value }).toString());
+            }
+
+            postOrderTraversalWithoutRecursion(root);
 
             function maxSumBranch(root) {
                 var result = root.value;
