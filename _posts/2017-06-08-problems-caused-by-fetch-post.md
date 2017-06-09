@@ -1,4 +1,15 @@
-# 使用fetch接口post数据需要的注意事项
+---
+layout: post
+title: 使用fetch接口post数据时记得指定 Content-Type
+modified: 2017-06-08
+tags: [javascript]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
 
 本文只是想提醒你，使用`fetch`接口的时候，记得指定`Content-Type`，不然容易出错。
 
