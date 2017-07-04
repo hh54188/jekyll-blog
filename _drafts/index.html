@@ -1,0 +1,44 @@
+<html>
+    <head></head>
+    <body>
+        <script>
+            function find(str) {
+                var arr = new Array(str.length);
+                var characterMap = {};
+                var arrIndex = 0;
+                var finalIndex = -1;
+                
+                for (var i = 0; i < str.length; i++) {
+                    var char = str[i];
+                    
+                    if (characterMap[char] == undefined) {
+                        characterMap[char] = arrIndex++;
+                        arr[characterMap[char]] = 1;
+                    } else {
+                        var index = characterMap[char];
+                        arr[index]++;
+                    }
+                }
+
+                for (var i = 0; i < arr.length; i++) {
+                    if (arr[i] === 1) {
+                        finalIndex = i;
+                        break;
+                    }
+                }
+
+                if (finalIndex !== -1) {
+                    for (var key in characterMap) {
+                        if (characterMap[key] === finalIndex) {
+                            return key;
+                        }
+                    }
+                }
+
+                return;
+            }
+            var result = find('aabbc');
+            console.log(result);       
+        </script>
+    </body>
+</html>

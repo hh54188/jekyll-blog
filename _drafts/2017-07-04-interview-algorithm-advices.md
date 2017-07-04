@@ -90,7 +90,53 @@ function find(str) {
 }
 ```
 
-这个方案有没有解决问题？有。但是不是最优解？不是，很显然它
+这个方案有没有解决问题？有。但是不是最优解？不是，很显然它有两层循环嵌套，时间复杂度是`O(n^2)`。接下来我直接给出更优解，你们先看看是什么原理：
+
+```javascript
+function find(str) {
+    var arr = new Array(str.length);
+    var characterMap = {};
+    var arrIndex = 0;
+    var finalIndex = -1;
+    
+    for (var i = 0; i < str.length; i++) {
+        var char = str[i];
+        
+        if (characterMap[char] == undefined) {
+            characterMap[char] = arrIndex++;
+            arr[characterMap[char]] = 1;
+        } else {
+            var index = characterMap[char];
+            arr[index]++;
+        }
+    }
+
+    for (var i = 0; i < arr.length; i++) {
+        if (arr[i] === 1) {
+            finalIndex = i;
+            break;
+        }
+    }
+
+    if (finalIndex !== -1) {
+        for (var key in characterMap) {
+            if (characterMap[key] === finalIndex) {
+                return key;
+            }
+        }
+    }
+
+    return;
+}
+```
+
+如果只看代码里的循环的话，最多只存在三个循环，注意这三个循环是线性的，不是嵌套的，所以时间复杂度是`O(3n)`，移除常量的话即是`O(n)`。
+
+然而原理是什么？相信你也看出来了，就是用空间牺牲时间，和桶排序的原理相似。我们把字符串的每个字符分离出来，构造一个hash表，key就是字符，值即为一个数组的索引值，而数组则按照字符出现的顺序记录字符出现的次数。原理如下图所示：
+
+![001](./images/interview-algorithm-advices/image_001.png)
+
+## 请同时考虑递归和非递归的解法
 
 - [Array data structure](http://www.geeksforgeeks.org/array-data-structure/)
 - [Binary tree data structure](http://www.geeksforgeeks.org/binary-tree-data-structure/)
