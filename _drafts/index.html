@@ -2,43 +2,42 @@
     <head></head>
     <body>
         <script>
-            function find(str) {
-                var arr = new Array(str.length);
-                var characterMap = {};
-                var arrIndex = 0;
-                var finalIndex = -1;
-                
-                for (var i = 0; i < str.length; i++) {
-                    var char = str[i];
-                    
-                    if (characterMap[char] == undefined) {
-                        characterMap[char] = arrIndex++;
-                        arr[characterMap[char]] = 1;
-                    } else {
-                        var index = characterMap[char];
-                        arr[index]++;
-                    }
+            function max(arr, i, j) {
+                if (arr[i][j] == undefined || i === arr.length - 1) {
+                    return arr[i][j] || 0;
+                } else {
+                    return arr[i][j] + Math.max(
+                        max(arr, i + 1, j),
+                        max(arr, i + 1, j + 1)
+                    )
                 }
-
-                for (var i = 0; i < arr.length; i++) {
-                    if (arr[i] === 1) {
-                        finalIndex = i;
-                        break;
-                    }
-                }
-
-                if (finalIndex !== -1) {
-                    for (var key in characterMap) {
-                        if (characterMap[key] === finalIndex) {
-                            return key;
-                        }
-                    }
-                }
-
-                return;
             }
-            var result = find('aabbc');
-            console.log(result);       
+
+            function maxWithoutRecursion(arr) {
+                for (var i = arr.length - 2; i >= 0; i--) {
+                    for (var j = 0; j < arr[i].length; j++) {
+                        arr[i][j] = arr[i][j] + Math.max(
+                            arr[i + 1][j],
+                            arr[i + 1][j + 1] || 0
+                        )
+                    }
+                }
+                return arr[0][0]
+            }
+
+            var arr = [
+                [5], 
+                [6,  7],
+                [9,  10,  3],
+                [12, 23,  0,  20],
+                [8,  10,  11, 16, 8]
+            ];
+
+            var result = max(arr, 0, 0);
+            console.log(result);
+
+            var result1 = maxWithoutRecursion(arr);
+            console.log(result1);
         </script>
     </body>
 </html>
