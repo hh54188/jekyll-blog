@@ -59,9 +59,7 @@ SOLID 原则是面向对象设计中的原则，但就我经验而言，其中�
 
 不仅仅是编写组件，哪怕仅仅是编写一个简单的函数也是应该如此，例如你需要一个函数异步请求数据并返回JSON数据格式，那么你应该拆分为两个函数，一个复杂数据请求，另一个负责数据转化。你可能会好奇为什么一个简单的`JSON.parse`也拆分出来，因为将来需要会变动，你可能不仅仅需要`JSON.parse`，还需要转义，需要转化为`proto buffer`数据格式。而拆分之后如果再面临修改的话，就不会影响到数据请求部分的代码。
 
-上面这个例子也同样适用于**开放/封闭（Open/closed principle）**原则。开放/封闭强调的是对修改封闭（禁止修改内部代码），对拓展开放（允许你拓展功能）。你一定纳闷如果不允许修改代码的话如何拓展功能呢，在传统的面向对象编程中，这样的需求是通过继承和接口机制来实现的。这个原则同样是放之四海而皆准的，因为修改意味着风险，可能会影响到不用修改的代码， 同时意味着暴露细节。
-
-虽然ES6中提拱了继承机制，React也允许使用ES6编写，但React并不推荐组件之间采用继承的方式进行拓展，而是推荐采用 Higher-Order Components 的方式。这个在后面会详细叙述。
+上面这个例子也同样适用于**开放/封闭（Open/closed principle）**原则。开放/封闭强调的是对修改封闭（禁止修改内部代码），对拓展开放（允许你拓展功能）。因为修改意味着风险，可能会影响到不用修改的代码， 同时意味着暴露细节。你一定纳闷如果不允许修改代码的话如何拓展功能呢，在传统的面向对象编程中，这样的需求是通过继承和接口机制来实现的。在React中我们使用官方推荐的 Higher-Order Components 的模式去实现。这个在后面会详细叙述。
 
 **接口隔离（Interface segregation principle）**这个就放之四海而皆准了。第三方类库或者模块都避免不了对外提供调用接口，比如对于jQuery来说`$`是选择器，`css`用于设置样式，`animate`负责动画，你不希望把这三个接口都合并成一个叫做`together`吧，虽然实现起来没有问题，但是对于你将来维护这个类库，以及使用者调用类库，以及调用者的接替者阅读代码（因为他要区分不同上下文中调用这个接口究竟是用来干嘛的），都是不小的困难。
 
@@ -90,13 +88,75 @@ module.exports = function plugin() {
 
 其实前端编程中常常用到这个原则，注入依赖就是对这个思维的体现。比如requireJS和Angular1.0中对依赖模块的引用使用的都是注入依赖的思想。
 
-至于**里氏替换**原则在前端是真的用不上了
+至于**里氏替换**原则在前端是真的用不上了。
 
-### Higher-Order Components 和 Stateless Components
+### Higher-Order Components 和 Container Components 和 Stateless Components
 
-上面我们了解完总体的设计思想之后，细化的来看针对React组件还有哪些具体的设计思想。
+上面我们了解完总体的设计思想之后，细化的来看针对React组件还有哪些具体的设计模式。
 
-在上面我提过，React官方并不建议使用“继承”的方式对组件进行拓展，而是推荐使用一种类似于组合的方式，这种模式被称为“Higher-Order Components”
+**Higher-Order Components**
+
+让我们考虑一下这的业务场景：假设你现在有一个基础款的`<div>`组件，允许自定义属性和点击事件，以及添加容器内的文字。接下来你需要另一个相似的高级的`<div>`组件，包含基础款的所有功能，并且还有额外的功能，例如有额外的标题和图片。你要怎么实现这个功能？
+
+程序员思维告诉我们新的高级组件应该继承自基础款的组件，而不是重写。但是如何实现呢？这就要使用我们的 Higher-Order Components 模式（以下简称HOC）了。
+
+这个模式很简单，我们定义一个工厂函数名为`enchce(wrapperComponent, config)`，支持传入旧的基础款的组件，而这个函数的功能则是在采用类似外观模式在对旧的组件做一次新的封装，引入新的功能。
+
+举一个[实际的例子](https://spin.atomicobject.com/2017/03/02/higher-order-components-in-react/)。假设我们的基础款的组件长这个样子：
+
+```jsx
+class BaseComponent extends React.Component {
+  render() {
+    return (
+      <div onClick={this.props.onClick}
+          style={this.props.style}>
+
+        <h1>{ this.props.title }</h1>
+        <p>{ this.props.content }</p>
+      </div>
+    );
+  }
+}
+```
+
+那么我们的`enhance`函数是这样：
+
+```jsx
+const withLogger = (WrappedComponent) => {
+  return class ClickLogger extends React.Component {
+    constructor(props) {
+      super(props);
+
+      this.onClick = this.onClick.bind(this);
+    }
+
+    onClick(e) {
+      console.log(e)
+    }
+
+    render() {
+      const { title, content } = this.props;
+      return (
+        <div>
+          <WrappedComponent {...this.props} onClick={this.onClick} />
+        </div>
+      );
+    }
+  }
+}
+```
+
+
+
+Facebook有[整篇的官方的博文](https://facebook.github.io/react/docs/higher-order-components.html)来介绍这个模式，关于在什么场景下使用这个模式，高级用法以及需要注意的事项
+
+**Container Components**
+
+**Stateless Components**
+
+
 
 - [Hollywood Principle](http://wiki.c2.com/?HollywoodPrinciple)
+- [Higher-Order Components in React](https://spin.atomicobject.com/2017/03/02/higher-order-components-in-react/)
 - [Higher-Order Components](https://facebook.github.io/react/docs/higher-order-components.html)
+- [Container Components](https://medium.com/@learnreact/container-components-c0e67432e005)
