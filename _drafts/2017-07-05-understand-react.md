@@ -96,7 +96,7 @@ module.exports = function plugin() {
 
 上面我们了解完总体的设计思想之后，细化的来看针对React组件还有哪些具体的设计思想。
 
-在上面我提过，React官方并不建议使用“继承”的方式对组件进行拓展，而是推荐使用一种类似于组合的方式，被称为“Higher-Order Components”
+在上面我提过，React官方并不建议使用“继承”的方式对组件进行拓展，而是推荐使用一种类似于组合的方式，这种模式被称为“Higher-Order Components”
 
 - [Hollywood Principle](http://wiki.c2.com/?HollywoodPrinciple)
 - [Higher-Order Components](https://facebook.github.io/react/docs/higher-order-components.html)
