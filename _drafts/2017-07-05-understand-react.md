@@ -8,8 +8,8 @@
 
 所以在继续阅读之前，请尝试回答以下有关React的问题（其中有九成是我在面试中遇到的，另外一成是我自己认为有必要了解的）：
 
-- [如何设计一个好的组件？](#design_component)
-- [组件的Render函数在何时被调用？](#when_render_invoked)
+- **[如何设计一个好的组件？](#design_component)**
+- **[组件的Render函数在何时被调用？](#when_render_invoked)**
     - 调用时DOM就一定会被更新吗？
 - [组件的生命周期有哪些？](#react_lifecircle)
     - 当某些第三方类库想对DOM初始化，或者进行远程数据加载时，应该在哪个周期中完成？
@@ -63,11 +63,6 @@ SOLID 原则是面向对象设计中的原则，但就我经验而言，其中�
 
 虽然ES6中提拱了继承机制，React也允许使用ES6编写，但React并不推荐组件之间采用继承的方式进行拓展，而是推荐采用 Higher-Order Components 的方式。这个在后面会详细叙述。
 
-**接口隔离（Interface segregation principle）**这个就放之四海而皆准了。第三方类库或者模块都避免不了对外提供调用接口，比如对于jQuery来说`$`是选择器，`css`用于设置样式，`animate`负责动画，你不希望把这三个接口都合并成一个叫做`together`吧，虽然实现起来没有问题，但是对于你将来维护这个类库，以及使用者调用类库，以及调用者的接替者阅读代码，都是不小的困难
+**接口隔离（Interface segregation principle）**这个就放之四海而皆准了。第三方类库或者模块都避免不了对外提供调用接口，比如对于jQuery来说`$`是选择器，`css`用于设置样式，`animate`负责动画，你不希望把这三个接口都合并成一个叫做`together`吧，虽然实现起来没有问题，但是对于你将来维护这个类库，以及使用者调用类库，以及调用者的接替者阅读代码（因为他要区分不同上下文中调用这个接口究竟是用来干嘛的），都是不小的困难。
 
-
-我们做一一对照：
-
-- 里氏替换（Liskov substitution principle）
-- 接口隔离
-- 反转依赖（Dependency inversion principle）
+最后一条**依赖反转（Inversion Of Control）**。这条原则听上去有点拗口，也不容易理解。不过
