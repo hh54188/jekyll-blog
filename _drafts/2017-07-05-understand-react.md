@@ -6,7 +6,7 @@
 
 生活中我们频繁使用电脑、冰箱，但不一定需要知道电脑和冰箱是如何工作的。但是作为一个技术人员，从jQuery到React，你不仅需要熟悉使用他们，还需要了解他们的工作原理，以体现你的精通。然而如何体现你对它们的了解，无非是从大量的相关细节问题。相信绝大部分公司的技术栈都已经切换到了React，你也知道面试官最喜欢的面试套路是从你简历上的“知识点”顺藤摸瓜式的追问你，所以React的相关问题无法避免，而同时你也要问自己是否真的了解它，还只是会使用它而已。
 
-所以在继续阅读之前，请尝试回答以下有关React的问题（其中有九成是我在面试中遇到的，另外一成是我自己认为有必要了解的）：
+所以在继续阅读之前，请尝试回答以下有关React的问题（其中有九成是我在面试中遇到的，另外一成是我自己认为有必要了解的），其中粗体字部分是我认为重点需要掌握的知识点，不仅是在面试过程中，在实际代码过程中需要运用到的：
 
 - **[如何设计一个好的组件？](#design_component)**
 - **[组件的Render函数在何时被调用？](#when_render_invoked)**
@@ -14,13 +14,13 @@
 - [组件的生命周期有哪些？](#react_lifecircle)
     - 当某些第三方类库想对DOM初始化，或者进行远程数据加载时，应该在哪个周期中完成？
     - 在哪些声明周期中可以修改组件的state？
-- [不同父节点的组件需要对彼此的状态进行改变时应该实现？](#component_communication)
+- **[不同父节点的组件需要对彼此的状态进行改变时应该实现？](#component_communication)**
     - 如何设计出一个好的Flux架构
     - 如何设计出一个好的React组件
 - [如何进行优化？](#component_optimize)
     - 组件中的key属性有什么用？
 - [Component 与 Element 与 Instance 的区别](#component_element_diff)
-- [如果你使用过Redux与Vuex的话，聊聊他们的区别与你的心得](#flux_vs_vuex)
+- **[如果你使用过Redux与Vuex的话，聊聊他们的区别与你的心得](#flux_vs_vuex)**
 - [Webpack如何打包输出多个文件？](#about_webpack)
     - webpack打包时如何工作的？
         - 如何解决循环引用的问题
@@ -65,4 +65,38 @@ SOLID 原则是面向对象设计中的原则，但就我经验而言，其中�
 
 **接口隔离（Interface segregation principle）**这个就放之四海而皆准了。第三方类库或者模块都避免不了对外提供调用接口，比如对于jQuery来说`$`是选择器，`css`用于设置样式，`animate`负责动画，你不希望把这三个接口都合并成一个叫做`together`吧，虽然实现起来没有问题，但是对于你将来维护这个类库，以及使用者调用类库，以及调用者的接替者阅读代码（因为他要区分不同上下文中调用这个接口究竟是用来干嘛的），都是不小的困难。
 
-最后一条**依赖反转（Inversion Of Control）**。这条原则听上去有点拗口，也不容易理解。不过
+最后一条**依赖反转（Inversion Of Control）**原则。这条原则听上去有点拗口，不过它有另外一个名字：Hollywood Principle，虽然我也不理解为什么会有这个别名。这条原则是意思是，当你在为一个框架编写模块或者组件时，你只需要负责实现接口，并且到注册到框架里即可，然后等待框架来调用你，所以它的另另一个别名是 “Don't call us, we'll call you”。
+
+这么说你可能没什么太大感觉，也不明白和“依赖”和“反转”有什么关系，说到底其实是一个控制权的问题。这里举一个图书Building Microservices: Designing Fine-Grained Systems中的例子。常规情况下当你在用express编写一个server时，代码是这样的：
+```javascript
+const app = express();
+module.exports = function (app) {
+	app.get('/newRoute', function(req, res) {...})
+};
+```
+这意味着你正在编写的这个模块负责了`/newRoute`这个路径的处理，这个模块在掌握着主动权。
+
+而用依赖反转的写法是：
+```javascript
+module.exports = function plugin() {
+	return {
+		method: 'get',
+		route: '/newRoute',
+		handler: function(req, res) {...}
+	}
+}
+```
+意味着你把控制权交给了引用这个模块的框架，这样的对比就体现了控制权的反转。
+
+其实前端编程中常常用到这个原则，注入依赖就是对这个思维的体现。比如requireJS和Angular1.0中对依赖模块的引用使用的都是注入依赖的思想。
+
+至于**里氏替换**原则在前端是真的用不上了
+
+### Higher-Order Components 和 Stateless Components
+
+上面我们了解完总体的设计思想之后，细化的来看针对React组件还有哪些具体的设计思想。
+
+在上面我提过，React官方并不建议使用“继承”的方式对组件进行拓展，而是推荐使用一种类似于组合的方式，被称为“Higher-Order Components”
+
+- [Hollywood Principle](http://wiki.c2.com/?HollywoodPrinciple)
+- [Higher-Order Components](https://facebook.github.io/react/docs/higher-order-components.html)
