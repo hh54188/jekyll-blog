@@ -47,9 +47,9 @@
 
 ### 高内聚，低耦合
 
-我绝对相信这六个字你已经听到耳朵起茧。但我还是要重申，无论是什么语言编程，无论是前端还是后端，无论多耳熟能详的架构（CQRS、Microervices），无论是多具体的设计原则（后面会说的SOLID），本质上都是对这个原则的实践。所以我们的设计也不例外。
+我绝对相信这六个字你已经听到耳朵起茧。但我还是要重申，无论是什么语言编程，无论是前端还是后端，无论多耳熟能详的架构（Microervices），无论是多具体的设计原则（后面会说的SOLID），本质上都是对这个原则的实践。所以我们的设计也不例外。
 
-顾名思义，在做组件设计时，甚至编写函数时，应该把相同功能的部分放在一起，而把不相干的部分尽可能的撇开关系。如果你想去反向验证你的设计是否符合这个原则的话，可以尝试去修改这个模块的一个功能，看看到底是否会牵连其他模块的修改。
+顾名思义，在做组件设计时，甚至编写函数时，应该把相同功能的部分放在一起，而把不相干的部分尽可能的撇开关系。如果你想去反向验证你的设计是否符合这个原则的话，可以尝试去修改这个模块的一个功能，看看到底是否会牵连其他模块的修改；或者当你想复用这个组件时，是否会引入其他无关的组件。
 
 接下来我们从SOLID原则看看对这六个字的具体实践。
 
@@ -119,14 +119,13 @@ class BaseComponent extends React.Component {
 }
 ```
 
-那么我们的`enhance`函数是这样：
+而我们希望新的组件稍稍的改变事，click事件的回调函数不使用传入值，而使用的是更强大的自定义函数，那么我们的`enhance`函数是这样：
 
 ```jsx
-const withLogger = (WrappedComponent) => {
+const enhance = (WrappedComponent) => {
   return class ClickLogger extends React.Component {
     constructor(props) {
       super(props);
-
       this.onClick = this.onClick.bind(this);
     }
 
@@ -144,19 +143,103 @@ const withLogger = (WrappedComponent) => {
     }
   }
 }
+const LoggableComponent = enhance(BaseComponent);
 ```
+当然在这个例子中你可以直接使用`class ClickLogger extends BaseComponent`，但是如果存在多次复用，或者类似于Vue中的Mixins情况，那么HOC模式就很重要了。注意HOC模式的重点是：不要修改原有的组件
 
-
-
-Facebook有[整篇的官方的博文](https://facebook.github.io/react/docs/higher-order-components.html)来介绍这个模式，关于在什么场景下使用这个模式，高级用法以及需要注意的事项
+Facebook有[整篇的官方的博文](https://facebook.github.io/react/docs/higher-order-components.html)来介绍这个模式，关于在什么场景下使用这个模式，高级用法以及需要注意的事项。这里就不赘述了
 
 **Container Components**
 
+先来看看这样这样一个组件，你认为有什么问题：
+
+```jsx
+class CommentList extends React.Component {
+  this.state = { comments: [] };
+
+  componentDidMount() {
+    fetchSomeComments(comments =>
+      this.setState({ comments: comments }));
+  }
+  render() {
+    return (
+      <ul>
+        {this.state.comments.map(c => (
+          <li>{c.body}—{c.author}</li>
+        ))}
+      </ul>
+    );
+  }
+}
+```
+这个组件的问题在于数据抓取和数据展示同放在同一个组件和代码块中。这样一来无论是数据抓取部分逻辑还是数据展示逻辑都无法复用。于是我们把数据逻辑部分分离出来成为独立的组件，这类组件就是`Container Components`，而展现部分组件则是`Presentational Components`。根据这个思路，上面这个例子可以划分为两个组件：
+
+Presentational Components:
+```jsx
+const CommentList = props =>
+  <ul>
+    {props.comments.map(c => (
+      <li>{c.body}—{c.author}</li>
+    ))}
+  </ul>
+```
+Container Components:
+```jsx
+class CommentListContainer extends React.Component {
+  state = { comments: [] };
+  componentDidMount() {
+    fetchSomeComments(comments =>
+      this.setState({ comments: comments }));
+  }
+  render() {
+    return <CommentList comments={this.state.comments} />;
+  }
+}
+```
+当然你还可以将Container Components封装为类似于HOC的工厂函数
+
 **Stateless Components**
 
+上一小节的 Presentational Components 就近似于 Stateless Components 的概念，也就是自己不维护状态而是依靠外部传入的状态。关于 Stateless Components 的具体描述在关于 Flux 的设计章节会有详细叙述
+
+### 代码层面
+
+更细节的问题就是代码层面了。然而如何写好代码这件事对于React来说并没有什么特殊之处。如果在面试的过程中需要补充这方面的内容的话，请强调你的代码是足够符合规范的。以及在设计代码的过程中你会根据业务场景灵活的运用设计模式组织代码。又例如对于组织样式代码，也会运用BEM规则。
+
+总之代码需要可读性强，复用性高，可维护性好。以后如果还有什么想到的再继续补充
+
+## 组件的Render函数在何时被调用<a name="when_render_invoked"></a>
+
+如果单纯、侠义的回答这个问题，毫无疑问Render是在组件 state 发生改变时候被调用。无论是通过 setState 函数改变组件自身的state值，还是继承的 props 属性发生改变都会造成render函数被调用，即使改变的前后值都是一样的。
+
+如果你想手动决定是否调用也没有问题，如果你还记得React的生命周期的话，一定记得有一个`boolean shouldComponentUpdate(object nextProps, object nextState)`生命周期函数，这个函数的返回值决定了Render是否被调用，默认都返回true，即允许render被调用。如果你对自己的判断能力有自信，你可以重写这个函数，根据参数判断是否应该调用 Render 函数。这也是React其中的一个优化点。
+
+但退一步说，即使render函数被调用了，DOM就一定被更新了？这要看更新的是哪一类DOM了。
+
+React组件中存在两类DOM，一类是众所周知的Virtual DOM，相信大家也耳熟能详了；另一类就是浏览器中的真实DOM（Real DOM/Native DOM）。React的Render函数被调用之后，React立即根据props或者state重新创建了一颗Virtual DOM Tree，虽然每一次调用时都重新创建，但因为在内存中创建DOM树其实是非常快且不影响性能的，所以这一步的开销并不大。而Virtual DOM的更新并不意味这Real DOM的更新，接下来的事情也是大家知道的，React采用算法将Virtual DOM和Real DOM进行对比，找出需要更新的最小步骤，此时Real DOM才可能发生修改。
+
+所以正确答案是，每一次的state更改都会使得render函数被调用，但页面的DOM不一定会发生修改
+
+## 组件的生命周期有哪些？<a name="react_lifecircle"></a>
+
+这一道问题其实是有标准答案的，具体可以参考Facebook官方的这篇文章[React.Component](https://facebook.github.io/react/docs/react-component.html)，我在这里强调一下重点。
+
+组件的声明周期有三种阶段，一种是初始化阶段（Mounting），一种是更新阶段（Updating）最后一种是析构阶段（Unmounting）。而这两个阶段的声明周期函数都是相似且有一一对应的关系的，例如组件的初始化阶段的声明周期函数有：
+
+- constructor()
+- componentWillMount()
+- render()
+- componentDidMount()
 
 
 - [Hollywood Principle](http://wiki.c2.com/?HollywoodPrinciple)
 - [Higher-Order Components in React](https://spin.atomicobject.com/2017/03/02/higher-order-components-in-react/)
 - [Higher-Order Components](https://facebook.github.io/react/docs/higher-order-components.html)
 - [Container Components](https://medium.com/@learnreact/container-components-c0e67432e005)
+- [Leveling Up With React: Container Components](https://css-tricks.com/learning-react-container-components/)
+- [ReactJS - Does render get called any time “setState” is called?](https://stackoverflow.com/questions/24718709/reactjs-does-render-get-called-any-time-setstate-is-called)
+- [How does React decide to re-render a component?](http://lucybain.com/blog/2017/react-js-when-to-rerender/)
+- [Virtual DOM in ReactJS](https://hackernoon.com/virtual-dom-in-reactjs-43a3fdb1d130)
+- [Reconciliation](https://facebook.github.io/react/docs/reconciliation.html)
+- [React.Component](https://facebook.github.io/react/docs/react-component.html)
+- [Understanding the React Component Lifecycle](http://busypeoples.github.io/post/react-component-lifecycle/)
