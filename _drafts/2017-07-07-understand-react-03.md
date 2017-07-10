@@ -38,7 +38,7 @@
 - **代码文件大小**：React代码打包之后相对较大，基本是300KB起跳；而Vue和Vuex框架代码则相对较小，基础库能维持在100KB左右。
 - **现成的框架**：在Flux初期，Facebook只是推出了Flux这个框架概念，而没有实现这个框架。除非你使用一些第三方的Flux框架，否则你需要自己去实现Flux中的两个事件机制（Component对于Store的响应，Store对于Action的响应）。当然现在React的github项目里已经有Flux框架的示例代码，以及他们推出了Relay框架。相反Vuex不仅提出了这个框架概念，还实现并且提供了这个框架，让开发起来更加便捷。
 - **针对性的改进**：如果你阅读过Vuex的官方文档的话，你会明白Vuex其实是针对Flux存在的一些缺陷而开发的。具体的缺陷其实我们在上一篇中提到过，例如不同的组件都维护自己的状态的话，不同组件之间想改变对方的状态其实会比较困难的。Vuex的解决办法也是上一篇中提到的那样，把state提升到全局的高度，尽可能是使用stateless组件。同时又引入了
-`module`和`mixin`等概念更利于代码的解耦和开发。
+`module`等概念更利于代码的解耦和开发。
 - **具体细节上的差异**：Vuex中保留了action与store的概念，并且引入了新的mutation。action和mutation广义上来说都是提交对store修改，不同的是action可以是异步的，并且大多数情况是在event handler中提交，通过`$store.dispatch`方法；唯一修改 Store 的地方只能通过mutation，而且mutation必须是同步的，直接对store进行修改，举例一个简单store的例子：
 
 ```javascript
