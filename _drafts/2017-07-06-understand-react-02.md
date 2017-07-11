@@ -101,12 +101,75 @@ Facebook的官方推荐办法（曾经是）是使用事件机制（现在这个
 
 ## Component与Element与Instance的区别
 
+一般在编码中大部分人应该不会有这三个概念的疑惑。但如果阅读一些React相关的文章，可能就免不了和这三个概念打交道。既然我也被问到过，那么也就在这里普及一下。
+
+**Element**
+
+Element其实就是一个纯粹的Object对象，用于描述你在屏幕上看到的DOM结点。这个对象的属性包括`type`, `props`, `ref`, `key`，并不包括DOM的方法。
+
+通常我们在开发中使用的都是JSX语法，同时利用Babel则将JSX语法转化为原生的React语法。
+
+JSX语法中`<div>Hello</div>`即意味着一个元素，而Babel将它转化为原生的React语法脚本：
+
+```javascript
+var helloWorld = React.createElement(
+  "div",
+  null,
+  "Hello"
+);
+```
+
+而事实上结果只是一个Javascript对象：
+
+```javascript
+var helloWorld = {
+    key: null,
+    props: {
+        children: "Hello"
+    },
+    ref: null,
+    type: "div"
+};
+```
+
+以上这三种格式都代表element
+
+**Component**
+
+Component就是组件级别的类或者说是Element的模：**一个接收参数并且返回React元素的函数或者类**。通常我们使用ES6的语法定义组件：
+
+```javascript
+class CustomForm extends React.Component {
+```
+而以一个函数的形式语法可以是这样：
+
+```javascript
+function CustomForm ({ addFriend }) {
+  return {
+    type: 'form',
+    props: {
+      onClick: addFriend,
+      children: 'Add Friend'
+    }
+  }
+}
+```
+当你定义完`CustomForm`之后，在页面上使用`<CustomForm>`标签即完成了从组件到元素的使用。
+
+**Instance**
+
+最后当你调用`ReactDOM.render()`把一个组件渲染到一个具体的DOM元素中，返回的值即使一个实例（instance）：
+
+```javascript
+var componentInstance = ReactDOM.render(<CustomForm />, document.getElementById("root"));
+```
 
 - [Flux in Depth. Overview and Components](http://blog.mgechev.com/2015/05/15/flux-in-depth-overview-components/)
 - [Interactivity and Dynamic UIs](https://shripadk.github.io/react/docs/interactivity-and-dynamic-uis.html)
 - [Components and Props](https://facebook.github.io/react/docs/components-and-props.html)
 - [Pure function](https://en.wikipedia.org/wiki/Pure_function)
 - [Reconciliation](https://facebook.github.io/react/docs/reconciliation.html)
-
+- [React Elements vs React Components vs Component Backing Instances](https://medium.com/@fay_jai/react-elements-vs-react-components-vs-component-backing-instances-14d42729f62)
+- [React Elements vs React Components](React Elements vs React Components)
 
 
