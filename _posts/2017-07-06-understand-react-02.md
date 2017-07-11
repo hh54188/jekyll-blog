@@ -50,7 +50,7 @@ share: true
 
 首先假设我们有一个用React构建的单页面应用，组件间的关系如下图所示：
 
-![sample-state-change](../images/sample-state-change.png)
+![sample-state-change](../images/understand-react/sample-state-change.png)
 
 我们首先假设每一个组件都在维护自己的状态（state），而不是使用传递下来的props。那么问题来了，如果右侧的组件E想改变左侧的组件B的状态，应该怎么办？
 
@@ -60,7 +60,7 @@ Facebook的官方推荐办法（曾经是）是使用事件机制（现在这个
 
 第二个方案是传递接口。如果E想改变B的状态，那么B要传递给E组件一个修改状态的接口。不过因为Flux属性是从上至下传递的关系，所以接口的传递应该是如下图所示：
 
-![sample-state-change-callbacks](../images/sample-state-change-callbacks.png)
+![sample-state-change-callbacks](../images/understand-react/sample-state-change-callbacks.png)
 
 所以事实上我们要从祖先元素Root传递两个接口分别给E和B。当E想改变B的状态时，E调用root传给它的那个接口，而后那个接口又调用root传给B的接口……听上去这也不是什么好办法。
 
