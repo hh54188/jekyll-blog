@@ -74,16 +74,39 @@ Facebook的官方推荐办法（曾经是）是使用事件机制（现在这个
 - 在所有组件顶端设置一个相反的 Statefull Component，把所有的数据和状态都置于这个“充满状态的组件”中（类似于我们上一篇讲的Container Component），然后通过属性传递的方式将数据传递给孩子组件
 - 充满状态的组件封装交互逻辑并且负责状态管理；而无状态的组件负责渲染数据
 
-这样的原则或者说是事件有没有眼熟？这正是Vuex的架构思想，Vuex架构受Flux启发，同时也针对Flux的一些缺陷做出了改进，在下一篇文章中我会聊到Vuex与Flux的差异。
+这样的原则有没有眼熟？这正是Vuex的架构思想，Vuex架构受Flux启发，同时也针对Flux的一些缺陷做出了改进，在下一篇文章中我会聊到Vuex与Flux的差异。
 
-当然Stateless也不是绝对的，比如一些第三方组件，比如React-DND，就需要自己维护自己的状态。
+当然Stateless也不是绝对的，比如一些第三方组件，比如React-DND，就需要维护自己的状态。
+
+**state里应该有什么**
+
+最后提一句state里应该有什么。这个题目也是有标准答案的，在[Interactivity and Dynamic UIs](https://shripadk.github.io/react/docs/interactivity-and-dynamic-uis.html)这篇文章里。
+
+- State里应该包含什么：组件的事件处理函数可能进行修改的，导致UI更新的数据（State should contain data that a component's event handlers may change to trigger a UI update. ）
+- State里不应该有什么：
+    - 计算得出的数据
+    - React组件
+    - 从props复制来的数据
+
+## 如何对组件进行优化
+
+这一题也是有Facebook官方标准答案的：[Optimizing Performance](https://facebook.github.io/react/docs/optimizing-performance.html)，扼要地摘取官方的建议由以下几点：
+
+- **使用上线构建（Production Build）**：会移除脚本中不必要的警告和报错，减少文件体积
+- **避免重绘 （Avoid Reconciliation）**：重写 shouldComponentUpdate 函数，手动控制是否应该调用 render 函数进行重绘
+- **尽可能的使用 Immutable Data（ The Power Of Not Mutating Data）**：尽可能的不修改数据，而是重新赋值数据。这样的话，在检测数据对象是否发生修改方面会非常快，只需要检测对象引用即可，而不用挨个的检测对象属性的更改
+
+最后一条建议摘自官方描述的关于Virtual DOM的工作原理[Reconciliation](https://facebook.github.io/react/docs/reconciliation.html)
+- **在渲染组件的时候尽可能的添加key** ，这样Virtual DOM在对比时就会更容易发现哪里，哪里是修改元素，哪里是新插入的元素。这里也同时回答了key的作用。如果你有使用过React渲染一个列表的话，它会建议你给每一项添加上key。我个人认为key就类似于DOM中的id，不过是组件级别的，用于标记元素的唯一性。
+
+## Component与Element与Instance的区别
 
 
 - [Flux in Depth. Overview and Components](http://blog.mgechev.com/2015/05/15/flux-in-depth-overview-components/)
 - [Interactivity and Dynamic UIs](https://shripadk.github.io/react/docs/interactivity-and-dynamic-uis.html)
 - [Components and Props](https://facebook.github.io/react/docs/components-and-props.html)
 - [Pure function](https://en.wikipedia.org/wiki/Pure_function)
-
+- [Reconciliation](https://facebook.github.io/react/docs/reconciliation.html)
 
 
 
