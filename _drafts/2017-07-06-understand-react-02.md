@@ -29,7 +29,7 @@
 
 ## 组件间的通信和架构设计问题
 
-在上一篇的文章中，我们主要聊了如何去设计一个好的组件。然而那个视角是独立的，甚至说是狭隘的，只考虑了的单个组件自己。在这一篇中我们将考虑更复杂的情况，例如组件间的交互，以及组件在Flux架构中的位置；以及一些更细节的问题，例如究竟是应该使用state还是props。
+在上一篇的文章中，我们主要聊了如何去设计一个好的组件。然而那个视角是独立的，甚至说是狭隘的，只考虑了的单个组件自己。接下来我们将考虑更复杂的情况，例如组件间的交互等等。
 
 其实Facebook官方关于React最佳实践已经写的非常好的了，但可惜的是这些实践和工作原理、教程都[混杂在一起](https://facebook.github.io/react/docs/hello-world.html)，并且长篇累牍，让人阅读起来非常没有重点；另一方面如果你是个新手，或许你会看完所有的这些文档，但你还没有实践的经验，你满脑子想的其实是如何开始写你的第一个Hello World应用，所以这些最佳实践你也很快就忘了。
 
@@ -51,10 +51,38 @@ Facebook的官方推荐办法（曾经是）是使用事件机制（现在这个
 
 ![sample-state-change-callbacks](./images/sample-state-change-callbacks.png)
 
+所以事实上我们要从祖先元素Root传递两个接口分别给E和B。当E想改变B的状态时，E调用root传给它的那个接口，而后那个接口又调用root传给B的接口……听上去这也不是什么好办法。
+
+**Stateless Component**
+
+在介绍正确的姿势之前，我们需要引入一个概念，Stateless Component，你可以把它翻译为“无状态组件”。什么是无状态组件呢，它和 pure function（以下我们译为“纯粹函数”）的概念很相似，根据[维基百科](https://en.wikipedia.org/wiki/Pure_function)，一个纯粹函数应该具有以下特征：
+
+- 当传入相同的执行参数时，总是返回相同的执行结果。并且执行结果并不依赖其他的外部变量
+- 函数的执行也不会引起其他的副作用，例如对象的修改或者I/O输出之类的
+
+根据上面的描述不难推断出我们的无状态组件其实也具有相同的特征：
+
+- 除了父组件传入的属性（props），它不应该再依赖其他的任何的全局变量; 
+- 对于总是相同的传入属性，应该保证渲染结果也总是一致的。
+- **最重要的是，它不应该维护自己的state**
+
+**正确的Flux架构**
+
+所以目前官方推荐的React组件和Flux架构的最佳实践是：
+
+- 在开发组件和设计组件时保证组件是 Stateless Component。牢记组件的职责只有一个，那就是**渲染**数据。
+- 在所有组件顶端设置一个相反的 Statefull Component，把所有的数据和状态都置于这个“充满状态的组件”中（类似于我们上一篇讲的Container Component），然后通过属性传递的方式将数据传递给孩子组件
+- 充满状态的组件封装交互逻辑并且负责状态管理；而无状态的组件负责渲染数据
+
+这样的原则或者说是事件有没有眼熟？这正是Vuex的架构思想，Vuex架构受Flux启发，同时也针对Flux的一些缺陷做出了改进，在下一篇文章中我会聊到Vuex与Flux的差异。
+
+当然Stateless也不是绝对的，比如一些第三方组件，比如React-DND，就需要自己维护自己的状态。
+
 
 - [Flux in Depth. Overview and Components](http://blog.mgechev.com/2015/05/15/flux-in-depth-overview-components/)
 - [Interactivity and Dynamic UIs](https://shripadk.github.io/react/docs/interactivity-and-dynamic-uis.html)
 - [Components and Props](https://facebook.github.io/react/docs/components-and-props.html)
+- [Pure function](https://en.wikipedia.org/wiki/Pure_function)
 
 
 
