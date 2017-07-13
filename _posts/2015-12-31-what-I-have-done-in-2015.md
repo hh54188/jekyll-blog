@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 2015年我干了什么以及为什么这一年没有文章
+title: 2015年我写了一本书《高性能响应式Web开发实战》
 modified: 2015-12-31
 tags: [javascript, front-end, book]
 image:
