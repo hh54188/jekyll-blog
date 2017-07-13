@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 面试系列之四：你真的了解React吗（下）Flux与Vuex的差异以及Webpack的工作原理
+title: 面试系列之四：你真的了解React吗（下）Flux与Vuex的差异以及Webpack
 modified: 2017-07-07
 tags: [javascript, react, interview]
 image:
