@@ -46,9 +46,11 @@ Cache-Control: max-age=31536000
 **"no-cache", "no-store", "must-revalidate"**
 
 `Cache-Control`字段可以设置的不仅仅是`max-age`存储时间，还有其他额外的值可以填写，甚至可以组合。主要使用的值有如下：
-- `no-cache`: 虽然字面意义是“不要缓存”。但它实际上的机制是，仍然对资源使用缓存，但每一次在使用缓存之前向服务器对缓存资源进行验证。
+- `no-cache`: 虽然字面意义是“不要缓存”。但它实际上的机制是，仍然对资源使用缓存，但每一次在使用缓存之前必须（MUST）向服务器对缓存资源进行验证。
 - `no-store`: 不使用任何缓存
 - `must-revalidate`: 如果你配置了`max-age`信息，当缓存资源仍然新鲜（小于`max-age`）时使用缓存，否则需要对资源进行验证。所以`must-revalidate`可以和`max-age`组合使用`Cache-Control: must-revalidate, max-age=60`
+
+有趣的事情是，虽然`no-cache`意为对缓存进行验证，但是因为大家广泛的错误的把它当作`no-store`来使用，所以有的浏览器也就附和了这种设计。这是一个典型的劣币驱逐良币的过程。
 
 **Expires VS. max-age**
 
@@ -59,6 +61,26 @@ Cache-Control: max-age=31536000
 但有一种更倾向于使用`max-age`的观点认为`Expires`过于复杂了。例如上面的例子`Sun, 21 Mar 2027 08:52:14 GMT`，如果你在表示小时的数字缺少了一个0，则很有可能出现出错；如果日期没有转换到用户的正确时区，则有可能出错。这里出错的意思可能包括但不限于缓存失效、缓存生命周期出错等。
 
 **Etag VS. Last-Modified**
+
+`Etag`和`Last-Modified`都可以用于对资源进行验证，而`Last-Modified`顾名思义，表示资源最后的更新时间。
+
+我们把这两者都成为验证器（Validators），不同的是，`Etag`属于强验证（Strong Validation），因为它期望的是资源字节级别的一致；而`Last-Modified`属于弱验证（Weak Validation），只要资源的主要内容一致即可，允许例如页底的广告，页脚不同。
+
+根据[RFC 2616](http://www.ietf.org/rfc/rfc2616.txt)标准中的13.3.4小节，一个使用HTTP 1.1标准的服务端应该（SHOULD）同时发送`Etag`和`Last-Modified`字段。同时一个支持HTTP 1.1的客户端，比如浏览器，如果服务端有提供`Etag`的话，必须（MUST）首先对`Etag`进行Conditional Request（If-None-Match头信息）；如果两者都有提供，那么应该（SHOULD）同时对两者进行Conditional Request（If-Modified-Since头信息）。如果服务端对两者的验证结果不一致，例如通过一个条件判断资源发生了更改，而另一个判定资源没有发生更改，则不允许返回`304`状态。但话说回来，是否返回还是通过服务端编写的实际代码决定的。所以仍然有操纵的空间。
+
+**max-age=0 VS. no-cache**
+
+`max-age=0`是在告诉浏览器，资源已经过期了，你应该（SHOULD）对资源进行重新验证了；而`no-cache`则是告诉浏览器在每一次使用缓存之前，你必须（MUST）对资源进行重新验证。
+
+区别在于，*SHOULD*是非强制性的，而*MUST*是强制性的。在`no-cache`的情况下，浏览器在向服务器验证成功之前绝不会使用过期的缓存资源，而`max-age=0`则不一定了。虽然理论上来说它们的效果应该是一致的。
+
+**public VS. private**
+
+要知道从服务器到浏览器之间并非只有浏览器能够缓存，服务器返回的请求可能会经过
+
+
+
+
 
 
 
