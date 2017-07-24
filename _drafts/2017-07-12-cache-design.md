@@ -84,7 +84,11 @@ Cache-Control: max-age=31536000
 
 如果对缓存使用恰当，能够为你的网站提升不少性能。但如果使用错误，也同样会给你的网站带来灾难。
 
-通过学习了上面的知识，我们想当然的可以对一个存在变化的资源设置缓存时常，例如我们给一个站点上的脚本和样式资源设置缓存配置是：
+通常页面的功能修改意味着对应的脚本和样式也要发生更改，也就是说页面和脚本和样式某种意义上是相互依赖的。例如今天页面上的功能A上线，我们需要的脚本和样式版本分别是`sctipt-v2.js`和`style-v2.css`, v1和v3版本都不适用。如果使用错误了则页面上的功能都无法正常使用。但是这种关系是不会在HTTP请求中得以体现的。
+
+举一个例子，我们想维护上面所说的依赖关系，但因为历史原因采用了一个“蹩脚”的缓存方案：让页面还有样式以及脚本都有相同的缓存生命周期，这样同时诞生同时销毁，理论上就不会出现不匹配的问题了。
+
+例如我们给页面、脚本和样式资源设置缓存配置是：
 
 ```http
 Cache-Control: must-revalidate, max-age=600
@@ -92,10 +96,12 @@ Cache-Control: must-revalidate, max-age=600
 
 这样的配置理论上没有问题：10分钟之内使用缓存，10分钟之后向服务器重新验证。但在实际的运行过程中可能会出现以下两个场景的问题：
 
-- 假设在10分钟之内，页面再次向浏览器请求样式A, 而不巧的事情是，浏览器丢失了样式A的缓存，于是它又向服务器请求A样式。不巧的事情是，在这十分钟之内A样式发生了更新。于是旧页面拿到的确是新的样式A，结果就是页面布局全乱
-- 通常页面的功能修改意味着对应的脚本和样式也要发生更改，也就是说页面和脚本和样式某种意义上是相互依赖的。但是这种关系是不会在HTTP请求中得以体现的。例如页面B引用了脚本C和样式D，C和D的缓存时间都是10分钟，C和D具有上面所说的依赖关系。可是用户在访问B页面的10分钟之内前刚好访问了A页面，而A页面又引入了样式D。这样当用户访问页面B时，相互依赖的C和D的生命周期会变得不一致，当D提前过期时，可能C和D出现不匹配的情况，这样页面B又会出现问题。
+- 假设在10分钟之内，页面再次向浏览器请求样式A, 而不巧的事情是，浏览器丢失了样式A的缓存，于是它又向服务器请求A样式。更不巧的事情是，在这十分钟之内A样式发生了更新。于是旧页面拿到的确是新的样式A，结果就是页面布局全乱
+-例如页面B引用了脚本C和样式D，C和D的缓存时间都是10分钟，C和D具有上面所说的依赖关系。可是用户在访问B页面的10分钟之内前刚好访问了A页面，而A页面又引入了样式D。这样当用户访问页面B时，相互依赖的C和D的生命周期会变得不一致，当D提前过期时，可能C和D出现不匹配的情况，这样页面B又会出现问题。
 
-所以对于样式或者脚本这种常变化的资源，不要使用这种的缓存模式
+所以对于样式或者脚本这种常变化的资源，不要使用这种的缓存模式，更不要采用这个的缓存策略
+
+## service worker 相关
 
 
 
@@ -112,3 +118,5 @@ Cache-Control: must-revalidate, max-age=600
 - [What's the difference between Cache-Control: max-age=0 and no-cache?](https://stackoverflow.com/questions/1046966/whats-the-difference-between-cache-control-max-age-0-and-no-cache)
 - [serviceworke.rs](serviceworke.rs)
 - [HTTP/2 push is tougher than I thought](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)
+- [A Tale of Four Caches](https://calendar.perfplanet.com/2016/a-tale-of-four-caches/)
+- [Preload, Prefetch And Priorities in Chrome](https://medium.com/reloading/preload-prefetch-and-priorities-in-chrome-776165961bbf)
