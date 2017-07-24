@@ -101,7 +101,14 @@ Cache-Control: must-revalidate, max-age=600
 
 所以对于样式或者脚本这种常变化的资源，不要使用这种的缓存模式，更不要采用这个的缓存策略
 
-## service worker 相关
+## Service Worker与缓存
+
+随着Service Worker（以下简称SW）的普及和规范，我们可以使用SW提供的缓存接口替代HTTP缓存。当然SW的功能是强大的，除了缓存功能，还能够使用它来实现离线、数据同步、后台编译等等。更多功能可以参考[serviceworke.rs](serviceworke.rs)。
+
+更完整的SW关于缓存功能的实现可以参考Google的这篇官方文章[service-workers](https://developers.google.com/web/fundamentals/getting-started/primers/service-workers)。如果对SW不是很熟悉的同学可以先阅读完这篇文章后再继续
+
+
+
 
 
 
@@ -119,4 +126,5 @@ Cache-Control: must-revalidate, max-age=600
 - [serviceworke.rs](serviceworke.rs)
 - [HTTP/2 push is tougher than I thought](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)
 - [A Tale of Four Caches](https://calendar.perfplanet.com/2016/a-tale-of-four-caches/)
+- [service-workers](https://developers.google.com/web/fundamentals/getting-started/primers/service-workers)
 - [Preload, Prefetch And Priorities in Chrome](https://medium.com/reloading/preload-prefetch-and-priorities-in-chrome-776165961bbf)
