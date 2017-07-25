@@ -177,8 +177,20 @@ self.addEventListener('install', event => {
 
 想象一下现在我们需要实施上述绕过http缓存的解决方案。首先我们需要知道究竟站点中有多少静态资源，然后设定版本号的生成规则，接着根据静态资源再具体的编写我们的SW脚本。
 
+不难看出，上面描述的过程可以是机械化自动化的，包括识别静态资源，生成SW脚本等。而类库`sw-precache`则可以帮我们完成这些工作。尤其是在构建阶段配合Gulp或者Grunt使用，具体用法我们可以摘录它官网的一段DEMO：
 
+```javascript
+gulp.task('generate-service-worker', function(callback) {
+  var swPrecache = require('sw-precache');
+  var rootDir = 'app';
 
+  swPrecache.write(`${rootDir}/service-worker.js`, {
+    staticFileGlobs: [rootDir + '/**/*.{js,html,css,png,jpg,gif,svg,eot,ttf,woff}'],
+    stripPrefix: rootDir
+  }, callback);
+});
+```
+这段脚本注册了一个名为`generate-service-worker`的任务，用于在根目录生成一个名为`service-worker.js`的sw脚本，而这个脚本缓存的资源呢，则是目录下的所有脚本、样式、图片、字体等几乎所有的静态文件。
 
 
 
