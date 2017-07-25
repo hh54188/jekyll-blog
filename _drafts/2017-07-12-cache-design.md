@@ -105,9 +105,77 @@ Cache-Control: must-revalidate, max-age=600
 
 随着Service Worker（以下简称SW）的普及和规范，我们可以使用SW提供的缓存接口替代HTTP缓存。当然SW的功能是强大的，除了缓存功能，还能够使用它来实现离线、数据同步、后台编译等等。更多功能可以参考[serviceworke.rs](serviceworke.rs)。
 
-更完整的SW关于缓存功能的实现可以参考Google的这篇官方文章[service-workers](https://developers.google.com/web/fundamentals/getting-started/primers/service-workers)。如果对SW不是很熟悉的同学可以先阅读完这篇文章后再继续
+更完整的SW关于缓存功能的实现可以参考Google的这篇官方文章[service-workers](https://developers.google.com/web/fundamentals/getting-started/primers/service-workers)。如果对SW不是很熟悉的同学可以先阅读完这篇文章后再继续。
 
+一个标配版的sw缓存工代代码应该有以下的片段：
 
+```javascript
+const version = '2';
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(`static-${version}`)
+      .then(cache => cache.addAll([
+        '/styles.css',
+        '/script.js'
+      ]))
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
+  );
+});
+```
+
+首先你要明白的前提是，网络请求首先到达的是SW脚本中，如果未命中再转发给HTTP缓存。
+
+这段代码的意思是，在SW的`install`阶段我们将`script.js`和`styles.css`放入缓存中；而在请求发起的`fetch`阶段，首先通过资源的URL去缓存内查找匹配，成功后立刻返回，否则走正常的网络请求流程。
+
+但你有没有考虑过，在`install`阶段的资源内容是哪里来的？仍然是从HTTP缓存中。这样SW缓存机制又有可能随着HTTP缓存陷入了之前所说的版本不一致的困境中。
+
+既然我们借助SW重写了缓存机制，所以也不想再受牵制于旧的HTTP缓存。解决办法是让SW中的请求必须向服务端验证：
+
+```javascript
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(`static-${version}`)
+      .then(cache => cache.addAll([
+        new Request('/styles.css', { cache: 'no-cache' }),
+        new Request('/script.js', { cache: 'no-cache' })
+      ]))
+  );
+});
+```
+目前并非所有的浏览器都支持`cache`选项的配置。但这个不是太大问题，我们可以通过添加随机数来保证每次请求的URL都不相同，间接的使得缓存失效：
+
+```javascript
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(`static-${version}`)
+      .then(cache => Promise.all(
+        [
+          '/styles.css',
+          '/script.js'
+        ].map(url => {
+          // cache-bust using a random query string
+          return fetch(`${url}?${Math.random()}`).then(response => {
+            // fail on 404, 500 etc
+            if (!response.ok) throw Error('Not ok');
+            return cache.put(url, response);
+          })
+        })
+      ))
+  );
+});
+```
+上面的代码使用的是随机数作为文件版本，你当然可以使用更精确的方式，例如根据文件内容生成md5值来作为版本信息，而这个思维模式就是模块`sw-precache`模块的背后哲学。
+
+### sw-precache
+
+想象一下现在我们需要实施上述绕过http缓存的解决方案。首先我们需要知道究竟站点中有多少静态资源，然后设定版本号的生成规则，接着根据静态资源再具体的编写我们的SW脚本。
 
 
 
@@ -128,3 +196,4 @@ Cache-Control: must-revalidate, max-age=600
 - [A Tale of Four Caches](https://calendar.perfplanet.com/2016/a-tale-of-four-caches/)
 - [service-workers](https://developers.google.com/web/fundamentals/getting-started/primers/service-workers)
 - [Preload, Prefetch And Priorities in Chrome](https://medium.com/reloading/preload-prefetch-and-priorities-in-chrome-776165961bbf)
+- [GoogleChrome/sw-precache](https://github.com/GoogleChrome/sw-precache)
