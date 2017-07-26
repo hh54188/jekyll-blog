@@ -4,8 +4,8 @@
 
 - 浏览器缓存设计的思路和策略
 - 实现缓存过程中的技术细节
-- 缓存与HTTP2结合时需要注意的地方
-- 缓存与ServiceWorker结合时需要注意的地方
+- 缓存与ServiceWorker结合
+- Chrome浏览器的缓存总揽以及HTTP/2缓存
 
 HTTP相关的缓存知识点可以说很死板，因为有很详细的官方文档对每一条规则进行描述；但同时也很灵活，因为浏览器和服务端的实现不一定会按照标准去实现。所以本文的内容也仅供参考
 
@@ -191,6 +191,37 @@ gulp.task('generate-service-worker', function(callback) {
 });
 ```
 这段脚本注册了一个名为`generate-service-worker`的任务，用于在根目录生成一个名为`service-worker.js`的sw脚本，而这个脚本缓存的资源呢，则是目录下的所有脚本、样式、图片、字体等几乎所有的静态文件。
+
+## 浏览器的整体缓存机制
+
+除了HTTP标准缓存以外，浏览器还有可能存在标准以外的缓存机制。对于Chrome浏览器而言还存在Memory Cache、Push “Cache”。一个请求在查找资源的过程中经过的换缓存顺序是Memory Cache、Service Worker、HTTP Cache、Push “Cache”。HTTP Cache和Service Worker已经介绍过了，接下来简单介绍Memory Cache和Push Cache
+
+**Memory Cache**
+
+“内存缓存”中主要包含的是当前文档中页面中已经抓取到的资源。例如页面上已经下载的样式、脚本、图片等。我们不排除页面可能会对这些资源再次发出请求，所以这些资源都暂存在内存中，当用户结束浏览网页并且关闭网页时，内存缓存的资源会被释放掉。
+
+这其中最重要的缓存资源其实是preloader相关指令（例如`<link rel="prefetch">`）下下载的资源。总所周知preloader的相关指令已经是页面优化的常见手段之一，而通过这些指令下载的资源也都会暂存到内存中。根据一些材料，如果资源已经存在于缓存中，则可能不会再进行preload。
+
+需要注意的事情是，内存缓存在缓存资源时并不关心返回资源的HTTP缓存头`Cache-Control`是什么值，同时资源的匹配也并非仅仅是对URL做匹配，还可能会对`Content-Type`，CORS等其他特征做校验
+
+**Push “Cache”**
+
+“推送缓存”是针对HTTP/2标准下的推送资源设定的。推送缓存是session级别的，如果用户的session结束则资源被释放；即使URL相同但处于不同的session中也不会发生匹配。推送缓存的存储时间较短，在Chromium浏览器中只有5分钟左右，同时它也并非严格执行HTTP头中的缓存指令
+
+Jake Archibald有一篇很有意思的文章[HTTP/2 push is tougher than I thought](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)描述了他对HTTP/2推送缓存的一些测试，有一些结论可以放上来以供参考，有一些也和我们上面的结论是一致的
+
+- 几乎所有的资源都能被推送，并且能够被缓存。测试过程是作者在推送资源之后尝试用`fetch()`、`XMLHttpRequest`、`<link rel="stylesheet" href="…">`、`<script src="…">`、`<iframe src="…">`获取推送的资源。Edge和Safari浏览器支持相对比较差
+- `no-cache`和`no-store`资源也能被推送
+- Push Cache是最后一道缓存机制（之前会经过Memory Cache、HTTP Cache、Service Worker）
+- 如果连接被关闭则Push Cache被释放
+- 多个页面可以使用同一个HTTP/2的连接，也就可以使用同一个Push Cache。这主要还是依赖浏览器的实现而定，出于对性能的考虑有的浏览器会对相同域名但不同的tab标签使用同一个HTTP连接。
+- 一旦Push Cache中的资源被使用即被移除
+- 如果Push Cache或者HTTP Cache已经存在被推送的资源，则有可能浏览器拒绝推送
+- 你可以为其他域名推送资源
+
+
+
+
 
 
 
