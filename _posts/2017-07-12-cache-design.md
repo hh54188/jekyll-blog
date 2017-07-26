@@ -1,4 +1,15 @@
-# 设计一个无懈可击的浏览器缓存方案：关于思路，细节，HTTP2，以及ServiceWorker
+---
+layout: post
+title: 设计一个无懈可击的浏览器缓存方案：关于思路，细节，ServiceWorker，以及HTTP/2
+modified: 2017-07-12
+tags: [javascript, browser, cache]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
 
 本文分为四个部分，文章的递进思路是由整体到局部，由业务概念到技术细节，由主线到分支，由现在到未来：
 
@@ -41,7 +52,7 @@ Cache-Control: max-age=31536000
 
 而头信息`If-None-Match`被称为`Conditional headers`，包含这样信息的请求则称为`Conditional Request`。
 
-![http-cache-control](./cache-design/http-cache-control.png)
+![http-cache-control](../images/cache-design/http-cache-control.png)
 
 以上就是缓存设计的基本思路，围绕着资源何时过期，以及过期后如何更新展开。接下来我们看一看技术细节，如何通过配置缓存相关的头信息能够更好的为这些策略服务。
 
@@ -84,7 +95,7 @@ Cache-Control: max-age=31536000
 
 所以综上，关于如何设计缓存机制，还是要依据你的需求而定，可以通过下面的这棵决策树决定：
 
-![http-cache-decision-tree](./cache-design/http-cache-decision-tree.png)
+![http-cache-decision-tree](../images/cache-design/http-cache-decision-tree.png)
 
 ### 不要对变化的资源添加较短的max-age
 
