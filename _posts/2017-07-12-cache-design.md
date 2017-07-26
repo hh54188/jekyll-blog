@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 设计一个无懈可击的浏览器缓存方案：关于思路，细节，ServiceWorker，以及HTTP/2
+title: 无懈可击的浏览器缓存方案：关于思路，细节，ServiceWorker，以及HTTP/2
 modified: 2017-07-12
 tags: [javascript, browser, cache]
 image:
