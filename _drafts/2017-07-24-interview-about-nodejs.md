@@ -1,0 +1,11 @@
+
+- 为什么Node.js够快
+- 解释性语言和编译性语言的区别
+- 什么是 Event Loop
+- 什么是注入依赖？
+- 什么是反转依赖？
+- Express VS KOA
+- nextTick VS setImmediate
+- module.export VS export
+- EventEmitter VS callbacks
+- observer VS Pub/Sub
