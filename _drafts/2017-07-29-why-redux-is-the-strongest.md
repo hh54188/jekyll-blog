@@ -1,0 +1,6 @@
+- [React Redux](https://github.com/reactjs/react-redux)
+- [Usage with React](http://redux.js.org/docs/basics/UsageWithReact.html)
+- [Why use Redux over Facebook Flux?](https://stackoverflow.com/questions/32461229/why-use-redux-over-facebook-flux)
+- [The Evolution of Flux Frameworks](https://medium.com/@dan_abramov/the-evolution-of-flux-frameworks-6c16ad26bb31)
+- [React and Flux](https://survivejs.com/react/implementing-kanban/react-and-flux/)
+- [pros-cons-discussion](https://github.com/markerikson/react-redux-links/blob/master/pros-cons-discussion.md)
