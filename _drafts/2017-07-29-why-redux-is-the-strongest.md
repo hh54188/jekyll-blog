@@ -1,9 +1,9 @@
 # 为什么Redux是地表最强的Flux
 
-[写给前端看的架构文章(1)：MVC VS Flux](https://zhuanlan.zhihu.com/p/21324696)
-[面试系列之二：你真的了解React吗（上）如何设计组件以及重要的生命周期](https://zhuanlan.zhihu.com/p/27828773)
-[面试系列之三：你真的了解React吗（中）组件间的通信以及React优化](https://zhuanlan.zhihu.com/p/27828866)
-[面试系列之四：你真的了解React吗（下）Flux与Vuex的差异以及Webpack的工作原理](https://zhuanlan.zhihu.com/p/27829029)
+- [写给前端看的架构文章(1)：MVC VS Flux](https://zhuanlan.zhihu.com/p/21324696)
+- [面试系列之二：你真的了解React吗（上）如何设计组件以及重要的生命周期](https://zhuanlan.zhihu.com/p/27828773)
+- [面试系列之三：你真的了解React吗（中）组件间的通信以及React优化](https://zhuanlan.zhihu.com/p/27828866)
+- [面试系列之四：你真的了解React吗（下）Flux与Vuex的差异以及Webpack的工作原理](https://zhuanlan.zhihu.com/p/27829029)
 
 
 - [Why use Redux over Facebook Flux?](https://stackoverflow.com/questions/32461229/why-use-redux-over-facebook-flux)
