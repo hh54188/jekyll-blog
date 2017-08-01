@@ -4,6 +4,7 @@
 - 什么是 Event Loop
 - 什么是注入依赖？
 - 什么是反转依赖？
+- 什么是内存泄露？为什么会出现内存泄露
 - Express VS KOA
 - nextTick VS setImmediate
 - module.export VS export

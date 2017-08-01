@@ -11,7 +11,7 @@
 - Redux的基本入门
     - [Redux – the best Flux implementation](http://frontendinsights.com/redux-the-best-flux-implementation/)
     - [Usage with React](http://redux.js.org/docs/basics/UsageWithReact.html)
-    - [--A Redux app tutorial](http://blog.krawaller.se/posts/a-redux-app-tutorial/)
+    - [A Redux app tutorial](http://blog.krawaller.se/posts/a-redux-app-tutorial/)
 
 - Connect解释
     - [connect.js](https://gist.github.com/gaearon/1d19088790e70ac32ea636c025ba424e)
@@ -20,7 +20,8 @@
     - [Redux’s Mysterious Connect Function](https://medium.com/mofed/reduxs-mysterious-connect-function-526efe1122e4)
 
 - Middleware
-    - [--A Beginner's Guide to Redux Middleware](https://www.codementor.io/vkarpov/beginner-s-guide-to-redux-middleware-du107uyud)
+    - [A Beginner's Guide to Redux Middleware](https://www.codementor.io/vkarpov/beginner-s-guide-to-redux-middleware-du107uyud)
+    - [Exploring Redux middleware](http://blog.krawaller.se/posts/exploring-redux-middleware/)
 
 - Framework Evolution
     - [--The Evolution of Flux Frameworks](https://medium.com/@dan_abramov/the-evolution-of-flux-frameworks-6c16ad26bb31)
