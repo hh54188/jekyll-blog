@@ -35,6 +35,7 @@
 
 - Redux的基本入门
     - [Redux – the best Flux implementation](http://frontendinsights.com/redux-the-best-flux-implementation/)
+    - [A Dummy's Guide to Redux and Thunk in React](https://codepen.io/stowball/post/a-dummy-s-guide-to-redux-and-thunk-in-react)
     - [Usage with React](http://redux.js.org/docs/basics/UsageWithReact.html)
     - [A Redux app tutorial](http://blog.krawaller.se/posts/a-redux-app-tutorial/)
 
