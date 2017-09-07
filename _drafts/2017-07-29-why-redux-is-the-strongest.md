@@ -36,7 +36,6 @@
 - Redux的基本入门
     - [Redux – the best Flux implementation](http://frontendinsights.com/redux-the-best-flux-implementation/)
     - [A Dummy's Guide to Redux and Thunk in React](https://codepen.io/stowball/post/a-dummy-s-guide-to-redux-and-thunk-in-react)
-    - [Usage with React](http://redux.js.org/docs/basics/UsageWithReact.html)
     - [A Redux app tutorial](http://blog.krawaller.se/posts/a-redux-app-tutorial/)
 
 - Connect解释
@@ -48,6 +47,12 @@
 - Middleware
     - [A Beginner's Guide to Redux Middleware](https://www.codementor.io/vkarpov/beginner-s-guide-to-redux-middleware-du107uyud)
     - [Exploring Redux middleware](http://blog.krawaller.se/posts/exploring-redux-middleware/)
+
+- Router
+    - []()
+
+- Animation
+    - []()
 
 - Redux-thunk
     - [(Redux-thunk)Why Do I Need This](https://stackoverflow.com/questions/35411423/how-to-dispatch-a-redux-action-with-a-timeout/35415559#35415559)
