@@ -48,12 +48,6 @@
     - [A Beginner's Guide to Redux Middleware](https://www.codementor.io/vkarpov/beginner-s-guide-to-redux-middleware-du107uyud)
     - [Exploring Redux middleware](http://blog.krawaller.se/posts/exploring-redux-middleware/)
 
-- Router
-    - []()
-
-- Animation
-    - []()
-
 - Redux-thunk
     - [(Redux-thunk)Why Do I Need This](https://stackoverflow.com/questions/35411423/how-to-dispatch-a-redux-action-with-a-timeout/35415559#35415559)
     - [A Dummy's Guide to Redux and Thunk in React](https://codepen.io/stowball/post/a-dummy-s-guide-to-redux-and-thunk-in-react)
@@ -70,3 +64,6 @@
     - [--The Evolution of Flux Frameworks](https://medium.com/@dan_abramov/the-evolution-of-flux-frameworks-6c16ad26bb31)
     - [--React and Flux](https://survivejs.com/react/implementing-kanban/react-and-flux/)
     - [--Tutorial: Elm counter vs. Redux counter](https://medium.com/@Hannes_E/map-elm-redux-next-level-web-development-f3452f09a238)
+
+- Router(TO DO)
+- Animation(TO DO)
