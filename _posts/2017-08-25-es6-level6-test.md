@@ -1,4 +1,15 @@
-# ECMAScript 6 六级考试
+---
+layout: post
+title: ECMAScript 6 六级考试
+modified: 2017-08-25
+tags: [javascript]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
 
 这份试卷我并没有准备答案，一方面所有的代码可以立即在浏览器中执行看到（我）效（很）果（懒）；另一方面这也并非是一场真的（我）考（很）试（懒），而是用于检测自己ES6知识并且查漏补缺，所以不必有太大压力。
 
