@@ -4,10 +4,52 @@
 
 这份试卷的内容主要来源于两份我学习ES6的资料：nzakas（JavaScript高级程序设计的作者）的开源图书[understandinges6](https://github.com/nzakas/understandinges6)，以及Nicolás Bevacqua的[ES6 in Depth](https://ponyfoo.com/articles/tagged/es6-in-depth)系列。如果你对文中的一些问题有疑惑，你一定可以从它们中找到答案
 
-这份试卷难免会有纰漏，比如没有正确答案或者答案不唯一，如果有出现这样的情况，请留言给我让我及时纠正。
+这份试卷难免会有纰漏或者不严谨的地方，比如没有正确答案或者答案不唯一，如果有出现这样的情况，请留言给我让我及时纠正。
 
 最后，如果你有兴趣的话可以把你认为的正确答案或者解释写在留言中供大家参考
 
+## 选择题（有一个或多个答案）
+
+- 以下关于`...rest`参数说法错误的是
+	- 函数只能有一个`...rest`参数
+	- `...rest`参数后允许再接其他参数
+	- 对象的方法不能有`...rest`参数
+  - rest参数不影响`arguments`对象，`arguments`反映的还是实际传参（长度，索引等）
+
+- 以下关于 weakset 说法错误的是
+	- 调用`add`方法时传递的必须是object数据类型
+	- 可以通过 `for of` 进行遍历
+	- 没有 keys 和 values 方法
+	- 没有 size 属性
+
+- 以下关于 Symbol 说法正确的是
+  - Symbol 不是基础数据类型(primative type)
+  - Symbol 数据类型可以转化为字符串或者数字
+  - 必须使用 new 关键字创建 Symbol 数据类型
+  - 以上说法全是错误
+
+- 关于 module 以下说法错误的是
+  - import 命令使用的是解构(Destructuring)语法
+  - 一个模块只能导出一个 default value
+  - 在引入defaut值和非default值时，default值必须放在前面
+
+- 以下关于`super()`方法说法正确的是
+  - 在使用`this`关键字之前必须调用`super()`方法
+  - 只能在子类中调用`super()`函数
+  - 如果你在子类中定义了构造函数，你必须调用`super()`方法
+  - 如果你没有指定构造函数，`super()`方法也会自动为你调用
+
+- 关于迭代器（iterator）以下说法正确的是
+  - `map[Symbol.iterator] === map.entries`结果返回 true
+  - 可以通过 `Symbol.iterator` 来访问变量的默认迭代器
+  - arrays 和 sets 默认的迭代器是 values
+	- weakmap 和 weakset 没有默认的迭代器
+
+- 以下代码不会报错的是
+  - `Object.assign([1, 2, 3], [4, 5])`
+  - `var foo = 'bar'; var baz = { [foo] };`
+  - `map[Symbol.iterator] === map.entries`
+  - `let person = new class { //... }("Nicholas");`
 
 ## 请说出以下每一段代码的执行结果，或者是否会报错
 
@@ -308,3 +350,25 @@ console.log(proxy.name);
 revoke();
 console.log(proxy.name);
 ```
+
+```javascript
+let ints = new Int16Array([25, 50]);
+
+console.log(ints.length);
+console.log(ints[0]); 
+console.log(ints[1]); 
+
+ints[2] = 5;
+
+console.log(ints.length);
+console.log(ints[2]); 
+```
+## 问答题
+
+- 请说出 spread operator 六种以上的用法
+- `Number.isNaN` 和 `Global.isNaN` 有什么区别
+- `Object.getPrototypeOf()` 和 `Reflect.getPrototypeOf()` 有哪些差异
+- `Array.from` 与 `Array.of` 有什么区别
+- 解释一下什么是 code unit 以及 code point
+- `charCodeAt` 和 `codePointAt` 有什么区别
+- `fromCharCode` 和 `fromCodePoint` 有什么区别
