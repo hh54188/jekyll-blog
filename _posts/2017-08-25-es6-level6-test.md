@@ -376,8 +376,10 @@ ints[2] = 5;
 console.log(ints.length);
 console.log(ints[2]); 
 ```
+
 ## 问答题
 
+- `import` vs `require`
 - 请说出 spread operator 六种以上的用法
 - `Number.isNaN` 和 `Global.isNaN` 有什么区别
 - `Object.getPrototypeOf()` 和 `Reflect.getPrototypeOf()` 有哪些差异
