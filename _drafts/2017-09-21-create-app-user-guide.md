@@ -12,6 +12,8 @@
 
 因为CRA是Facebook官方推出的脚手架工具，所以我们以CRA为主线索展开，它的[User Guide](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md)文档最为（特）丰（别）富（长），本文的大部分内容也都参（翻）考（译）自这份文档，如果也理解不恰当之处还多多指教。其中也会穿插react-starter-kit的相关内容。
 
+最后一句废话想强调的是，任何脚手架生成的项目结构都仅供参考。实际的组织方式和使用工具都要依据实际情况而定。
+
 ## 项目目录
 
 首先让我们从最基本的目录文件夹开始
@@ -37,52 +39,9 @@ registerServiceWorker();
 
 - `public`: `public`通常存放的对外能够访问的资源，例如打包后的脚本、图片、HTML文件。但事实上并不仅限于此，从RSK项目中我们可以看到public文件夹中还有`robots.txt`、`humans.txt`、`crossdomain.xml`、`favicon.ico`等等
 
-虽然public中存放的不是组件，public目录同样存在入口，即`index.html`
+虽然public中存放的不是组件，public目录同样存在入口，即`/index.html`，也即是用户在域名根路径下访问到的页面。在CRA中规定，只有`public`文件夹内的资源才能被`index.html`使用。而html引用静态资源的方式也比较特别，并非是通过相对路径或者绝对路径的，而是通过全局变量引用。这个话题我们放在后面资源使用环节再说。
+
+可以再次对`public`文件夹中的资源进行分类。如果你有
 
 
-
-## 目录结构
-
-```
-my-app/
-  README.md
-  node_modules/
-  package.json
-  public/
-    index.html
-    favicon.ico
-  src/
-    App.css
-    App.js
-    App.test.js
-    index.css
-    index.js
-    logo.svg
-```
-public/index.html 模板入口;
-src/index.js 脚本入口.
-
-src文件夹中可以创建子文件夹，只有src文件夹里的文件会被Webpack处理。**所有的JS和CSS文件都必须放在Webpack中**，否则Webpack看不到它们。
-
-只有public中的文件才能被public/index.html使用
-
-## 命令
-
-- npm start: 3000端口的开发模式
-- npm test: 跑测试
-- npm run eject: 重置所有配置？
-
-## 支持的语法特性
-
-- Exponentiation Operator (ES2016).
-- Async/await (ES2017).
-- Object Rest/Spread Properties (stage 3 proposal).
-- Dynamic import() (stage 3 proposal)
-- Class Fields and Static Properties (part of stage 3 proposal).
-- JSX and Flow syntax.
-
-## 其他
-
-- jslint: 通过 `.eslintrc` 配置编辑器lint配置
-- Visual Studio Code 调试: 在`.vscode`文件夹中添加`launch.json`配置文件
-- WebStorm 调试
+- [In a web project, what is the difference between a dist and build directory (traditionally)?](https://stackoverflow.com/questions/16303525/in-a-web-project-what-is-the-difference-between-a-dist-and-build-directory-tra)
