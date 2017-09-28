@@ -41,7 +41,15 @@ registerServiceWorker();
 
 虽然public中存放的不是组件，public目录同样存在入口，即`/index.html`，也即是用户在域名根路径下访问到的页面。在CRA中规定，只有`public`文件夹内的资源才能被`index.html`使用。而html引用静态资源的方式也比较特别，并非是通过相对路径或者绝对路径的，而是通过全局变量引用。这个话题我们放在后面资源使用环节再说。
 
-可以再次对`public`文件夹中的资源进行分类。如果你有
+`public`文件夹有时候也被命名为`assets`文件夹，甚至`resources`文件夹这都没有关系。如果更加规矩一点，你可以在`public`中建立子文件夹`dist`用于存储发布上线的脚本和样式（dist其实就是distribute的缩写，也意味着发布的意思），或者建立`build`文件夹用于存储开发中编译后的脚本
+
+`src`和`public`是最重要的两个文件夹。CRA中的文件夹只有这两个。我们不妨再可以看看RSK中的文件夹还有哪些:
+- `docs`: 用于存放（markdown格式的）开发相关文档
+- `tools`: 用于存放“工具脚本”的文件夹。“工具脚本”即是那些用于完成指定工作的脚本，在文件夹里你会看到例如`build.js`、`deploy.js`、`copy.js`等等。即使不展示这些脚本的具体内容，通过文件名也很容易判断这些脚本的作用，依次为构建、部署、复制文件等。这一部分脚本也可以通过`npm`命令执行，稍后详谈。
+- `src/server`: 如果你的项目是以Javascript全栈的形式开发的话，可以将服务端代码也放入`src`中
+- `test`: 用于存放测试相关脚本
+
+## 各式各样的配置文件
 
 
 - [In a web project, what is the difference between a dist and build directory (traditionally)?](https://stackoverflow.com/questions/16303525/in-a-web-project-what-is-the-difference-between-a-dist-and-build-directory-tra)
