@@ -51,5 +51,23 @@ registerServiceWorker();
 
 ## 各式各样的配置文件
 
+越来越多的工具被发明来用于辅助我们的开发，但不同的工具配合不同的项目需要进行不同的配置。所以有各式各样的配置文件可能存在于我们的项目文件中。这些工具和配置文件你不一定都会用上，但至少你在过目之后不会再对它们陌生，或许在以后解决问题的过程中能够派的上用场。
+
+以下的配置文件摘自RSK脚手架中，以及会结合一些额外的我使用到的工具配置文件
+
+- `.editorconfig`: 告诉编辑器该项目的代码规范。在团队开发中可能涉及的一个问题是，不同的同学可能使用的开发工具和开发习惯并不相同，有的使用WebStorm，有的使用Visual Studio Code。所以有可能在你的编辑器中习惯缩进使用的是2个空格，在他的编辑器中缩进使用的是4个空格。该配置文件就是用于存储统一的样式规范，告诉编辑器统一使用两个空格，不允许空字符串结尾等等。具体请参考[http://editorconfig.org](http://editorconfig.org)
+- `.eslintrc.js`: 这个很好理解，eslint工具的配置文件。eslint是一款专业对js语法和格式进行检测的工具，大部分的编辑器应该都进行了集成，或者当作插件进行安装。该配置文件告诉eslint哪些文件可以忽略，哪些规则可以忽略，哪些文件适配哪些规则等等。具体请参考: [http://eslint.org/docs/user-guide/configuring](http://eslint.org/docs/user-guide/configuring)
+- `.stylelintrc.js`: 同上，stylelint是对样式文件进行语法规范检测的工具，该配置文件则可以对检测规则进行细节配置。具体规则请参考: [https://stylelint.io/user-guide/configuration/](https://stylelint.io/user-guide/configuration/)
+- `.flowconfig`: [flow](https://flow.org/en/)是Facebook推出一款用于对JavaScript语法进行类型检测的开源工具（有TypeScript的意思）。该文件就是该工具的配置文件，具体可以前往[https://flow.org/en/docs/config/](https://flow.org/en/docs/config/)
+- `.env`: 在启动项目时难免会使用到环境变量，最著名的环境环境变量莫过于`NODE_ENV`，例如告诉程序使用生产环境：`NODE_ENV=production`。我们都知道可以在执行命令行时通过命令行参数的形式指定环境变量，例如`NODE_ENV=production node app.js`，然后再从程序里通过读取命令行参数的方式间接读取环境变量。而通过[dotenv](https://github.com/motdotla/dotenv)模块，我们可以将环境变量都放入`.env`环境中统一管理统一读取。
+- `.travis.yml`: 持续集成工具[travis-ci](https://circleci.com/)的配置文件，该工具github marketplace有售，更多配置可以参考[https://docs.travis-ci.com/user/customizing-the-build](https://docs.travis-ci.com/user/customizing-the-build)
+- `circle.yml`: 持续集成工具[circleci](https://travis-ci.org/)的配置文件，该工具github marketplace有售，更多配置可以参考[https://circleci.com/docs/1.0/configuration/](https://circleci.com/docs/1.0/configuration/)
+- `jest.config.js`: Facebook 的测试工具jest的配置文件，更多配置可以参考[https://facebook.github.io/jest/docs/en/configuration.html](https://facebook.github.io/jest/docs/en/configuration.html)
+- `jsdoc.config.json`: [jsDoc](http://usejsdoc.org/)是一款能够根据文件内函数注释生成文档的工具，该文件是该工具的配置文件，更多信息可以参考[http://usejsdoc.org/about-configuring-jsdoc.html](http://usejsdoc.org/about-configuring-jsdoc.html)
+- `Dockerfile`: Docker容器的配置文件（对不起Docker我实在不熟，没有什么好补充的）
+
+除此之外，还有一些你可能会用得上的一些文件，比如
+- `CHANGELOG.md`: 版本更新的日志
+- `CONTRIBUTEING.md`: 关于如何向该项目做出贡献
 
 - [In a web project, what is the difference between a dist and build directory (traditionally)?](https://stackoverflow.com/questions/16303525/in-a-web-project-what-is-the-difference-between-a-dist-and-build-directory-tra)
