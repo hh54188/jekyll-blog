@@ -53,7 +53,7 @@ registerServiceWorker();
 
 越来越多的工具被发明来用于辅助我们的开发，但不同的工具配合不同的项目需要进行不同的配置。所以有各式各样的配置文件可能存在于我们的项目文件中。这些工具和配置文件你不一定都会用上，但至少你在过目之后不会再对它们陌生，或许在以后解决问题的过程中能够派的上用场。
 
-以下的配置文件摘自RSK脚手架中，以及会结合一些额外的我使用到的工具配置文件
+以下的配置文件摘自RSK脚手架中（如果你第一次看到脚手架为你生成了这么多从来没有看到过的文件你一定会感到害怕，反正我是这么觉得的。）
 
 - `.editorconfig`: 告诉编辑器该项目的代码规范。在团队开发中可能涉及的一个问题是，不同的同学可能使用的开发工具和开发习惯并不相同，有的使用WebStorm，有的使用Visual Studio Code。所以有可能在你的编辑器中习惯缩进使用的是2个空格，在他的编辑器中缩进使用的是4个空格。该配置文件就是用于存储统一的样式规范，告诉编辑器统一使用两个空格，不允许空字符串结尾等等。具体请参考[http://editorconfig.org](http://editorconfig.org)
 - `.eslintrc.js`: 这个很好理解，eslint工具的配置文件。eslint是一款专业对js语法和格式进行检测的工具，大部分的编辑器应该都进行了集成，或者当作插件进行安装。该配置文件告诉eslint哪些文件可以忽略，哪些规则可以忽略，哪些文件适配哪些规则等等。具体请参考: [http://eslint.org/docs/user-guide/configuring](http://eslint.org/docs/user-guide/configuring)
@@ -70,4 +70,19 @@ registerServiceWorker();
 - `CHANGELOG.md`: 版本更新的日志
 - `CONTRIBUTEING.md`: 关于如何向该项目做出贡献
 
+## 工具脚本
+
+还在我入行的时候，前端开发流程是很简单的，手动创建一个静态页面，然后引入你需要的脚本就可以开始了。然而到了现在，不仅引入脚本的方式发生了改变，包括调试过程，打包流程，发布上线都变得复杂而且专业，而这一切都离不开NodeJS脚本。脚本带来的好处是可复用、自动化以及批量化处理。
+
+开发中需要使用脚本处理的环节非常的多，例如将less编译为css，将脚本编译、压缩、拼接，压缩图片等等。这些工作可以交给Webpack或者Gulp或者Grunt去做。但这些第三方库并不是万能的，它们的运作也依赖它们所处生态里的插件。在这种复杂的依赖情况下，出错的情况常容易发生，为什么不建议再使用Gulp或者Grunt了呢，详见这篇文章：[Why we should stop using Grunt & Gulp](https://www.keithcirkel.co.uk/why-we-should-stop-using-grunt/)
+
+## 参考资料
+
 - [In a web project, what is the difference between a dist and build directory (traditionally)?](https://stackoverflow.com/questions/16303525/in-a-web-project-what-is-the-difference-between-a-dist-and-build-directory-tra)
+- [Why npm Scripts?](https://css-tricks.com/why-npm-scripts/)
+- [npm-build-boilerplate](https://github.com/damonbauer/npm-build-boilerplate/blob/master/package.json)
+- [Why we should stop using Grunt & Gulp](https://www.keithcirkel.co.uk/why-we-should-stop-using-grunt/)
+- [How to Use npm as a Build Tool](https://www.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/)
+- [kentcdodds/nps](https://github.com/kentcdodds/nps)
+- [Running scripts with npm](https://blog.jayway.com/2014/03/28/running-scripts-with-npm/)
+- [npm-scripts](https://docs.npmjs.com/misc/scripts)
