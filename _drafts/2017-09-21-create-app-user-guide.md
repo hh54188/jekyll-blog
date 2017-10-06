@@ -74,7 +74,54 @@ registerServiceWorker();
 
 还在我入行的时候，前端开发流程是很简单的，手动创建一个静态页面，然后引入你需要的脚本就可以开始了。然而到了现在，不仅引入脚本的方式发生了改变，包括调试过程，打包流程，发布上线都变得复杂而且专业，而这一切都离不开NodeJS脚本。脚本带来的好处是可复用、自动化以及批量化处理。
 
-开发中需要使用脚本处理的环节非常的多，例如将less编译为css，将脚本编译、压缩、拼接，压缩图片等等。这些工作可以交给Webpack或者Gulp或者Grunt去做。但这些第三方库并不是万能的，它们的运作也依赖它们所处生态里的插件。在这种复杂的依赖情况下，出错的情况常容易发生，为什么不建议再使用Gulp或者Grunt了呢，详见这篇文章：[Why we should stop using Grunt & Gulp](https://www.keithcirkel.co.uk/why-we-should-stop-using-grunt/)
+开发中需要使用脚本处理的环节非常的多，例如将less编译为css，将脚本编译、压缩、拼接，压缩图片等等。这些工作可以交给Webpack或者Gulp或者Grunt去做。但这些第三方库并不是万能的，它们的运作也依赖它们所处生态里的插件。在这种复杂的依赖情况下，出错的情况常容易发生，为什么不建议再使用Gulp或者Grunt了呢，详见这篇文章：[Why we should stop using Grunt & Gulp](https://www.keithcirkel.co.uk/why-we-should-stop-using-grunt/)。正所谓流水的工具，铁打的脚本
+
+npm脚本都存放在`package.json`文件里的`scripts`字段里
+
+npm命令有机会我们能单独拿出一篇文章来聊，但言归正传回到脚手架，CRA中只用到了四种npm命令，分别是
+- `npm start`: 在开发模式下启动app，默认使用使用3000端口，启动后在浏览器中输入[http://localhost:3000](http://localhost:3000)就能访问，如果应用发生了更改页面会自动刷星
+- `npm test`: 运行应用的测试脚本
+- `npm run build`: 为生产环境编译并且打包应用程序，打包到`build`文件夹中
+- `npm run eject`: 如果你稍有心的观察CRA的目录里的文件，你会发现没有`.babel`文件，没有`webpack.config.js`类似的文件。因为所有的这些琐碎的配置脚手架都帮你搞定了。全部都在`react-scripts`类库中。所以你看到`package.json`文件里`npm start`实际运行的是`react-scripts start`。当你不满足于脚手架为了你预设的配置时，你就可以使用`eject`命令将配置暴露出来（比如`start`命令，还有`webpack.config.dev.js`），这样你就可以完全自定义这些配置。注意这个操作是不可逆的。当你运行完毕之后你会发现`package.json`里的`scripts`的`start`命令变为`node scripts/start.js`
+
+### 自动格式化代码
+
+这里所说的格式化代码并不是指美化和格式化已经压缩过的代码以便于阅读。而是在代码的提交阶段（commit）强制对代码进行格式化。所以这里用到了额外的三个库
+- `husky`: 便于以npm脚本的形式调用git hooks（hook指的是在某一个特定情况下执行的代码，比如React的各个预留出来的生命周期函数就算是hook）
+- `lint-staged`: 便于我们对staged阶段（准备提交阶段）的文件执行npm脚本
+- `prettier`: 对代码进行格式化
+
+核心类库当然是[prettier](https://github.com/prettier/prettier)，为什么在开发时仍然需要对代码格式化，prettier自己给出了几个理由，比如强制对代码进行格式化避免PR时产生不必要的语法问题，比如帮助还不熟悉的新同学规范代码，总之仍然是有必要的。
+
+prettier解决了how的问题，但是还需要`husky`和`lint-staged`解决when的问题，也就是什么时候做格式化。在CRA中，格式化的工作时放在准备提交的阶段（pre-commit），在实际项目中你还可以放在预备push的阶段。
+
+husky解决的问题是将pre-commit的hook暴露出来。默认情况下如果你想编写pre-commit脚本，你需要编辑你项目的`.git/hooks/pre-commit`文件，如果我没有记错的话应该是shell脚本。并且在执行之前记得赋予它们执行权限。
+
+然而当你安装完husky之后，你就可以把pre-commit阶段需要执行的脚本直接放在`package.json`里的`scipts`里的`precommit`字段里，比如:
+```javascript
+"scripts": {
+  "precommit": "eslint"
+},
+```
+
+而`lint-staged`解决的则是最后一公里的问题，即封装在pre-commit阶段需要执行的脚本，同样是在`package.json`配置，例如：
+```javascript
+  "dependencies": {
+    // ...
+  },
+ "lint-staged": {
+   "src/**/*.{js,jsx,json,css}": [
+     "prettier --single-quote --write",
+     "git add"
+   ]
+ },
+  "scripts": {
+```
+
+## 开发规范
+
+进入到组件化的时代，一切都是组件，就连html也可以变身为组件。在RSK脚手架中，你会看到一个名为`Html.js`的组件
+
 
 ## 参考资料
 
