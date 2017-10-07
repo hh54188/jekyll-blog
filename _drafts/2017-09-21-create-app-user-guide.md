@@ -120,7 +120,46 @@ husky解决的问题是将pre-commit的hook暴露出来。默认情况下如果�
 
 ## 开发规范
 
-进入到组件化的时代，一切都是组件，就连html也可以变身为组件。在RSK脚手架中，你会看到一个名为`Html.js`的组件
+进入到组件化的时代，一切都是组件，就连html也可以变身为组件。在RSK脚手架中，你甚至会看到一个名为`Html.js`的组件。我们希望用组件解决一切问题，而不是把需要维护的代码遗落在各个地方，甚至包括`<head />`标签里的内容。`<title />`、`<meta />`就交给[React Helmet](https://github.com/nfl/react-helmet)解决吧。
+
+开发组件和引用组件就不赘述了，全世界都一样，相信大家也耳熟能详了。
+
+至于样式，无论你是使用Less、Sass、还是Stylus都一样，只要在Webpack中使用对应的loader就能将其编译为css。需要注意的是组织样式的方式。传统项目中样式和脚本是分离的，放在不同的文件夹中。但是在React项目中，我们只有组件一个维度，组件同时包含样式和脚本，都放在`components`文件夹中。例如：
+```
+components/
+|--Button.js
+|--Button.less
+```
+那么在`Button.js`中你可以直接引用样式
+```javascript
+import React, { Component } from 'react';
+import './Button.css';
+```
+或者，你也可以把所有的样式都在样式入口`src/index.css`中引入，然后在组件入口`src/index.js`中又统一引入样式入口`src/index.css`。
+
+除了编译样式之外还有一些额外的工作需要进行，例如压缩，例如为某些样式属性添加浏览器前缀。在CRA中会使用[Autoprefixer](https://github.com/postcss/autoprefixer)或者postcss进行处理，当然这一切都集成在react-scripts中。你也可以独立的使用npm脚本进行处理，监视样式的变化，当样式文件发生更改时自动的进行预处理和“后”处理，这个流程对脚本文件也同样有效。
+
+目前也有很多专门用于优化npm脚本执行的类库，在上述流程中你也能够（或者说是必须）用上：
+- `onchange`、`watch`: 用于监视文件修改，然后执行特定的npm脚本，比如
+```
+"scripts": {
+  ...
+  "watch:css": "onchange 'src/scss/*.scss' -- npm run build:css",
+  "watch:js": "onchange 'src/js/*.js' -- npm run build:js",
+}
+```
+- `parallelshell`: 用于并行的执行多个npm脚本，比如
+```
+"scripts": {
+  ...
+  "watch:all": "parallelshell 'npm run serve' 'npm run watch:css' 'npm run watch:js'"
+}
+```
+
+
+
+
+
 
 
 ## 参考资料
