@@ -124,6 +124,8 @@ husky解决的问题是将pre-commit的hook暴露出来。默认情况下如果�
 
 开发组件和引用组件就不赘述了，全世界都一样，相信大家也耳熟能详了。
 
+### 样式
+
 至于样式，无论你是使用Less、Sass、还是Stylus都一样，只要在Webpack中使用对应的loader就能将其编译为css。需要注意的是组织样式的方式。传统项目中样式和脚本是分离的，放在不同的文件夹中。但是在React项目中，我们只有组件一个维度，组件同时包含样式和脚本，都放在`components`文件夹中。例如：
 ```
 components/
@@ -156,7 +158,56 @@ import './Button.css';
 }
 ```
 
+### 添加图片字体等额外资源
 
+图片与字体等资源也和样式一样都与要使用它们的组件放在同一层级，至少都应该属于同一个`components`文件夹中，在组件也是通过`import`的关键字引入，例如
+
+```javascript
+import React from 'react';
+import logo from './logo.png'; // Tell Webpack this JS file uses this image
+
+console.log(logo); // /logo.84287d09.png
+
+function Header() {
+  // Import result is the URL of your image
+  return <img src={logo} alt="Logo" />;
+}
+```
+
+为了减少页面的请求数，体积小于10000 bytes的图片会返回data URI而不是实际的路径。当项目需要（为生产环境）进行构建时，Webpack会把大于10000 bytes的图片资源拷贝到最终构建的文件夹中（在CRA中的目录是`/build/static/media`），并且根据内容hash值进行重新命名。所以不用担心资源发生修改之后因为浏览器的缓存而不会生效
+
+为什么要采用`import`的方式引用样式和图片，文档中给出了三条理由：
+- 脚本和样式能够得到压缩以及打包在一起，以便减少额外的网络请求
+- 在编译阶段如果发现文件丢失就会及时报错，而不是上线之后再呈现给用户404错误
+- 根据文件内容的hash值对文件进行重命名而避免浏览器缓存问题
+
+### 如果一定要引用`public`文件夹中的资源
+
+并非所有的资源都能在组件中引用，又或者有的第三方类库并不支持与React集成，此时你就需要把资源放入`public`文件夹中，然后在html中引用，比如：
+```html
+<link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
+```
+那么在构建时（`npm run build`），Webpack会将`%PUBLIC_URL%`替换为实际的`public`目录的绝对路径。
+
+在js文件中也可以通过访问`process.env.PUBLIC_URL`变量来获得`public`文件夹的绝对路径
+```javascript
+render() {
+  // Note: this is an escape hatch and should be used sparingly!
+  // Normally we recommend using `import` for getting asset URLs
+  // as described in “Adding Images and Fonts” above this section.
+  return <img src={process.env.PUBLIC_URL + '/img/logo.png'} />;
+}
+```
+这种访问资源的方式有以下一些缺点（当然是相对于`import`方式而言），请务必了解：
+- `public`文件夹内的文件不会做任何处理，包括压缩或者拼接之类的
+- 如果有文件丢失的话在编译阶段不会报错，用户可能会收到404的请求返回
+- 你可能需要手动处理缓存问题，例如对文件发生修改时对文件进行重命名，或者修改`Etag`等缓存条件。详情可以参考我的这篇文章[《设计一个无懈可击的浏览器缓存方案：关于思路，细节，ServiceWorker，以及HTTP/2》](https://zhuanlan.zhihu.com/p/28113197)
+
+但是在某些情况下可以考虑使用这种访问资源的方式
+- 你需要引用一些打包之外的额外脚本，比如[pace.js](http://github.hubspot.com/pace/docs/welcome/)，比如google analytics脚本
+- 有一些脚本和Webpack不兼容
+- 上千张图片需要动态引用
+- 构建时打包输出的文件需要指定文件名
 
 
 
