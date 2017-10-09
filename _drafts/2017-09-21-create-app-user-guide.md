@@ -209,6 +209,38 @@ render() {
 - 上千张图片需要动态引用
 - 构建时打包输出的文件需要指定文件名
 
+## 添加自定义的环境变量
+
+CRA脚手架还允许你在`process.env`上添加自定义的环境变量供全局访问。
+
+默认它会提供两个环境变量供使用，一个是上一节用到的`public`文件夹路径`PUBLIC_URL`。另一个是大家更加熟悉的`NODE_ENV`。后者是一个代表当前开发环境的变量，当你运行`npm start`时它等于`development`；当你运行`npm test`时它的值是`test`；当你运行`npm run build`时，它的值是`production`。你无法手动的覆盖它，它能够防止开发者不小心打包了一个开发版本部署到线上。`NODE_ENV`也能够帮助你有针对性的调试代码，比如你只希望非`production`环境下停用分析脚本：
+```javascript
+if (process.env.NODE_ENV !== 'production') {
+  analytics.disable();
+}
+```
+
+当然你也可以添加自己的环境变量，添加方式有两种，一种是通过命令行的方式比如在Windows系统下`set REACT_APP_SECRET_CODE=abcdef&&npm start`。另一种是通过`.env`文件（也就是通过[dotenv](https://github.com/motdotla/dotenv)类库），把你所需要的环境变量都写在这个文件中:
+```
+REACT_APP_SECRET_CODE=abcdef
+```
+需要注意的事情是，所有的自定义环境变量都需要以`REACT_APP_SECRET_CODE`开头（至于理由我没有看懂：Any other variables except NODE_ENV will be ignored to avoid accidentally exposing a private key on the machine that could have the same name. 我不是很理解 exposing a private key 是什么意思）。
+
+一旦环境变量定义完毕之后，就能在文件中使用，比如在脚本中：
+```javascript
+render() {
+  return (
+    <div>
+      <small>You are running this application in <b>{process.env.NODE_ENV}</b> mode.</small>
+    </div>
+  );
+}
+```
+比如在html中：
+```html
+<title>%REACT_APP_WEBSITE_NAME%</title>
+```
+最后，不同开发环境中的环境变量不必都放在`.env`文件中，可以划分为`.env.development`, `.env.test`, .`env.production`等不同的文件存放，并且不同文件之间还存在优先级的关系，详情可以访问[dotenv的文档](https://github.com/motdotla/dotenv)
 
 
 
