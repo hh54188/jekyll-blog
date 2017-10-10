@@ -1,4 +1,15 @@
-# 从React脚手架工具学习React项目的最佳实践（上）：前端基础配置
+---
+layout: post
+title: 从React脚手架工具学习React项目的最佳实践（上）：前端基础配置
+modified: 2017-10-10
+tags: [javascript, React]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
 
 这篇文章不是聊React这门技术本身，而是关于如何维护好一个React项目。
 
