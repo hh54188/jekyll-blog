@@ -1,6 +1,6 @@
 2017.10.17
 
-- | Material-UI(0.19.4) | Material-UI v1(v1.0.0-beta.17) | Semantic UI React(0.75.0) / Semantic-UI(2.2) | Blueprint(v1.32.0) | Ant-design | React Toolbox | Office UI Fabric | grommet
+x | Material-UI(0.19.4) | Material-UI v1(v1.0.0-beta.17) | Semantic UI React(0.75.0) / Semantic-UI(2.2) | Blueprint(v1.32.0) | Ant-design | React Toolbox | Office UI Fabric | grommet
 --- | --- | --- | --- | --- | --- | --- | --- | ---
 Watch | 1086 | 1086 | 155 / 1378 | 187 | 0 | 0 | 0 | 0
 Star | 29552 | 29552 | 4431 / 37586 | 7206 | 0 | 0 | 0 | 0
