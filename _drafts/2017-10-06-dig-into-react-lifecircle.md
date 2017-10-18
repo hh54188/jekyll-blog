@@ -8,10 +8,11 @@
 
 好的，那让我们正式开始
 
-React组件是存在声明周期的，从出生（mount）到更新（update）到死亡（unmount），然而我们怎么知道组件进入到了哪个阶段？只能通过React组件暴露给我们的钩子（hook）函数来知晓。什么是钩子函数，就是在特定阶段执行的函数，比如`constructor`只会在组件出生阶段被调用一次，那么这就算一个“钩子”。顺便多说一句，“钩子”在编程中也算是一类设计模式，比如github的[Webhooks](https://developer.github.com/webhooks/)。顾名思义它也是钩子，你能够通过Webhook订阅github上的事件，当事件发生时，github就会像你的服务发送POST请求。利用这个特性，你可以监听master分支有没有新的合并事件发生，如果你的服务收到了该事件的消息，那么你就可以例子执行部署工作。
+React组件是存在生命周期的，从出生（mount）到更新（update）到死亡（unmount），然而我们怎么知道组件进入到了哪个阶段？只能通过React组件暴露给我们的钩子（hook）函数来知晓。什么是钩子函数，就是在特定阶段执行的函数，比如`constructor`只会在组件出生阶段被调用一次，那么这就算一个“钩子”。顺便多说一句，“钩子”在编程中也算是一类设计模式，比如github的[Webhooks](https://developer.github.com/webhooks/)。顾名思义它也是钩子，你能够通过Webhook订阅github上的事件，当事件发生时，github就会像你的服务发送POST请求。利用这个特性，你可以监听master分支有没有新的合并事件发生，如果你的服务收到了该事件的消息，那么你就可以例子执行部署工作。
 
-React组件的声明周期分为三个阶段，分别是出生（初始化/Mounting），成长（更新/Growth/Update）
+React组件的生命周期分为三个阶段，按照时间顺序分别是出生（初始化/Mounting），成长（更新/Growth/Update）以及死亡（Unmount）。我们按照阶段的时间顺序对每一个钩子函数进行讲解。
 
+在编写React组件时还
 
 
 
