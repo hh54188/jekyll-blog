@@ -134,10 +134,34 @@ class Person extends React.Component {
 }
 ```
 
+### `componentWillMount()`
+
+`componentWillMount`函数在第一次`render`之前被调用，并且只会被调用一次。当组件进入到这个生命周期中时，所有的`state`和`props`已经配置完毕，我们可以通过`this.props`和`this.state`访问它们，也可以通过`setState`重新设置状态。总之推荐在这个生命周期函数里进行配置（状态）处理，为下一步`render`做准备
+
+### `render()`
+
+当一切配置都就绪之后，就能够正式开始渲染组件了。`render`函数和其他的钩子函数不同，它会同时在出生和更新阶段被调用。在出生阶段被调用一次，但是在更新阶段会被调用多次。
+
+无论是编写哪个阶段的`render`函数，请牢记一点：保证它的“纯粹”（pure）。怎样才算纯粹？最基本的一点是不要尝试在render里改变组件的状态。因为通过`setState`引发的状态改变会导致再一次调用render函数进行渲染，而又继续改变状态又继续渲染，导致无限循环下去。如果你这么做了你会在开发模式下收到警告：
+
+> Warning: Cannot update during an existing state transition (such as within `render` or another component's constructor). Render methods should be a pure function of props and state; constructor side-effects are an anti-pattern, but can be moved to `componentWillMount`.
+
+另一个需要注意的地方是，你也不应该在`render`中通过`ReactDOM.findDOMNode`方法访问原生的DOM元素（原生相对于虚拟DOM而言）。因为这么做存在两个风险：
+1. 此时虚拟元素还没有被渲染到页面上，所以你访问的元素并不存在
+2. 因为当前的`render`即将执行完毕返回新的DOM结构，你访问到的可能是旧的数据。
+
+并且如果你真的这么做了，那么你会得到警告：
+
+> Warning: App is accessing findDOMNode inside its render(). render() should be a pure function of props and state. It should never access something that requires stale data from the previous render, such as refs. Move this logic to componentDidMount and componentDidUpdate instead.
+
+### `componentDidMount()`
+
+
 ## 参考
 
 - [do not extend React.Component](https://stackoverflow.com/questions/36296658/do-not-extend-react-component)
 - [React Elements vs React Components vs Component Backing Instances](https://medium.com/@fay_jai/react-elements-vs-react-components-vs-component-backing-instances-14d42729f62)
+- [React.createClass versus extends React.Component](https://toddmotto.com/react-create-class-versus-component/)
 
 Element和Instance的区别有什么？
 没有继承React的class是什么意思？
