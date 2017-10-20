@@ -12,7 +12,7 @@ React组件的生命周期分为三个阶段，按照时间顺序分别是出生
 
 ## 出生
 
-首先我们要引入一个概念：组件（Component）。组件非常好理解，就是可以复用的模板。例如通过按钮模板我们可以实例化出多个相似的按钮出来。这和代码中类（Class）的概念是相同的。并且在ES6代码中定义组件时也是通过类来实现的：
+首先我们要引入一个概念：组件（Component）。组件非常好理解，就是可以复用的模板。例如通过按钮组件（模板）我们可以实例化出多个相似的按钮出来。这和代码中类（Class）的概念是相同的。并且在ES6代码中定义组件时也是通过类来实现的：
 ```javascript
 import React from 'react';
 
@@ -27,7 +27,7 @@ class MyButton extends React.Component {
   }
 }
 ```
-也可以通过`React.createClass`接口来定义组件：
+也可以通过ES2015的语法接口`React.createClass`来定义组件：
 ```javascript
 const MyButton = React.createClass({
   render: function() {
@@ -37,8 +37,107 @@ const MyButton = React.createClass({
   }
 });
 ```
+如果你的babel配置文件`.babelrc`中`presets`使用了`es2015`，那么在编译之后的文件中，你会发现`class MyButton extends React.Component`语句转化之后就是使用`React.createClass`进行的替换。
+
+注意到当我们在使用`class`定义组件时，继承（`extends`）了`React.Component`类。但实际上这并不是必须的。比如你完全可以写成纯函数的形式：
+```javascript
+const MyButton = () => {
+  return <h1>My Button</h1>
+}
+```
+这就是无状态（stateless）组件，顾名思义它是没有自己独立状态的，这React的设计模式中，无论是High Order Component或者是Container Component中都是重要的组成部分。具体可以参考我的另一篇文章[面试系列之三：你真的了解React吗（中）组件间的通信以及React优化](https://zhuanlan.zhihu.com/p/27828866)。
+
+它的局限也很明显，因为没有继承`React.Component`的缘故，你无法获得各种生命周期函数，也无法访问状态（`state`），但是仍然能够访问传入的属性（`props`）,它们是作为函数的参数传入的。
+
+定义组件时并不会触发任何的生命周期函数，组件自己也并不会存在生命周期这一说，真正的生命周期开始于组件被渲染至页面中。
+
+让我们看一段最简单的代码：
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+class MyComponent extends React.Component {
+  render() {
+    return <div>Hello World!</div>;
+  }
+};
+
+ReactDOM.render(<MyComponent />, document.getElementById('mount-point'));
+```
+在这段代码中，`MyComponnet`组件通过`ReactDOM.render`函数被渲染至页面中。如果你在`MyComponent`组件的生命周期函数中添加日志的话，会看到日志依次在控制台输出。
+
+为了说明一些问题，我们尝试对代码做一些修改：
+```javascript
+import MyButton from './Button';
+class MyComponent extends React.Component {
+  render() {
+    const button = <MyButton />
+    return <div>Hello World!</div>;
+  }
+};
+```
+在组件的`render`函数中，我们使用到了另一个组件`MyButton`，但是它并没有出现在最终返回的DOM结构中。问题来了，当`MyComponnet`组件渲染至页面上时，`Mybutton`组件的生命周期函数会开始调用吗？`<MyButton />`究竟代表了什么？
+
+我们先回答第二个问题。`<MyButton />`看上去确实有些奇怪，但是别忘了它是JSX语法。如果你去看babel编译之后的代码就会发现，其实它把`<MyButton />`转化为函数调用：`React.createElement(MyButton, null)`。也就是说`<XXX />`语法，实际上返回的是一个XXX类型的React元素（Element）。React元素说白了就是一个纯粹的object对象，基本由`key`（id）, `props`（属性）, `ref`, `type`（元素类型）四个属性组成（`children`属性包含在`props`中）。为什么要用“纯粹”这个形容词，是因为虽然它和组件有关，但是它并不包含组件的方法，此时此刻，它仅仅是一个包含若干属性的对象。如果你觉得这一切看上去都无比熟悉的话，那么你猜对了，元素代表的其实是虚拟DOM（Virtual DOM）上的节点，是对你在页面上看到的每一个DOM节点的描述。
+
+那么我们可以回答第一个问题了，仅仅是生成一个React元素是不会触发生命周期函数调用的。
+
+当我们把React元素传递给`ReactDOM.render`方法，并且告诉它具体在页面上渲染元素的位置之后，它会给我们返回组件的实例（Instance）。在JS语法中，我们通过`new`关键字初始化一个类的实例，而在React中，我们通过`ReactDOM.render`方法来初始化一个组件的实例。但一般情况下我们不会用到这个实例，不过你也可以保留它，当测试组件的时候可以派上用场
 
 
+### Default Porps & Default State
+
+如果被问起`constructor`之后的下一个生命周期函数是什么，绝大部分人会回答`componentWillMount`。准确来说应该是`getDefaultProps`和`getInitialState`。
+
+而为什么大部分人对这两个函数陌生，是因为这两个函数只是在ES2015语法中创建组件时暴露出来，在ES6语法中我们通过两个赋值语句实现了同样的效果。
+
+比如添加默认组件属性的`getDefaultProps`函数在ES6中是通过给组件类添加静态字段`defaultProps`实现的：
+```javascript
+class MyComponent extends React.Component() {
+  //...
+}
+MyComponent.defaultProps = { age: 'unknown' }
+```
+
+在实际计算属性的过程中，将传入属性与默认属性进行合并成为最终使用的属性，用伪代码写的意思就是
+```javascript
+this.props = Object.assign(defaultProps, passedProps);
+```
+注意知识点要来了，看下面这个组件:
+```javascript
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    return <div>{this.props.name}</div>
+  }
+}
+App.defaultProps = { name: 'default' }; 
+```
+
+我给这个组件设置了一个默认属性`name`，值为`default`。那么在
+1. `<App name={null} />`
+2. `<App name={undefined} />`
+这两种情况下，`this.props.name`值会是什么？也就是最终输出会是什么？
+
+正确答案是如果给`name`传入的值是`null`，那么最终页面上的输出是空，也就是`null`会生效；如果传入的是`undefined`，那么React认为这个值是undefined（当然……），则会使用默认值，最终页面上的输出是`default`
+
+而获取默认状态的函数`getInitialState`在ES6中是通过给`this.state`赋值实现的
+```javascript
+class Person extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { count: 0 };
+  }
+  //...
+}
+```
+
+## 参考
+
+- [do not extend React.Component](https://stackoverflow.com/questions/36296658/do-not-extend-react-component)
+- [React Elements vs React Components vs Component Backing Instances](https://medium.com/@fay_jai/react-elements-vs-react-components-vs-component-backing-instances-14d42729f62)
 
 Element和Instance的区别有什么？
 没有继承React的class是什么意思？
