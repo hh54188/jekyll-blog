@@ -156,6 +156,32 @@ class Person extends React.Component {
 
 ### `componentDidMount()`
 
+当这个函数被调用时，就意味着可以访问组件的原生DOM了。如果你有经验的话，此时不仅仅能够访问当前组件的DOM，还能够访问当前组件孩子组件的原生DOM元素。
+
+你可能会觉得所有这一切应当。
+
+在之前讲解每个周期函数时，都只考虑单个组件的情况。但是当组件包含孩子组件时，孩子组件的钩子函数的调用顺序就需要留意了。
+
+比如有下面这样的树状结构的组件
+
+![react element tree](./images/react-element-tree.png)
+
+在出生阶段`componentWillMount`和`render`的调用顺序是
+
+```
+A -> A.0 -> A.0.0 -> A.0.1 -> A.1 -> A.2.
+```
+这很容易理解，因为当你想渲染父组件时，务必也要立即开始渲染子组件。所以子组件的生命周期开始于父组件之后。
+
+而`componentDidMount`的调用顺序是
+
+```
+ A.2 -> A.1 -> A.0.1 -> A.0.0 -> A.0 -> A
+```
+
+`componentDidMount`的调用顺序正好是`render`的反向。这其实也很好理解。如果父组件想要渲染完毕，那么首先它的子组件需要提前渲染完毕，也所以子组件的`componentDidMount`在父组件之前调用。
+
+
 
 ## 参考
 
