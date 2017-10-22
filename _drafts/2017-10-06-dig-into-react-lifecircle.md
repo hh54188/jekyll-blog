@@ -181,6 +181,35 @@ A -> A.0 -> A.0.0 -> A.0.1 -> A.1 -> A.2.
 
 `componentDidMount`的调用顺序正好是`render`的反向。这其实也很好理解。如果父组件想要渲染完毕，那么首先它的子组件需要提前渲染完毕，也所以子组件的`componentDidMount`在父组件之前调用。
 
+正因为我们能在这个函数中访问原生DOM，所以在这个函数中通常会做一些第三方类库初始化的工具，包括异步加载数据。比如说对`c3.js`的初始化
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import c3 from 'c3';
+
+export default class Chart extends React.Component {
+
+  componentDidMount() {
+    this.chart = c3.generate({
+      bindto: ReactDOM.findDOMNode(this.refs.chart),
+      data: {
+        columns: [
+          ['data1', 30, 200, 100, 400, 150, 250],
+          ['data2', 50, 20, 10, 40, 15, 25]
+        ]
+      }
+    });
+  }
+
+  render() {
+    return (
+      <div ref="chart"></div>
+    );
+  }
+}
+```
+因为能够访问原生DOM的缘故，你可能会在`componentDidMount`函数中重新对元素的样式进行计算，调整然后生效。因此立即需要对DOM进行重新渲染。
+
 
 
 ## 参考
