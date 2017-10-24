@@ -210,7 +210,15 @@ export default class Chart extends React.Component {
 ```
 因为能够访问原生DOM的缘故，你可能会在`componentDidMount`函数中重新对元素的样式进行计算，调整然后生效。因此立即需要对DOM进行重新渲染。
 
+## 更新阶段
 
+更新阶段会在三种情况下触发：
+
+- 更改`props`：一个组件并不能主动更改它拥有的`props`属性，它的`props`属性是由它的父组件传递给它的。强制对`props`进行重新赋值会导致程序报错。
+
+- 更改`state`：`state`的更改是通过`setState`方法实现的。同时设计`state`是需要技巧的，哪些状态可以放在里面，哪些不可以；什么样的组件可以有`state`，哪些不可以有；这些都需要遵循一定原则的。
+
+- 调用`forceUpdate`方法
 
 ## 参考
 
@@ -218,10 +226,6 @@ export default class Chart extends React.Component {
 - [React Elements vs React Components vs Component Backing Instances](https://medium.com/@fay_jai/react-elements-vs-react-components-vs-component-backing-instances-14d42729f62)
 - [React.createClass versus extends React.Component](https://toddmotto.com/react-create-class-versus-component/)
 
-Element和Instance的区别有什么？
-没有继承React的class是什么意思？
-https://stackoverflow.com/questions/43703984/react-component-without-extend-react-component-class
-https://stackoverflow.com/questions/36296658/do-not-extend-react-component
 
 this.setState是异步的
 当props发生更改时，componentWillReceiveProps会被调用；但是并不意味着componentWillReceiveProps被调用了而props发生了更改。也就是在一些情况下，componentWillReceiveProps被调用了，但是props并没有发生更改
