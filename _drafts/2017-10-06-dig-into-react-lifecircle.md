@@ -12,6 +12,13 @@ React组件的生命周期分为三个阶段，按照时间顺序分别是出生
 
 ## 出生
 
+- `constructor`
+- `getDefaultProps()` (React.createClass) or` MyComponent.defaultProps` (ES6 class)
+- `getInitialState()` (React.createClass) or `this.state = ...` (ES6 constructor)
+- `componentWillMount()`
+- `render()`
+- `componentDidMount()`
+
 首先我们要引入一个概念：组件（Component）。组件非常好理解，就是可以复用的模板。例如通过按钮组件（模板）我们可以实例化出多个相似的按钮出来。这和代码中类（Class）的概念是相同的。并且在ES6代码中定义组件时也是通过类来实现的：
 ```javascript
 import React from 'react';
@@ -113,7 +120,7 @@ class App extends React.Component {
     return <div>{this.props.name}</div>
   }
 }
-App.defaultProps = { name: 'default' }; 
+App.defaultProps = { name: 'default' };
 ```
 
 我给这个组件设置了一个默认属性`name`，值为`default`。那么在
@@ -212,20 +219,85 @@ export default class Chart extends React.Component {
 
 ## 更新阶段
 
+- `componentWillReceiveProps()`
+- `shouldComponentUpdate()`
+- `componentWillUpdate()`
+- `render()`
+- `componentDidUpdate()`
+
 更新阶段会在三种情况下触发：
 
 - 更改`props`：一个组件并不能主动更改它拥有的`props`属性，它的`props`属性是由它的父组件传递给它的。强制对`props`进行重新赋值会导致程序报错。
 
-- 更改`state`：`state`的更改是通过`setState`方法实现的。同时设计`state`是需要技巧的，哪些状态可以放在里面，哪些不可以；什么样的组件可以有`state`，哪些不可以有；这些都需要遵循一定原则的。
+- 更改`state`：`state`的更改是通过`setState`接口实现的。同时设计`state`是需要技巧的，哪些状态可以放在里面，哪些不可以；什么样的组件可以有`state`，哪些不可以有；这些都需要遵循一定原则的。
 
-- 调用`forceUpdate`方法
+- 调用`forceUpdate`方法：这个我们在上一阶段已经提到了，强制组件进行更新。
+
+### `componentWillReceiveProps(nextProps)`
+
+当传递给组件的`props`发生改变时，组件的`componentWillReceiveProps`即会被触发调用，方法传递的参数的是发更更改的之后的`props`值（通常我们命名为`nextProps`）。在这个方法里，你可以通过`this.props`访问当前的属性值，可以通过`nextProps`访问即将更新的属性值，或者将它们进行对比，或者将它们进行计算，最终确定你需要更新的状态（`state`）并最终调用`setState`方法对状态进行更新。在这个钩子函数中调用`setState`方法并不会触发再一次渲染。
+
+非常有意思的是，虽然`props`的更改会引起`componentWillReceiveProps`的调用；但`componentWillReceiveProps`的调用并不意味着`props`真的发生了变化。这可不是我说的，Facebook官方花了一整篇文章说这件事：[(A => B) !=> (B => A)](https://reactjs.org/blog/2016/01/08/A-implies-B-does-not-imply-B-implies-A.html)。比如看下面这个组件：
+
+```javascript
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      number: 1,
+    }
+    this.onClick = this.onClick.bind(this);
+  }
+  onClick() {
+    this.setState({
+      number: 1,
+    })
+  }
+  render() {
+    return (
+      <MyButton onClick={this.onClick} data-number={this.state.number} />
+    );
+  }
+}
+```
+每一次点击事件都会重新使用`setState`接口对`state`进行更新，但每次更新的值都是相同的，即`number:1`。并且把当前组件的状态以属性的形式传递给`<MyButton />`。问题来了，那么当我每次点击按钮时，按钮的`componentWillReceiveProps`都会被调用吗？
+
+会，即使每次更新的值都是一样的。
+
+之所以出现这样的情况原因其实非常简单，因为React并不知道传入的属性是否发生了更改。而为什么React不尝试去做一个是否相等的判断呢？
+
+因为办不到，新传入的属性和旧属性可能引用的是同一块内存区域（引用类型），所以单纯的用`===`判断是否相等并不准确。可行的解决办法之一就是对数据进行深度拷贝然后进行比较，但是这对大型数据结构来说性能太差，还能会碰上循环引用的问题。
+
+所以React将这个变化通过钩子函数暴露出来，千万不要以为当`componentWillReceiveProps`被调用就意味着`props`发生了更改，如果需要在变化时做一些事情，务必要手动的进行比较。
+
+### `shouldComponentUpdate()`
+
+`shouldComponentUpdate`很重要，它可以决定是否继续当前的生命周期。默认情况该函数返回`true`即继续当前的生命周期；也可以返回`false`终止当前的生命周期，阻止进一步的`render`与接下来的步骤。
+
+我们上面刚刚说过，React并不会对`props`进行深度比较，这对`state`也同样适用。所以即使`props`与`state`并未发生了更改，`shouldComponentUpdate`也会被再次调用，包括接下来的步骤`componentWillUpdate`、`render`、`componentDidUpdate`也都会再次运行一次。这很明显会给性能造成不小的伤害。
+
+传递给`shouldComponentUpdate`的参数包括即将改变的`props`和`state`，形参的名称是`nextProps`和`nextState`，在这个函数里你同时又能通过`this`关键字访问到当前的`state`和`props`，所以你在这里你是“全知”的，可以完全按照你自己的业务逻辑判断是否`state`与`props`是否发生了更改，并且决定是否要继续接下来的步骤。`shouldComponentUpdate`也就通常我们在优化React性能时的第一步。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## 参考
 
 - [do not extend React.Component](https://stackoverflow.com/questions/36296658/do-not-extend-react-component)
 - [React Elements vs React Components vs Component Backing Instances](https://medium.com/@fay_jai/react-elements-vs-react-components-vs-component-backing-instances-14d42729f62)
 - [React.createClass versus extends React.Component](https://toddmotto.com/react-create-class-versus-component/)
-
+- [(A => B) !=> (B => A)](https://reactjs.org/blog/2016/01/08/A-implies-B-does-not-imply-B-implies-A.html)
 
 this.setState是异步的
 当props发生更改时，componentWillReceiveProps会被调用；但是并不意味着componentWillReceiveProps被调用了而props发生了更改。也就是在一些情况下，componentWillReceiveProps被调用了，但是props并没有发生更改
