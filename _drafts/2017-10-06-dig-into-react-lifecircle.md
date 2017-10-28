@@ -278,6 +278,87 @@ class App extends React.Component {
 
 传递给`shouldComponentUpdate`的参数包括即将改变的`props`和`state`，形参的名称是`nextProps`和`nextState`，在这个函数里你同时又能通过`this`关键字访问到当前的`state`和`props`，所以你在这里你是“全知”的，可以完全按照你自己的业务逻辑判断是否`state`与`props`是否发生了更改，并且决定是否要继续接下来的步骤。`shouldComponentUpdate`也就通常我们在优化React性能时的第一步。
 
+当然如果你对判断`props`是否发生改变的检测逻辑要求比较简单的话，比如只是浅度（shallow）的判断（即判断对象的引用是否发生了更改）对象是否发生了更改，那么可以利用`PureRenderMixin`插件即可：
+```javascript
+import PureRenderMixin from 'react-addons-pure-render-mixin'; // ES6
+const createReactClass = require('create-react-class');
+
+createReactClass({
+  mixins: [PureRenderMixin],
+
+  render: function() {
+    return <div className={this.props.className}>foo</div>;
+  }
+});
+```
+`PureRenderMixin`插件的工作非常简单，它为你重写了`shouldComponentUpdate`函数，并对对象进行了浅度对比，具体代码可以从[这里](https://github.com/facebook/react/blob/15-stable/src/addons/shallowCompare.js)和[这里](https://github.com/moroshko/shallow-equal)找到。
+
+在ES6中你也可以通过直接继承`React.PureComponent`而不是`React.Component`实现。用React官方的原话说就是
+> `React.PureComponent` is exactly like `React.Component`, but implements `shouldComponentUpdate()` with a shallow prop and state comparison.
+
+**Pure**
+
+我们再次强调，`PureComponent`为你实现的只是对引用是否发生了更改的判断，甚至可以说它只是简单的用`===`进行的判断，所以这也是我们称之为**pure**的原因。为了具体说明问题，我们举一个实际的例子
+```javascript
+/* MyButton.js: */
+import React from 'react';
+
+class MyButton extends React.PureComponent {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    console.log('render');
+    return <button onClick={this.props.onClick}>My Button</button>
+  }
+}
+export default MyButton;
+
+/* App.js: */
+import React from 'react';
+import MyButton from './Button.js';
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      arr: [1],
+    }
+    this.onClick = this.onClick.bind(this);
+  }
+  onClick() {
+    this.setState({
+      arr: [...this.state.arr, 2],
+    });
+  }
+  render() {
+    return (
+      <MyButton onClick={this.onClick} data-arr={this.state.arr} />
+    );
+  }
+}
+
+export default App;
+```
+在上面的这个例子中，每一次点击都会修改`state`中的`arr`变量，`arr`变量的引用和值都发生了更改。重点是`MyButton`组件继承的是`React.PureComponent`。那么每一次点击时，`MyButton`中的log信息都会被打印出来，即每次都会重新出发`render`
+
+如果我们把`onClick`方法做一些修改：
+```javascript
+onClick() {
+  const arr = this.state.arr;
+  arr.push(2);
+  this.setState({
+    arr: arr,
+  })
+}
+```
+这个方法同样使得`arr`变量发生了变化，但是仅仅是值而不是引用，此时当再一次点击按钮（`MyButton`）时，`MyButton`都不会再次进行渲染了。也就是说`PureComponent`提前为我们进行了shallow comparison.
+
+使用这种只修改引用，不修改数据内容的immutable data也常常作为优化React的一个手段之一，immutable.js就能为我们实现这个需求，每一次修改数据时你得到的其实是新的数据引用
+
+
+
+
 
 
 
