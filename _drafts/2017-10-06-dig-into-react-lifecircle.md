@@ -276,7 +276,7 @@ class App extends React.Component {
 
 我们上面刚刚说过，React并不会对`props`进行深度比较，这对`state`也同样适用。所以即使`props`与`state`并未发生了更改，`shouldComponentUpdate`也会被再次调用，包括接下来的步骤`componentWillUpdate`、`render`、`componentDidUpdate`也都会再次运行一次。这很明显会给性能造成不小的伤害。
 
-传递给`shouldComponentUpdate`的参数包括即将改变的`props`和`state`，形参的名称是`nextProps`和`nextState`，在这个函数里你同时又能通过`this`关键字访问到当前的`state`和`props`，所以你在这里你是“全知”的，可以完全按照你自己的业务逻辑判断是否`state`与`props`是否发生了更改，并且决定是否要继续接下来的步骤。`shouldComponentUpdate`也就通常我们在优化React性能时的第一步。
+传递给`shouldComponentUpdate`的参数包括即将改变的`props`和`state`，形参的名称是`nextProps`和`nextState`，在这个函数里你同时又能通过`this`关键字访问到当前的`state`和`props`，所以你在这里你是“全知”的，可以完全按照你自己的业务逻辑判断是否`state`与`props`是否发生了更改，并且决定是否要继续接下来的步骤。`shouldComponentUpdate`也就通常我们在优化React性能时的第一步。这一步的优化不仅仅是优化组件自身的流程，同时也能节省去子组件的重新渲染的代价 。
 
 当然如果你对判断`props`是否发生改变的检测逻辑要求比较简单的话，比如只是浅度（shallow）的判断（即判断对象的引用是否发生了更改）对象是否发生了更改，那么可以利用`PureRenderMixin`插件即可：
 ```javascript
@@ -354,7 +354,17 @@ onClick() {
 ```
 这个方法同样使得`arr`变量发生了变化，但是仅仅是值而不是引用，此时当再一次点击按钮（`MyButton`）时，`MyButton`都不会再次进行渲染了。也就是说`PureComponent`提前为我们进行了shallow comparison.
 
-使用这种只修改引用，不修改数据内容的immutable data也常常作为优化React的一个手段之一，immutable.js就能为我们实现这个需求，每一次修改数据时你得到的其实是新的数据引用
+使用这种只修改引用，不修改数据内容的immutable data也常常作为优化React的一个手段之一。[immutable.js](http://facebook.github.io/immutable-js/)就能为我们实现这个需求，每一次修改数据时你得到的其实是新的数据引用，而不会修改到原有的数据。同时Redux中的reducer想达到的效果其实也相似，`reducer`的重点是它的纯洁性（pure），比如不会造成副作用，也就要避免对传入数据引用的修改，同时也方便比较出组件状态的更新。
+
+### `componentWillUpdate()`
+
+`componentWillUpdate`方法和`componentWillMount`方法很相似，都是在即将发生渲染前触发，在这里你能够拿到`nextProps`和`nextState`，同时也能访问到当前即将过期的`props`和`state`。如果有需要的话你可以把它们暂存起来便于以后使用。
+
+与`componentWillMount`不同的是，在这个方法中你不可以使用`setState`，否则会立即触发另一轮的渲染并且又再一次调用`componentWillUpdate`，陷入无限循环中。
+
+
+
+
 
 
 
