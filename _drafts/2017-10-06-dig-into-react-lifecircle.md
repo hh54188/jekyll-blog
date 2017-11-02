@@ -233,6 +233,12 @@ export default class Chart extends React.Component {
 
 - 调用`forceUpdate`方法：这个我们在上一阶段已经提到了，强制组件进行更新。
 
+### `setState`是异步的
+
+虽然这个接口与生命周期无关，但是原书中也提到了这个特性
+
+
+
 ### `componentWillReceiveProps(nextProps)`
 
 当传递给组件的`props`发生改变时，组件的`componentWillReceiveProps`即会被触发调用，方法传递的参数的是发更更改的之后的`props`值（通常我们命名为`nextProps`）。在这个方法里，你可以通过`this.props`访问当前的属性值，可以通过`nextProps`访问即将更新的属性值，或者将它们进行对比，或者将它们进行计算，最终确定你需要更新的状态（`state`）并最终调用`setState`方法对状态进行更新。在这个钩子函数中调用`setState`方法并不会触发再一次渲染。
@@ -362,26 +368,42 @@ onClick() {
 
 与`componentWillMount`不同的是，在这个方法中你不可以使用`setState`，否则会立即触发另一轮的渲染并且又再一次调用`componentWillUpdate`，陷入无限循环中。
 
+### `componentDidUpdate()`
 
+和Mount阶段类似，当组件进入`componentDidUpdate`阶段时意味着最新的原生DOM已经渲染完成并且可以通过`refs`进行访问。该函数会传入两个参数，分别是`prevProps`和`prevState`，顾名思义是之前的状态。你仍然可以通过`this`关键字访问当前的状态，因为可以访问原生DOM的关系，在这里也适用于做一些第三方需要操纵类库的操作。
 
+update阶段各个钩子函数的调用顺序也与mount阶段相似，尤其是`componentDidUpdate`，子组件的该钩子函数优先于父组件调用
 
+因为可以访问DOM的缘故，我们有可能需要在这个钩子函数里获取实际的元素样式，并且写入`state`中，比如你的代码可能会长这样：
+```javascript
+componentDidUpdate(prevProps, prevState) {
+// BAD: DO NOT DO THIS!!!
+  let height = ReactDOM.findDOMNode(this).offsetHeight;
+  this.setState({ internalHeight: height });
+}
+```
+如果默认情况下你的`shouldComponentUpdate()`函数总是返回`true`的话，那么这样在`componentDidUpdate`里更新`state`的代码又会把我们带入无限`render`的循环中。如果你必须要这么做，那么至少应该把上一次的结果缓存起来，有终止条件的更新`state`:
+```javascript
+componentDidUpdate(prevProps, prevState) {
+  // One possible fix...
+  let height = ReactDOM.findDOMNode(this).offsetHeight;
+  if (this.state.height !== height ) {
+    this.setState({ internalHeight: height });
+  }
+}
+```
 
+## 死亡阶段
 
+### `componentWillUnmount()`
 
+当组件需要从DOM中移除时，即会触发这个钩子函数。这里没有太多需要注意的地方，在这个函数中通常会做一些“清洁”相关的工作
+1. 将已经发送的网络请求都取消掉
+2. 移除组件上DOM的Event Listener
 
+## 总结
 
-
-
-
-
-
-
-
-
-
-
-
-
+最后再次强调，本文是开源图书[React In-depth: An exploration of UI development](https://www.gitbook.com/book/developmentarc/react-indepth/details)的归纳。基本上想了解生命周期看这一本书就够了，看完也无敌了。希望这篇中文简约版也会对你有帮助。
 
 ## 参考
 
@@ -389,13 +411,4 @@ onClick() {
 - [React Elements vs React Components vs Component Backing Instances](https://medium.com/@fay_jai/react-elements-vs-react-components-vs-component-backing-instances-14d42729f62)
 - [React.createClass versus extends React.Component](https://toddmotto.com/react-create-class-versus-component/)
 - [(A => B) !=> (B => A)](https://reactjs.org/blog/2016/01/08/A-implies-B-does-not-imply-B-implies-A.html)
-
-this.setState是异步的
-当props发生更改时，componentWillReceiveProps会被调用；但是并不意味着componentWillReceiveProps被调用了而props发生了更改。也就是在一些情况下，componentWillReceiveProps被调用了，但是props并没有发生更改
-https://reactjs.org/blog/2016/01/08/A-implies-B-does-not-imply-B-implies-A.html
-React.PureComponent
-
-render返回的是什么？是element吧？
-render pass？
-
-需要实验的部分：key以及内存回收
+- [Beware: React setState is asynchronous!](https://medium.com/@wereHamster/beware-react-setstate-is-asynchronous-ce87ef1a9cf3)
