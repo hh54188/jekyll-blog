@@ -50,6 +50,7 @@
 
 ## Form Validator
 
+* [Forms](https://reactjs.org/docs/forms.html)
 * [React.js Forms: Controlled Components](https://lorenstewart.me/2016/10/31/react-js-forms-controlled-components/)
 * [How to do Simple Form Validation in #Reactjs](https://learnetto.com/blog/how-to-do-simple-form-validation-in-reactjs)
 * [Elegant Form Validation Using React](https://spin.atomicobject.com/2016/10/05/form-validation-react/)
