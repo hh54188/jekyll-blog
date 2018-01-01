@@ -79,7 +79,7 @@ export default connect(mapStateToProps, { markItem })(App);
 
 ## 诊断
 
-那么问题出在哪里？我们通过 Chrome 开发者工具一探究竟：
+那么问题出在哪里？我们通过 Chrome 开发者工具（还有很多其他的 React 相关的性能工具同样也能洞察性能问题，比如 react-addons-perf, [why-did-you-update](https://github.com/garbles/why-did-you-update)，[React Developer Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?hl=en) 等等。但都存在或多或少的问题，使用 Chrome 开发者工具是最靠谱的）一探究竟：
 
 * 本地启动项目， 打开 Chrome 浏览器，**在地址栏以访问项目地址加上`react_perf`后缀的方式访问项目页面**，比如我的项目地址是: http://localhost:3000/ 的话，实际请访问 http://localhost:8080/?react_perf 。加上`react_perf`后缀的用意是启用 React 中的性能埋点，这些埋点用于统计 React 中某些操作的耗时，使用`User Timing API`实现
 * 打开 Chrome 开发者工具，切换到 performance 面板
@@ -100,13 +100,95 @@ export default connect(mapStateToProps, { markItem })(App);
 
 [performance-main](./images/redux-performance-01/performance-user-timing.png)
 
-**原来时间都花费`App`组件的更新，其实也就是每一个`Item`的更新上**
+**原来时间都花费`App`组件的更新，每一次`App`组件的更新，意味着每一个`Item`组件也都要更新，每一个`Item`都要被重新渲染**
 
-其实还有很多的 React 相关工具
+**每一次点击列表项时，都会引起 store 中`items`状态的更改（因为要修改 mark），并且返回的`items`状态总是新的数组，也就造成了每次点击过后传递给`App`组件的属性都是新的（发生了更改）**
 
-### User Timing 主线
+如果你依然觉得对以上说法表示怀疑，或者说难以想象，可以直接在`App`组件的`render`函数和`Item`组件的`render`函数加上`console.log`。那么每次点击时，你会看到`App`里的`console`和`Item`里的`console`都调用了 10k 次。注意此时页面会响应的更慢了，因为在控制台输出 10k 次`console.log`也是需要代价的
+
+**更重要的知识点在于，只要组件的状态（`props`或者`state`）发生了更改，那么组件就会默认执行`render`函数重新进行渲染（你也可以通过重写`shouldComponentUpdate`手动阻止这件事的发生，这是后面会提到的优化点）。同时要注意的事情是，执行`render`函数并不意味着浏览器中的真实 DOM 树需要修改。浏览器中的真实 DOM 是否需要发生修改，是由 React 最后比较 Virtual Tree 决定的。** 我们都直到修改浏览器中的真实 DOM 是非常耗费性能的一件事，于是 React 为我们做出了优化。但是执行`render`的代价仍然需要我们自己承担
+
+## 反击
+
+请记住下面这个公式
+
+`UI = f(state)`
+
+你在页面的所见所得，都是对状态的映射。反过来说，只要组件状态或者传递给组件的属性没有发生改变，那么组件也不会重新进行渲染。我们可以利用这一点阻止`App`的渲染，只要保证转递给`App`组件的属性不会发生改变即可。毕竟只修改一条列表项的数据却结果造成了其他 9999 条数据的重新渲染是不合理的。
+
+但是应该如何做才能保证修改数据的同时传递给`App`的数据不发生变化？
+
+**通过更改数据结构**
+
+原本所有的`items`信息都存在数组结构里，数组结构的一个重要特性是保证了访问数据的顺序始终。现在我们把数据拆分为两部分
+
+1. 数组结构`ids`：只保留 id 用于记录数据顺序，比如:`[id1, id2, id3]`
+2. 字典（对象）结构`items`：以`key-value`的形式记录每个数据项的具体信息：`{id1: {marked: false}, id2: {marked: false}}`
+
+关键代码如下：
+
+```javascript
+function itemsReducer(state = {}, action) {
+  return {
+    ids: ids(state.ids, action),
+    items: items(state.items, action)
+  };
+}
+
+const store = createStore(itemsReducer);
+
+function ids(state = [], action) {
+  return state;
+}
+
+function items(state = {}, action) {
+  switch (action.type) {
+    case "MARK":
+      const item = state[action.id];
+      return {
+        ...state,
+        [action.id]: { ...item, marked: !item.marked }
+      };
+    default:
+      return state;
+  }
+}
+
+class App extends Component {
+  render() {
+    const { ids } = this.props;
+    return (
+      <div>
+        {ids.map(id => {
+          return <Item key={id} id={id} />;
+        })}
+      </div>
+    );
+  }
+}
+
+// App.js:
+function mapStateToProps(state) {
+  return { ids: state.ids };
+}
+// Item.js
+function mapStateToProps(state, props) {
+  const { id } = props;
+  const { items } = state;
+  return {
+    item: items[id]
+  };
+}
+
+const markItem = id => ({ type: "MARK", id });
+export default connect(mapStateToProps, { markItem })(Item);
+```
+
+在这种思维模式下，`Item`组件直接与 Store 相连，每次点击时通过 id 直接找到`items`状态字典中的信息进行修改。因为`App`只关心`ids`状态，而在这个需求中不涉及增删改，所以`ids`状态永远不会发生改变，在`Mounted`之后，`App`再也不会更新了。所以现在无论你如何点击列表项，只有被点击的列表项会更新。
+
+很多年前我写过一篇文章：[《在 Node.js 中搭建缓存管理模块》](http://qingbob.com/built-cache-management-module-in-nodejs/)，里面提到过相同的解决思路，有更详细的叙述
 
 ## 参考资料
 
-* [Debugging React performance with React 16 and Chrome Devtools.](https://building.calibreapp.com/debugging-react-performance-with-react-16-and-chrome-devtools-c90698a522ad)
 * [High Performance React: 3 New Tools to Speed Up Your Apps](https://medium.freecodecamp.org/make-react-fast-again-tools-and-techniques-for-speeding-up-your-react-app-7ad39d3c1b82)
+* [Debugging React performance with React 16 and Chrome Devtools.](https://building.calibreapp.com/debugging-react-performance-with-react-16-and-chrome-devtools-c90698a522ad)
