@@ -100,13 +100,13 @@ export default connect(mapStateToProps, { markItem })(App);
 
 [performance-main](./images/redux-performance-01/performance-user-timing.png)
 
-**原来时间都花费`App`组件的更新，每一次`App`组件的更新，意味着每一个`Item`组件也都要更新，每一个`Item`都要被重新渲染**
+**原来时间都花费`App`组件的更新，每一次`App`组件的更新，意味着每一个`Item`组件也都要更新，每一个`Item`都要被重新渲染（执行`render`函数）**
 
-**每一次点击列表项时，都会引起 store 中`items`状态的更改（因为要修改 mark），并且返回的`items`状态总是新的数组，也就造成了每次点击过后传递给`App`组件的属性都是新的（发生了更改）**
+**每一次点击列表项时，都会引起 store 中`items`状态的更改，并且返回的`items`状态总是新的数组，也就造成了每次点击过后传递给`App`组件的属性都是新的**
 
 如果你依然觉得对以上说法表示怀疑，或者说难以想象，可以直接在`App`组件的`render`函数和`Item`组件的`render`函数加上`console.log`。那么每次点击时，你会看到`App`里的`console`和`Item`里的`console`都调用了 10k 次。注意此时页面会响应的更慢了，因为在控制台输出 10k 次`console.log`也是需要代价的
 
-**更重要的知识点在于，只要组件的状态（`props`或者`state`）发生了更改，那么组件就会默认执行`render`函数重新进行渲染（你也可以通过重写`shouldComponentUpdate`手动阻止这件事的发生，这是后面会提到的优化点）。同时要注意的事情是，执行`render`函数并不意味着浏览器中的真实 DOM 树需要修改。浏览器中的真实 DOM 是否需要发生修改，是由 React 最后比较 Virtual Tree 决定的。** 我们都直到修改浏览器中的真实 DOM 是非常耗费性能的一件事，于是 React 为我们做出了优化。但是执行`render`的代价仍然需要我们自己承担
+**更重要的知识点在于，只要组件的状态（`props`或者`state`）发生了更改，那么组件就会默认执行`render`函数重新进行渲染（你也可以通过重写`shouldComponentUpdate`手动阻止这件事的发生，这是后面会提到的优化点）。同时要注意的事情是，执行`render`函数并不意味着浏览器中的真实 DOM 树需要修改。浏览器中的真实 DOM 是否需要发生修改，是由 React 最后比较 Virtual Tree 决定的。** 我们都知道修改浏览器中的真实 DOM 是非常耗费性能的一件事，于是 React 为我们做出了优化。但是执行`render`的代价仍然需要我们自己承担
 
 ## 反击
 
@@ -188,7 +188,76 @@ export default connect(mapStateToProps, { markItem })(Item);
 
 很多年前我写过一篇文章：[《在 Node.js 中搭建缓存管理模块》](http://qingbob.com/built-cache-management-module-in-nodejs/)，里面提到过相同的解决思路，有更详细的叙述
 
+在这一小节的结尾我要告诉大家一个坏消息：虽然我们可以精心设计状态的数据结构，但在实际工作中用来展示数据的控件，比如表格或者列表，都有各自独立的数据结构的要求，所以最终的优化效果并非是理想状态
+
+## 阻止渲染的发生
+
+让我们回到最初发生事故的代码，它的问题在于每次在渲染需要高亮的代码时，无需高亮的代码也被渲染了一遍。如果能避免这些无辜代码的渲染，那么同样也是一种性能上的提升。
+
+你肯定已经知道在 React 组件生命周期就存在这样一个函数 `shoudlComponentUpdate` 可以决定是否继续渲染，默认情况下它返回`true`，即始终要重新渲染，你也可以重写它让它返回`false`，阻止渲染。
+
+利用这个生命周期函数，我们限定只允许`marked`属性发生前后发生变更的组件进行重新渲染：
+
+```javascript
+class Item extends Component {
+  constructor() {
+    //...
+  }
+  shouldComponentUpdate(nextProps) {
+    if (this.props["marked"] === nextProps["marked"]) {
+      return false;
+    }
+    return true;
+  }
+```
+
+虽然每次点击时`App`组件仍然会重新渲染，但是成功阻止了其他 9999 个`Item`组件的渲染
+
+事实上 React 已经为我们实现了类似的机制。你可以不重写`shouldComponentUpdate`， 而是选择继承`React.PureComponent`：
+
+```javascript
+class Item extends React.PureComponent
+```
+
+`PureComponent`与`Component`不同在于它已经为你实现了`shouldComponentUpdate`生命周期函数，并且在函数对改变前后的 props 和 state 做了“浅对比”（shallow comparison），这里的“浅”和“浅拷贝”里的浅是同一个概念，即比较引用，而不比较嵌套对象里更深层次的值。话说回来 React 也无法为你比较嵌套更深的值，一方面这也耗时的操作，违背了`shouldComponentUpdate`的初衷，另一方面复杂的状态下决定是否重新渲染组件也会有复杂的规则，简单的比较是否发生了更改并不妥当
+
+## 反面教材（anti-pattern）
+
+残酷的现实是，即使你理解了以上的知识点，你可能仍然对日常代码中的性能陷阱浑然不知，
+
+比如设置缺省值的时候:
+
+```javascript
+<RadioGroup options={this.props.options || []} />
+```
+
+如果每次 `this.props.options` 值都是 `null` 的话，意味着每次传递给`<RadioGroup />`都是字面量数组`[]`，但字面量数组和`new Array()`效果是一样的，始终生成新的实例，所以表面上看虽然每次传递给组件的都是相同的空数组，其实对组件来说每次都是新的属性，都会引起渲染。所以正确的方式应该将一些常用值以变量的形式保存下来：
+
+```javascript
+const DEFAULT_OPTIONS = []
+<RadioGroup options={this.props.options || DEFAULT_OPTIONS} />
+```
+
+又比如给事件绑定函数的时候
+
+```javascript
+<Button onClick={this.update.bind(this)} />
+```
+
+或者
+
+```javascript
+<Button
+  onClick={() => {
+    console.log("Click");
+  }}
+/>
+```
+
+在这两种情况下，对于组件来说每次绑定的都是新的函数，所以也会造成重新渲染。关于如何在`eslint`中加入对`.bind`方法和箭头函数的检测，以及解决之道请参考[No .bind() or Arrow Functions in JSX Props (react/jsx-no-bind)](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md)
+
 ## 参考资料
 
 * [High Performance React: 3 New Tools to Speed Up Your Apps](https://medium.freecodecamp.org/make-react-fast-again-tools-and-techniques-for-speeding-up-your-react-app-7ad39d3c1b82)
 * [Debugging React performance with React 16 and Chrome Devtools.](https://building.calibreapp.com/debugging-react-performance-with-react-16-and-chrome-devtools-c90698a522ad)
+* [React.js pure render performance anti-pattern](https://medium.com/@esamatti/react-js-pure-render-performance-anti-pattern-fb88c101332f)
