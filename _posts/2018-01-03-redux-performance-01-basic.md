@@ -1,4 +1,15 @@
-# React + Redux 性能优化（一）：理论篇
+---
+layout: post
+title: React + Redux 性能优化（一）：理论篇
+modified: 2018-01-03
+tags: [javascript, React, Redux, performance]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
 
 本文的叙事线索与代码示例均来自[High Performance Redux](http://somebody32.github.io/high-performance-redux/)，特此表示感谢。之所以感谢是因为最近一直想系统的整理在 React + Redux 技术栈下的性能优化方案，但苦于找不到切入点。在查阅资料的过程中，这份 Presentation 给了我很大的启发，它的很多观点一针见血，也与我的想法不谋而合。于是这篇文章也是参照它的讲解线索来依次展开我想表达的知识点
 
@@ -80,22 +91,22 @@ export default connect(mapStateToProps, { markItem })(App);
 
 * 本地启动项目， 打开 Chrome 浏览器，**在地址栏以访问项目地址加上`react_perf`后缀的方式访问项目页面**，比如我的项目地址是: http://localhost:3000/ 的话，实际请访问 http://localhost:8080/?react_perf 。加上`react_perf`后缀的用意是启用 React 中的性能埋点，这些埋点用于统计 React 中某些操作的耗时，使用`User Timing API`实现
 * 打开 Chrome 开发者工具，切换到 performance 面板
-  [devtools-performance](./images/redux-performance-01/devtools-performance.png)
+  ![devtools-performance](../images/redux-performance-01/devtools-performance.png)
 * 点击 performance 面板左上角的“录制”按钮，开始录制性能信息
-  [devtools-performance](./images/redux-performance-01/devtools-performance-record.png)
+  ![devtools-performance](../images/redux-performance-01/devtools-performance-record.png)
 * 点击列表中的任意一项
 * 等被点击项进入高亮状态时，点击“stop”按钮停止录制性能信息
-  [devtools-performance](./images/redux-performance-01/devtools-performance-stop.png)
+  ![devtools-performance](../images/redux-performance-01/devtools-performance-stop.png)
 * 接下来你就能看到点击阶段的性能大盘信息：
-  [performance](./images/redux-performance-01/performance-overview.png)
+  ![performance](../images/redux-performance-01/performance-overview.png)
 
 我们把目光聚焦到 CPU 活动最剧烈的那段时间内，
 
-[performance-main](./images/redux-performance-01/performance-main.png)
+![performance-main](../images/redux-performance-01/performance-main.png)
 
 从图表中可以看出，这部分的时间（712ms）消耗基本是由脚本引起的，准确来说是由点击事件执行的脚本引起的，并且从函数的调用栈以及从时间排序中可以看出，时间基本上花费在`updateComponent`函数中。这已经能猜出一二，如果你还不确定这个函数究竟干了什么，不如展开`User Timing`一栏看看更“通俗”的时间消耗
 
-[performance-main](./images/redux-performance-01/performance-user-timing.png)
+![performance-main](../images/redux-performance-01/performance-user-timing.png)
 
 **原来时间都花费在`App`组件的更新上，每一次`App`组件的更新，意味着每一个`Item`组件也都要更新，意味着每一个`Item`都要被重新渲染（执行`render`函数）**
 
