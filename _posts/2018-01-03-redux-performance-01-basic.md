@@ -110,8 +110,6 @@ export default connect(mapStateToProps, { markItem })(App);
 
 **原来时间都花费在`App`组件的更新上，每一次`App`组件的更新，意味着每一个`Item`组件也都要更新，意味着每一个`Item`都要被重新渲染（执行`render`函数）**
 
----
-
 如果你依然觉得对以上说法表示怀疑，或者说难以想象，可以直接在`App`组件的`render`函数和`Item`组件的`render`函数加上`console.log`。那么每次点击时，你会看到`App`里的`console`和`Item`里的`console`都调用了 10k 次。注意此时页面会响应的更慢了，因为在控制台输出 10k 次`console.log`也是需要代价的
 
 **更重要的知识点在于，只要组件的状态（`props`或者`state`）发生了更改，那么组件就会默认执行`render`函数重新进行渲染（你也可以通过重写`shouldComponentUpdate`手动阻止这件事的发生，这是后面会提到的优化点）。同时要注意的事情是，执行`render`函数并不意味着浏览器中的真实 DOM 树需要修改。浏览器中的真实 DOM 是否需要发生修改，是由 React 最后比较 Virtual Tree 决定的。** 我们都知道修改浏览器中的真实 DOM 是非常耗费性能的一件事，于是 React 为我们做出了优化。但是执行`render`的代价仍然需要我们自己承担
