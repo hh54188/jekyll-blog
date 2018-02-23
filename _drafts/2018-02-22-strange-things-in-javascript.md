@@ -15,13 +15,13 @@ javascript 中从来就没有什么奇怪的事件，我只是想梳理一下 ja
 * `{} + [] === [] + {}`
 * `[+false] + [+false] + [+false]`
 * `[+false] + [+false] + [+false] - [+false]`
-* `[ [] [ [] ] + [] ] [ +[] ] [++ [ +[] ] [ +[] ]]`
 * `'1' == true`
 * `1 < 2 < 3`
 * `3 > 2 > 1`
 * `isNaN(false)`
 * `isNaN(null)`
 * `parseInt('infinity') == 0 / 0`
+* `[[][[]]+[]][+[]][++[+[]][+[]]]`
 * 以及这个表达式想要实现的功能 `x = x => x <= x - x ?- x :x`
 
 如果想知道正确答案的话把表达式粘贴到浏览器的控制台执行即可
@@ -87,6 +87,52 @@ javascript 中从来就没有什么奇怪的事件，我只是想梳理一下 ja
 * `'2' + '2' - '2'` 表达式首先要遵循从左至右的执行顺序，`'2' + '2'`的执行的是字符串拼接，结果是`'22'`，在接下来的`'22' - '2'`计算中两个操作数都成功的转化为了数字，结果是数字相减的结果`20`
 * `[+false] + [+false] + [+false] - [+false]`表达式实际上执行的是`'000' - '0'`，最后的结果也就是数字`0`
 
+## `==`操作符
+
+在 JavaScript 中`===`称为恒等操作符（The identity operator），`==`称为相等操作符（The equality operator）。因为篇幅关系在这里我们简单的针对题目聊聊后者
+
+如果`==`操作符的操作数的数据类型不同：
+1. 如果一个操作数是`null`，并且另外一个操作数是`undefined`，他们是相等的
+2. 如果一个操作数是数值类型，并且另一个是字符串类型，那么把字符串类型转化为数值类型再进行比较
+3. 如果一个操作数是布尔类型，那么把`true`转化为1，`false`转化为0在进行比较
+4. 如果一个操作数是对象，另一个操作数是数字或者字符串，那么把对象转化为基本类型再进行比较
+
+* 根据以上规则，在计算表达式`'1' == true`时，首先将`true`转化为数字`1`，此时表达式中同时存在数值和字符串类型，再把字符串`'1'`转化为数字`1`，最终`1 == 1`当然成立
+
+更全面`==`和`===`的比较规则请参考: [The legend of JavaScript equality operator](https://dmitripavlutin.com/the-legend-of-javascript-equality-operator/)
+
+比较运算符`>`和`<`也遵循相似的规则: 1. 优先将字符串转化为数字进行比较；2. 将布尔类型转化为数字再进行比较，
+
+* 在表达式`1 < 2 < 3` 中，首先执行`1 < 2`，结果为`true`，但是在比较`true < 3`的过程中，需要把`true`转化为数值类型`1`，最终比较`1 < 3`，返回值为 `true`
+* 同理在表达式`3 > 2 > 1`中，最终比较的其实是`true > 1`，也即是`1 > 1`当然返回的是`false`
+
+
+最后我们以表达式`[[][[]]+[]][+[]][++[+[]][+[]]]`作为文章的结尾
+
+在这个表达式中出现了三种操作符，分别是
+- 成员操作符: `[]`
+- 一元操作符: `+`
+- 作为求和或者连接字符串作用的操作符: `+`
+- 自增操作符: `++`
+
+根据操作符的[优先次序表](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence)，我们能确定操作符的优先级依次是: `[]` > 一元操作符`+` > `++` > `+`
+
+所以根据优先级我们首先可以计算出表达式的`+[]`部分，并且将表达式的这一部分用计算结果替换掉: `[[][[]]+[]][0][++[0][0]]`
+
+接下来我们把表达式拆分为三部分看待: `[    [][[]]+[]    ]  [0]  [    ++[0][0]    ]`。如果还是不清晰的话，三部分从左到右分别是：
+1. `[    [][[]]+[]    ]`
+2. `[0]`
+3. `[    ++[0][0]    ]`
+
+我们先看第一部分中`+`前面的 `[][[]]` 操作数，第一个`[]`是空数组，而紧跟着的`[[]]`是属性访问器（成员操作符），属性访问器内的`[]`会被强制转化为字符串类型最终的结果即是空字符串`''`，所以第一个操作数的最终结果其实是`[]['']`，即是`undefined`，而又因为`+`操作符的规则，最终`[][[]]+[]`表达式的结果是字符串`'undefined'`，那么现阶段表达式的结果是`['undefined'][0][++[0][0]]`，即`'undefined'[++[0][0]]`
+
+接下来我们解决第三部分: `[++[0][0]]`，我已经知道成员操作符`[]`的优先级要高于自增操作符`++`, 所以关于表达式`++[0][0]`，我们需要首先计算`[0][0]`，结果是`0`，之后计算`++0`的结果即是`1`
+
+所以最终表达式转化为了`'undefined'[1]`，最终的结果即是`'n'`
+
+
+
+
 ## 参考文章
 
 - [JavaScript addition operator in details](https://dmitripavlutin.com/javascriptss-addition-operator-demystified/)
@@ -94,3 +140,5 @@ javascript 中从来就没有什么奇怪的事件，我只是想梳理一下 ja
 - [What is the explanation for these bizarre JavaScript behaviours mentioned in the 'Wat' talk for CodeMash 2012?](https://stackoverflow.com/questions/9032856/what-is-the-explanation-for-these-bizarre-javascript-behaviours-mentioned-in-the)
 - [Why is {} + {} no longer NaN in Chrome console?](https://stackoverflow.com/questions/36438034/why-is-no-longer-nan-in-chrome-console)
 - [Why does JavaScript handle the plus and minus operators between strings and numbers differently?](https://stackoverflow.com/questions/24383788/why-does-javascript-handle-the-plus-and-minus-operators-between-strings-and-numb)
+- [Operator precedence](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence)
+- [Member operators](http://learnjavascript.co.uk/reference/operators/member.html)
