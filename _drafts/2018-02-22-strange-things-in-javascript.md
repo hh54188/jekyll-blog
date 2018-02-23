@@ -89,3 +89,4 @@ javascript 中从来就没有什么奇怪的事件，我只是想梳理一下 ja
 - [The legend of JavaScript equality operator](https://dmitripavlutin.com/the-legend-of-javascript-equality-operator/)
 - [What is the explanation for these bizarre JavaScript behaviours mentioned in the 'Wat' talk for CodeMash 2012?](https://stackoverflow.com/questions/9032856/what-is-the-explanation-for-these-bizarre-javascript-behaviours-mentioned-in-the)
 - [Why is {} + {} no longer NaN in Chrome console?](https://stackoverflow.com/questions/36438034/why-is-no-longer-nan-in-chrome-console)
+- [Why does JavaScript handle the plus and minus operators between strings and numbers differently?](https://stackoverflow.com/questions/24383788/why-does-javascript-handle-the-plus-and-minus-operators-between-strings-and-numb)
