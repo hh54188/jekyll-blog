@@ -4,7 +4,7 @@
 * 关于在 Redux 中使用 Immutable.js 的基本入门：[Using Immutable.JS with Redux](https://redux.js.org/docs/recipes/UsingImmutableJS.html#what-are-some-opinionated-best-practices-for-using-immutablejs-with-redux)
 * Immutable.js 的**快的秘密**已经一些最佳实践 :
   [Immutable.js, persistent data structures and structural sharing](https://medium.com/@dtinth/immutable-js-persistent-data-structures-and-structural-sharing-6d163fbd73d2)
-  * \*Redux 中的一些不好的模式：
+  * Redux 中的一些不好的模式：
     [React.js pure render performance anti-pattern](https://medium.com/@esamatti/react-js-pure-render-performance-anti-pattern-fb88c101332f)
   * 更详细的 structrual sharing 技术细节：
     [A deep dive into Clojure's data structures - EuroClojure 2015](https://www.slideshare.net/mohitthatte/a-deep-dive-into-clojures-data-structures-euroclojure-2015)
