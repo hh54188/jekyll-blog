@@ -27,7 +27,44 @@ combineReducers({ todos: myTodosReducer, counter: myCounterReducer })
 
 在经过一轮（这里的一轮指的是把每一个领域都遍历了一遍）遍历之后，`combineReducer`就得到了一个新的状态对象，通过`hasChanged`标识位我们就能判断出整体状态是否发生了更改，如果为`true`，新的状态就会被返回给下游，如果是`false`，旧的当前状态就会被返回给下游
 
-在每一
+其次是在`react-redux`中也会对状态进行浅对比
+
+我们通常会使用`react-redux`中的`connect`函数将程序状态注入进组件中，例如:
+
+```javascript
+import {conenct} from 'react-redux'
+
+function mapStateToProps(state) {
+  return {
+    todos: state.todos,
+    visibleTodos: getVisibleTodos(state),
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)
+```
+代码中组件`App`是被 redux 封装的组件，那么`react-redux`会假设`App`是一个`Pure Component`，即对于唯一的`props`和`state`有唯一的渲染结果。
+所以`react-redux`会对根状态（root state，上面代码中`mapStateToProps`的第一个形参`state`）创建索引，以及`mapStateToProps`返回的`props`对象里的每一个属性的值（即上面例子中的`state.todos`值和`getVisibleTodos(state)`的返回值，而不是被返回的`props`整个对象）创建一个索引。和`shouldComponentUpdate`类似，只有当浅对比失败，即索引发生更改时才会重新对封装的组件进行渲染
+
+就上面的代码例子来说，只要`state.todos`和`getVisibleTodos(state)`的值不发生更改，那么`App`组件就永远不会再一次进行渲染。但是请注意下面的陷阱模式：
+
+```javascript
+function mapStateToProps(state) {
+  return {
+    data: {
+      todos: state.todos,
+      visibleTodos: getVisibleTodos(state),
+    }
+  }
+}
+```
+即使`state.todos`和`getVisibleTodos(state)`同样不再发生变化，但是因为每次`mapStateToProps`返回结果`{ data: {...} }`中的`data`都创建新的字面量对象，`App`依然会再次出发渲染
+
+
+
+
+
+
 
 
 
