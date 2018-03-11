@@ -12,6 +12,35 @@
 >  * 此函数在相同的输入值时，需产生相同的输出。函数的输出和输入值以外的其他隐藏信息或状态无关，也和由I/O设备产生的外部输出无关。
 >  * 该函数不能有语义上可观察的函数副作用，诸如“触发事件”，使输出设备输出，或更改输出值以外物件的内容等。
 
+简单来说纯函数的两个特征：1) 对于相同的输入总有相同的输出；2) 函数不依赖外部变量，也不会对外部产生影响（这种影响称之为“副作用（side effects）”）
+
+### Reducer
+
+redux 中**[规定](https://redux.js.org/basics/reducers) reducer 就是纯函数**。它接收前一个状态和 action 作为参数，返回下一个状态:
+
+```
+(previousState, action) => newState
+```
+保证 reducer 的“纯粹（pure）”非常重要，你永远不能在 reducer 中做以下三件事：
+* 修改参数
+* 执行任何具有副作用的操作，比如调用 API
+* 调用任何不纯粹的函数，比如`Math.random()`或者`Date.now()`
+
+所以你会看到在 reducer 里返回状态是通过`Object.assign({}, state)`实现的（注意不要写成`Object.assign(state)`，这样就修改了原状态），这样旧避免修改了原来的传入的`state`。而至于调用 API 等异步或者具有“副作用”的操作，则可以通过`redux-thunk`或者`redux-saga`实现。
+
+### Pure Component
+
+在上一篇中我们谈到过 Pure Component，准确说那是狭义上的`React.PureComponent`。广义上的 Pure Compnoent 指的是 Stateless Component，也就是无状态组件，也被称为 Dumb Component、 Presentational Component。从代码上它的特征是 1) 不维护自己的状态，2) 只有`render`函数:
+
+```javascript
+const HelloUser = ({userName}) => {
+  return <div>{`Hello ${userName}`}</div>
+}
+```
+
+显而易见的是，这种形式的“纯组件”和“纯函数”有异曲同工之妙，即对于相同的属性传入，组件总是输出唯一的结果。
+
+这样形式的组件也丧失了一部分的能力，例如不再拥有生命周期函数。
 
 ## 性能
 
@@ -115,3 +144,4 @@ function myCounterReducer(state = { count: 0 }, action) {
 * [React.PureComponent](https://reactjs.org/docs/react-api.html#reactpurecomponent)
 * [Immutable.js, persistent data structures and structural sharing](https://medium.com/@dtinth/immutable-js-persistent-data-structures-and-structural-sharing-6d163fbd73d2)
 * [Pure function](https://en.wikipedia.org/wiki/Pure_function)
+* [Reducers](https://redux.js.org/basics/reducers)
