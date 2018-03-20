@@ -3,6 +3,8 @@
 
 这会是一篇长文，我们首先会讨论使用 Immutable Data 的正当性；然后从功能上和性能上研究使用 Immutablejs 的技术的必要性
 
+我猜你更关心的是是否值得使用 Immutablejs，这里先放上结论：值得使用，也推荐使用；但是也不必强求，如果目前没有用到也不遗憾，也没有必要强制替换
+
 ## 关于 Pure
 
 无论是在 react 还是 redux 中，pure 都是非常重要的概念。理解什么是 pure 有助于我们理解我们为什么需要 Immutablejs
@@ -183,9 +185,115 @@ function myCounterReducer(state = { count: 0 }, action) {
 
 这只是 Immutablejs 的核心功能。基于它自己的封装的数据结构，它还给我们提供了其他好用的功能，比如`.getIn`方法或者`.setIn`方法，又或者`Record`数据结构。Immutablejs 的使用技巧可以另说
 
-### Immutablejs 巧妙的数据结构
+### Immutablejs 实现内幕
 
-提到 Immutablejs，不得不提用于实现它的数据结构，这常常是被认为它性能高于原生对象的论据之一，但是性能是否真的优秀最后要通过跑 benchmark 才知道
+提到 Immutablejs，不得不提用于实现它的数据结构，这常常是被认为它性能高于原生对象的论据之一。这一小节的部分直接翻译自[Immutable.js, persistent data structures and structural sharing](https://medium.com/@dtinth/immutable-js-persistent-data-structures-and-structural-sharing-6d163fbd73d2)，做了简化和删减
+
+假设你有这样的一个 Javascript 结构对象：
+
+```javascript
+const data = {
+  to: 7,
+  tea: 3,
+  ted: 4,
+  ten: 12,
+  A: 15,
+  i: 11,
+  in: 5,
+  inn: 9
+}
+```
+可以想象它在 Javscript 内存里的存储结构是这样的：
+
+![01](./images/immutablejs/01.png)
+
+但我们还可以根据 key 使用到的字母作为索引，组织成字典查找树的结构：
+
+![02](./images/immutablejs/02.png)
+
+在这种数据结构中，无论你想访问对象任意属性的值，从根节点出发都能够访问到
+
+当你想修改值时，只需要创建一棵新的字典查找树，并且最大限度的利用已有节点即可
+
+假设此时你想修改 `tea` 属性的值为`14`，首先需要找到访问到`tea`节点的关键路径:
+
+![03](./images/immutablejs/03.png)
+
+然后将这些节点复制出来，构建一棵一摸一样结构的树，只不过新树的其他的节点均是对原树的引用：
+
+![04](./images/immutablejs/04.png)
+
+最后将新构建的树的根节点返回
+
+这就是 Immutablejs 中 Map 的基本实现原理，这也当然只是 Immutablejs 的黑科技之一
+
+### 实战测试
+
+这样的数据结构能够带来多大性能上的提升？我们实际测试一下：
+
+假设我们有十万个`todos`数据，用原生的 Javascript 对象进行存储：
+
+```javascript
+const todos = {
+  '1': { title: `Task 1`, completed: false };
+  '2': { title: `Task 2`, completed: false };
+  '3': { title: `Task 3`, completed: false };
+  //...
+  '100000': { title: `Task 1`, completed: false };
+}
+```
+
+或者使用函数生成十万个`todos`:
+
+```javascript
+function generateTodos() {
+  let count = 100000;
+  const todos = {};
+  while (count) {
+    todos[count.toString()] = { title: `Task ${count}`, completed: false };
+    count--;
+  }
+  return todos;
+}
+```
+接下来我们准备一个 reducer 用于根据 id 切换单个 todo 的 `completed` 状态：
+
+```javascript
+function toggleTodo(todos, id) {
+  return Object.assign({}, todos, {
+    [id]: Object.assign({}, todos[id], {
+      completed: !todos[id].completed
+    })
+  });
+}
+```
+
+接下里我们测试一下修改单个`todo`所耗费的时间是多少：
+
+```javascript
+const startTime = performance.now();
+const nextState = toggleTodo(todos, String(100000 / 2));
+console.log(performance.now() - startTime);
+```
+
+在我的PC（配置 1700x ，32GB，  Chrome 64.0.3282.186）上执行的时间是 33ms
+
+接下来我们把`toggleTodo`换成 Immutablejs 版本（当然数据也要是 Immutablejs 中的`Map`数据类型，Immutablejs 提供了方法`fromJS`能够很方便的将原生 Javacript 数据类型转化为 Immutablejs 数据类型）再试试看：
+
+```javascript
+function toggleTodo(todos, id) {
+  return todos.set(id, !todos.getIn([id, "completed"]));
+}
+const startTime = performance.now();
+const nextState = toggleTodo(state, String(100000 / 2));
+console.log(performance.now() - startTime);
+```
+执行时间不超过 1ms，快了 30 倍
+
+但是你有没有看出这个测试的问题：
+* 虽然两者之间相差了30倍，但是最慢也就是 33ms 而已，用户几乎是感觉不到的，
+
+
 
 
 
@@ -201,3 +309,4 @@ function myCounterReducer(state = { count: 0 }, action) {
 * [Immutable.js, persistent data structures and structural sharing](https://medium.com/@dtinth/immutable-js-persistent-data-structures-and-structural-sharing-6d163fbd73d2)
 * [Pure function](https://en.wikipedia.org/wiki/Pure_function)
 * [Reducers](https://redux.js.org/basics/reducers)
+* [A deep dive into Clojure's data structures - EuroClojure 2015](https://www.slideshare.net/mohitthatte/a-deep-dive-into-clojures-data-structures-euroclojure-2015)
