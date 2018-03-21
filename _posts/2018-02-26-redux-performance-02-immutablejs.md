@@ -206,11 +206,11 @@ const data = {
 ```
 可以想象它在 Javscript 内存里的存储结构是这样的：
 
-![01](./images/immutablejs/01.png)
+![01](../images/immutablejs/01.png)
 
 但我们还可以根据 key 使用到的字母作为索引，组织成字典查找树的结构：
 
-![02](./images/immutablejs/02.png)
+![02](../images/immutablejs/02.png)
 
 在这种数据结构中，无论你想访问对象任意属性的值，从根节点出发都能够访问到
 
@@ -218,11 +218,11 @@ const data = {
 
 假设此时你想修改 `tea` 属性的值为`14`，首先需要找到访问到`tea`节点的关键路径:
 
-![03](./images/immutablejs/03.png)
+![03](../images/immutablejs/03.png)
 
 然后将这些节点复制出来，构建一棵一摸一样结构的树，只不过新树的其他的节点均是对原树的引用：
 
-![04](./images/immutablejs/04.png)
+![04](../images/immutablejs/04.png)
 
 最后将新构建的树的根节点返回
 
