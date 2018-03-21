@@ -1,4 +1,15 @@
-# React + Redux 性能优化（二）工具篇： Immutablejs
+---
+layout: post
+title: React + Redux 性能优化（二）工具篇： Immutablejs
+modified: 2018-03-21
+tags: [javascript, React, Redux, performance]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
 
 建议在阅读完上一篇[React + Redux 性能优化（一）：理论篇](http://qingbob.com/redux-performance-01-basic/)之后再开始本文的旅程，本文的很多概念和结论，都在上篇做了详细的讲解
 
