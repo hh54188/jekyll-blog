@@ -24,3 +24,25 @@ from googleapiclient.discovery import build
 drive = build('drive', 'v2', credentials=credentials)
 ```
 
+更具体的说，上面用于调用 API 的 token 我们称为细分为 access token。通常 access token 是有有效期限的，如果过期就需要重新获取。那么如何重新获取？现在我们要让时光倒流一会，回顾第一次获取 token 的流程是怎样的:
+
+1. 首先你需要向 Google API 注册你的应用程序，注册完毕之后你会拿到证书信息（credentials）包括
+ ID 和 secret。不是所有的程序类型都有 secret, 比如 JavsScript 程序就没有。
+2. 接下来就要向 Google 请求 access token。这里我们先忽略一些细节，例如请问参数（当然需要上面申请到的 secret）以及不同类型的程序的请求方式等。重要的是，如果你想访问的是用户资源，这里就会提醒用户进行授权。
+3. 如果用户授权完毕。Google 就会返回 access token。又或者是返回授权代码（authorization code），你再通过代码取得 access token
+4. token 获取到之后，就能够带上 token 访问 API 了
+
+流程如下图所示：
+![google token flow](./images/token-as-session/webflow.png)
+
+注意在第三步通过 code 兑换 access token 的过程中，Google 并不会仅仅返回 access token，还会返回额外的信息，这其中和之后更新相关的就是 refresh token
+
+一旦 access token 过期，你就可以通过 refresh token 再次请求 access token。
+
+以上只是大致的流程，比如更新 access token 当然也可以不需要 refresh token，这要根据你的请求方式和访问的资源类型而定。
+
+这里又会引起另外的两个问题：
+1. 如果 refesh token 也过期了怎么办？这就需要用户重新登陆授权了
+2. 为什么要区分 refrsh token 和 access token ？如果合并成一个 token 然后调整过期时间稍长，并且每次失效之后用户重新登陆授权就好了？这个问题会和后面的相关概念有关，稍后再回答
+
+
