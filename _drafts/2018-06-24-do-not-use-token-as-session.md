@@ -53,7 +53,25 @@ drive = build('drive', 'v2', credentials=credentials)
 
 通常公司内部会有非常多的工具平台供大家使用，比如人力资源，代码管理，日志监控，预算申请等等。如果每一个平台都实现自己的用户体系的话无疑是巨大的浪费，所以公司内部会有一套公用的用户体系，用户只要登陆之后，就能够访问所有的系统。这就是**单点登录（SSO: Single Sign-On）**
 
-SSO 是一类解决方案的统称，而在具体的实施方面，我们有两种策略可供选择：1) SAML 2.0 ; 2) OAuth 2.0
+SSO 是一类解决方案的统称，而在具体的实施方面，我们有两种策略可供选择：1) SAML 2.0 ; 2) OAuth 2.0。接下来我们区别一下这两种授权方式有什么不同。
 
+但是在描述不同的策略之前，我们先叙述几个公共的，并且相当重要的概念。
+
+**Authentication VS Authorisation**
+
+- Authentication: 身份鉴别，以下简称认证
+- Authorisation: 授权
+
+**认证**的作用在于认可你有权限访问系统，用于鉴别访问者是否是合法用户；而**授权**用于决定你有访问哪些资源的权限。包括我的大多数人不会区分这两者的区别，因为我们是站在用户的立场上，当我们登陆一个系统之后我们能访问的资源就已经确定了。而作为系统的设计者来说，这两者是有差别的，这是不同的两个工作职责，我们完全可以只需要认证功能，而不需要授权功能；甚至我们不需要自己实现认证功能，我们可以借助 Google 的认证系统，即用户可以用 Google 的账号进行登陆。
+
+**Authorization Server/Identity Provider(IdP) VS Service Provider(SP)/Resource Server**
+
+我们把负责认证的服务称为 Authorization Server 或者 Identity Provider，以下简称 IdP；而负责提供资源（API调用）的服务称为  Resource Server 或者 Service Provider，以下简称 SP
+
+### SMAL 2.0
+
+下图是 SMAL 2.0 的流程图，我们看图说话
+
+![smal flow](./images/token-as-session/smalflow.png)
 
 
