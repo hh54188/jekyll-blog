@@ -39,10 +39,21 @@ drive = build('drive', 'v2', credentials=credentials)
 
 一旦 access token 过期，你就可以通过 refresh token 再次请求 access token。
 
-以上只是大致的流程，比如更新 access token 当然也可以不需要 refresh token，这要根据你的请求方式和访问的资源类型而定。
+以上只是大致的流程，并且故意省略了一些额外的概念。比如更新 access token 当然也可以不需要 refresh token，这要根据你的请求方式和访问的资源类型而定。
 
 这里又会引起另外的两个问题：
 1. 如果 refesh token 也过期了怎么办？这就需要用户重新登陆授权了
-2. 为什么要区分 refrsh token 和 access token ？如果合并成一个 token 然后调整过期时间稍长，并且每次失效之后用户重新登陆授权就好了？这个问题会和后面的相关概念有关，稍后再回答
+2. 为什么要区分 refrsh token 和 access token ？如果合并成一个 token 然后调整过期时间稍长，并且每次失效之后用户重新登陆授权就好了？这个问题会和后面谈的相关概念有关，稍后再回答
+
+## OAuth
+
+从获取 token 到使用 token 访问接口。这其实是一个标准的 OAuth 2.0 机制下访问 API 的流程。这一节我们聊一聊 OAuth 里外相关的概念，更深入的理解 token 的作用。
+
+### SSO (Single sign-on)
+
+通常公司内部会有非常多的工具平台供大家使用，比如人力资源，代码管理，日志监控，预算申请等等。如果每一个平台都实现自己的用户体系的话无疑是巨大的浪费，所以公司内部会有一套公用的用户体系，用户只要登陆之后，就能够访问所有的系统。这就是**单点登录（SSO: Single Sign-On）**
+
+SSO 是一类解决方案的统称，而在具体的实施方面，我们有两种策略可供选择：1) SAML 2.0 ; 2) OAuth 2.0
+
 
 
