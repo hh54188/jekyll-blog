@@ -106,7 +106,11 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 那么 OAuth 是如何避免 SAML 流程下无法解析 POST 内容的信息的呢？用户从 IdP 返回客户端的方式是通过 URL 重定向，这里的 URL 允许自定义schema，所以即使在手机上也能拉起应用；另一方面因为 IdP 向客户端传递的是 code，而不是 XML 信息，所以 code 可以很轻易的附着在重定向 URL 上进行传递
 
-但这只是 OAuth 的冰山一角，或者说并非是它的本意。
+但以上的 SSO 流程体现不出 OAuth 的本意。**OAuth 的本意是一个应用允许另一个应用在用户授权的情况下访问自己的数据,OAuth 的设计本意更倾向于授权而非认证（当然授权用户信息就间接实现了认证）**, 虽然Google 的 OAuth 2.0 API 同时支持授权和认证，所以你在使用 Facebook 或者 Gmail 账号登陆第三方站点时，会出授权对话框告诉你第三方站点可以访问你的哪些信息，需要征得你的同意：
 
+![OAuth2Consent](./images/token-as-session/OAuth2Consent.png)
 
+在上面 SSO 的 OAuth 流程中涉及三方角色: SP, IdP 以及 Client。但在实际工作中 Client 可以是不存在的，例如你编写了一个后端程序定时的通过 Google API 从 Youtube 拉取最新的节目数据，那么你的后端程序需要得到 Youtube 的 OAuth 授权即可。
+
+### OAuth VS OpenId
 
