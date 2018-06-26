@@ -95,7 +95,18 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 ### OAuth 2.0
 
-我们先了解 SSO 下的 OAuth 2.0 的流程
+我们先简单了解 SSO 下的 OAuth 2.0 的流程。
+
+![oauth flow](./images/token-as-session/oauthflow.png)
+
+- 用户通过客户端（可以是浏览器也可以是手机应用）想要访问 SP 上的资源，但是 SP 告诉用户需要进行认证，将用户重定向至 IdP
+- IdP 向用户询问 SP 是否可以访问用户信息，如果用户同意，IdP 向客户端返回 access code
+- 客户端拿 code 向 IdP 换 access token，并拿着 access token 向 SP 请求资源
+- SP 接受到请求之后拿着附带 token 向 IdP 验证用户的身份
+
+那么 OAuth 是如何避免 SAML 流程下无法解析 POST 内容的信息的呢？用户从 IdP 返回客户端的方式是通过 URL 重定向，这里的 URL 允许自定义schema，所以即使在手机上也能拉起应用；另一方面因为 IdP 向客户端传递的是 code，而不是 XML 信息，所以 code 可以很轻易的附着在重定向 URL 上进行传递
+
+但这只是 OAuth 的冰山一角，或者说并非是它的本意。
 
 
 
