@@ -127,11 +127,29 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 这一小节我们重点了解了 OAuth，以及关于身份认证和授权的区别。现在我们可以把上一小节的知识关联起来，也更加能理解 token：token 其实是为 OAuth 服务的，它是访问数据的一把钥匙。接下来我们看看这把钥匙的另一种形态：Json Web Token, 简称 JWT
 
+## JWT
+
+### 例子
+
+Google 的一些 API 诸如 Prediction API 或者 Google Cloud Storage，是不需要访问用户的个人数据，因而不需要用户的同意而是应用程序可以直接访问的。就像上一节 OAuth 中没有 Client 没有参与的流程类似。这就要借助 JWT 完成访问了, 具体流程如下
+
+![serviceaccount](./images/token-as-session/serviceaccount.png)
+
+- 首先你需要再 Google API 上创建一个服务账号（service account）
+- 获取服务账号的认证信息（credential），包括邮箱地址，client ID，以及一对公钥/私钥
+- 使用 client ID 和私钥创一个签名的 JWT，然后将这个 JWT 发送给 Google 交换 access token
+- Google 返回 access token
+- 程序通过 access token 访问 API
+
+
+**甚至你可以不需要向 Google 索要 access token，而是携带 JWT 作为 HTTP header 里的  bearer token 直接访问 API 也是可以的**
+
 ## 参考资料
 
 ### Google API
 
 * https://developers.google.com/identity/protocols/OAuth2
+* https://developers.google.com/identity/protocols/OAuth2ServiceAccount
 
 ### JWT
 
