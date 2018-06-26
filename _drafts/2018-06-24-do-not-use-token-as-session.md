@@ -114,3 +114,69 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 ### OAuth VS OpenId
 
+如果你有留心的话，你会在某些站点看到允许以 OpenID 的方式登陆，其实也就是以 Facebook 账号或者 Google 账号登陆站点：
+
+![openid](./images/token-as-session/openid-logo.png)
+
+这听上去似乎和 OAuth 很像。但本质上来说它们是截然不同用户的两个东西：
+
+- OpenID 通常是用于身份认证（Authentication），允许你以同一个账户在多个网站登陆。它仅仅是为你的合法身份背书，当你以 Facebook 账号登陆某个站点之后，该站点无权访问你的在 Facebook 上的数据
+- OAuth 用于授权（Authorisation），允许被授权方访问 SP 的用户数据
+
+### 总结
+
+这一小节我们重点了解了 OAuth，以及关于身份认证和授权的区别。现在我们可以把上一小节的知识关联起来，也更加能理解 token：token 其实是为 OAuth 服务的，它是访问数据的一把钥匙。接下来我们看看这把钥匙的另一种形态：Json Web Token, 简称 JWT
+
+## 参考资料
+
+### Google API
+
+* https://developers.google.com/identity/protocols/OAuth2
+
+### JWT
+
+* https://medium.com/vandium-software/5-easy-steps-to-understanding-json-web-tokens-jwt-1164c0adfcec
+* https://dzone.com/articles/cookies-vs-tokens-the-definitive-guide
+* https://auth0.com/blog/ten-things-you-should-know-about-tokens-and-cookies/
+
+### Refresh Token
+
+* https://stackoverflow.com/questions/38986005/what-is-the-purpose-of-a-refresh-token
+* https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/
+* https://auth0.com/learn/refresh-tokens/
+
+### TOKEN EXPIRED AND UPDATE
+
+* https://stackoverflow.com/questions/39825953/handling-jwt-expiration-and-jwt-payload-update
+* https://github.com/brahalla/Cerberus/issues/5
+* https://softwareengineering.stackexchange.com/questions/338337/handling-token-renewal-session-expiration-in-a-restful-api
+* https://www.zhihu.com/question/41248303
+* https://news.ycombinator.com/item?id=11929267
+
+### Token VS Cookie
+
+* https://dzone.com/articles/cookies-vs-tokens-the-definitive-guide
+* https://stackoverflow.com/questions/17000835/token-authentication-vs-cookies
+
+### Oauth
+
+* https://stackoverflow.com/questions/4727226/on-a-high-level-how-does-oauth-2-work
+* https://gist.github.com/mziwisky/10079157
+* https://www.quora.com/How-does-OAuth-2-0-work
+* https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2
+
+### OpenID VS Oauth
+
+* https://stackoverflow.com/questions/1087031/whats-the-difference-between-openid-and-oauth
+* http://softwareas.com/oauth-openid-youre-barking-up-the-wrong-tree-if-you-think-theyre-the-same-thing/
+* https://spin.atomicobject.com/2016/05/30/openid-oauth-saml/
+
+### SAML VS Oauth
+
+* https://www.ubisecure.com/uncategorized/difference-between-saml-and-oauth/
+* https://www.mutuallyhuman.com/blog/2013/05/09/choosing-an-sso-strategy-saml-vs-oauth2/
+* https://spin.atomicobject.com/2016/05/30/openid-oauth-saml/
+
+### TOKEN SESSION VS COOKIE SESSION
+
+* https://ponyfoo.com/articles/json-web-tokens-vs-session-cookies
