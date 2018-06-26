@@ -129,9 +129,11 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 ## JWT
 
-### 例子
+### 感性认识
 
-Google 的一些 API 诸如 Prediction API 或者 Google Cloud Storage，是不需要访问用户的个人数据，因而不需要用户的同意而是应用程序可以直接访问的。就像上一节 OAuth 中没有 Client 没有参与的流程类似。这就要借助 JWT 完成访问了, 具体流程如下
+首先我们需要从感性上认识 JWT。本质上来说 JWT 也是 token，正如我们第一小节学习到的，它是访问资源的凭证
+
+Google 的一些 API 诸如 Prediction API 或者 Google Cloud Storage，是不需要访问用户的个人数据的，因而不需要经过用户的授权这一步骤，应用程序可以直接访问。就像上一节 OAuth 中没有 Client 没有参与的流程类似。这就要借助 JWT 完成访问了, 具体流程如下
 
 ![serviceaccount](./images/token-as-session/serviceaccount.png)
 
@@ -142,7 +144,37 @@ Google 的一些 API 诸如 Prediction API 或者 Google Cloud Storage，是不�
 - 程序通过 access token 访问 API
 
 
-**甚至你可以不需要向 Google 索要 access token，而是携带 JWT 作为 HTTP header 里的  bearer token 直接访问 API 也是可以的**
+**甚至你可以不需要向 Google 索要 access token，而是携带 JWT 作为 HTTP header 里的  bearer token 直接访问 API 也是可以的**。我认为这才是 JWT 的最大魅力
+
+### 理性认识
+
+JWT 顾名思义，它是 JSON 结构的 token，由三部分组成：1) header 2) payload 3) signature
+
+**header**
+
+header 用于描述产生 signature 的算法，比如：
+```json
+{
+    "typ": "JWT",
+    "alg": "HS256"
+}
+```
+`alg`关键字就指定了使用哪一种哈希算法来创建 signature
+
+**payload**
+
+payload 用于携带你希望向服务端传递的信息。你既可以往里添加官方字段（这里的“字段” (field) 也可以被称作“声明” claims），例如`iss`(Issuer), `sub`(Subject), `exp`(Expiration time)，也可以塞入自定义的字段，比如 `userId`:
+
+```json
+{
+    "userId": "b08f86af-35da-48f2-8fab-cef3904660bd"
+}
+```
+
+**signature**
+
+创建签名要分以下几个步骤：
+- 
 
 ## 参考资料
 
