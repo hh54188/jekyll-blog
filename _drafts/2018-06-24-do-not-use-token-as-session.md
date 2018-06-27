@@ -123,6 +123,15 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 - OpenID 通常是用于身份认证（Authentication），允许你以同一个账户在多个网站登陆。它仅仅是为你的合法身份背书，当你以 Facebook 账号登陆某个站点之后，该站点无权访问你的在 Facebook 上的数据
 - OAuth 用于授权（Authorisation），允许被授权方访问 SP 的用户数据
 
+### Refresh Token
+
+现在我们可以回答本篇第一小节的那个问题了：为什么我们需要 refresh token？
+
+这样的处理本质上还是为了职责的分离：refresh token 负责身份认证，access token 负责请求资源。虽然 refresh token 和 access token 都由 IdP 发出，但是 access token 还要和 SP 进行数据交换，如果公用的话这样就会有身份泄露的可能。并且 IdP 和 SP 可能是完全不同的服务提供的。而在第一小节中我们之所以没有这样的顾虑是因为 IdP 和 SP 都是 Google
+
+![refresh token](./images/token-as-session/refresh-token.png)
+
+
 ### 总结
 
 这一小节我们重点了解了 OAuth，以及关于身份认证和授权的区别。现在我们可以把上一小节的知识关联起来，也更加能理解 token：token 其实是为 OAuth 服务的，它是访问数据的一把钥匙。接下来我们看看这把钥匙的另一种形态：Json Web Token, 简称 JWT
@@ -214,7 +223,9 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZ
 
 关于 Encoding, Encryption, Hashing之间的差异，可以参考这篇文章：[Encoding vs. Encryption vs. Hashing vs. Obfuscation](https://danielmiessler.com/study/encoding-encryption-hashing-obfuscation/#encoding)
 
-### 服务端验证 JWT 
+### 用于接口调用
+
+在 API 调用中就可以附上 JWT （通常是在 HTTP Header 中）。又因为SP会与程序共享一个 secret，所以后端可以通过 header 提供的相同的 hash 算法来验证签名是否正确，从而判断应用继续是否有权力调用 API 
 
 ## 参考资料
 
