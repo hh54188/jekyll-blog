@@ -173,8 +173,48 @@ payload 用于携带你希望向服务端传递的信息。你既可以往里添
 
 **signature**
 
+signature 译为「签名」
+
 创建签名要分以下几个步骤：
-- 
+- 你需要从接口服务端拿到密钥，假设为`secret`
+- 将`header`进行 base64 编码，假设结果为`headerStr`
+- 将`payload`进行 base64 编码，假设结果为`payloadStr`
+- 将`headerStr`和`payloadStr`用`.`字符串拼装起来成为字符`data`
+- 以`data`和`secret`作为参数，使用哈希算法计算出签名
+
+如果上述描述还不直观，用伪代码表示就是：
+```
+// signature algorithm
+data = base64urlEncode( header ) + “.” + base64urlEncode( payload )
+signature = Hash( data, secret );
+```
+假设我们的原始 JSON 结构是这样的：
+```json
+// Header
+{
+  "typ": "JWT",
+  "alg": "HS256"
+}
+// Payload:
+{
+  "userId": "b08f86af-35da-48f2-8fab-cef3904660bd"
+}
+```
+密钥是字符串`secret`，那么最终 JWT 的结果就是这样的
+```
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZhYi1jZWYzOTA0NjYwYmQifQ.-xN_h82PHVTCMA9vdoHrcZxH-x5mb11y1537t3rGzcM
+```
+你可以在 [jwt.io](http://jwt.io) 上验证这个结果
+
+### JWT 究竟带来了什么
+
+**JWT 的目的不是为了隐藏或者保密数据，而是为了确保数据确实来自被授权的人创建的**
+
+回想一下，当你拿到 JWT 时候，你完全可以在没有 secret 的情况下解码出 header 和 payload，因为 header 和 payload 只是经过了 base64 编码（encode）而已，编码的目的在于利于数据结构的传输。虽然创建 signature 的过程近似于加密 (encrypt)，但本质其实是一种签名 (sign) 的行为，用于保证数据的完整性，实际上也并且并没有加密到任何数据
+
+关于 Encoding, Encryption, Hashing之间的差异，可以参考这篇文章：[Encoding vs. Encryption vs. Hashing vs. Obfuscation](https://danielmiessler.com/study/encoding-encryption-hashing-obfuscation/#encoding)
+
+### 服务端验证 JWT 
 
 ## 参考资料
 
@@ -188,6 +228,7 @@ payload 用于携带你希望向服务端传递的信息。你既可以往里添
 * https://medium.com/vandium-software/5-easy-steps-to-understanding-json-web-tokens-jwt-1164c0adfcec
 * https://dzone.com/articles/cookies-vs-tokens-the-definitive-guide
 * https://auth0.com/blog/ten-things-you-should-know-about-tokens-and-cookies/
+* https://stackoverflow.com/questions/39239051/rs256-vs-hs256-whats-the-difference
 
 ### Refresh Token
 
