@@ -227,6 +227,14 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZ
 
 在 API 调用中就可以附上 JWT （通常是在 HTTP Header 中）。又因为SP会与程序共享一个 secret，所以后端可以通过 header 提供的相同的 hash 算法来验证签名是否正确，从而判断应用继续是否有权力调用 API 
 
+## 常见的 session 模型
+
+让我们回想一下常见的 session 模型是如何工作的：
+- 用户在浏览器登陆之后，服务端为用户生成唯一的 session id，存储在服务端的 Redis 中
+- 该 session id 也同时返回给浏览器，通常以 SESSION_ID 为 KEY 存储在浏览器的 cookie 中
+- 如果用户再次访问该网站，cookie 里的 SESSIO_ID 会随着请求一同发往服务端
+- 服务端通过判断 SESSION_ID 是否已经在 Redis 中判断用户是否处于登陆状态
+
 ## 参考资料
 
 ### Google API
