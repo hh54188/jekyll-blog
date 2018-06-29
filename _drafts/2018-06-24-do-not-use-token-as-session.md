@@ -1,4 +1,4 @@
-# 不要把 JWT 用作 session 管理
+# 不要把 JWT 用作 session 管理（上）：全面了解 Token, JWT, OAuth, SAML, SSO
 
 通常为了弄清楚一个概念，我们需要掌握十个概念。在判断 JWT 是否适用于 session 管理之前，我们要了解什么是 token，以及 access_token 和 refresh_token 的区别；了解什么是 OAuth，什么是 SSO，authorisation 和 authentication 的不同，SSO 下不同策略 OAuth 和 SAML 的不同，以及 OAuth 与 OpenID 的不同。最后我们引出 JSON WEB TOKEN，聊聊 JWT　在 session 管理方面的优势和劣势，同时尝试解决这些劣势，看看成本和代价有多少
 
@@ -227,13 +227,24 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZ
 
 在 API 调用中就可以附上 JWT （通常是在 HTTP Header 中）。又因为SP会与程序共享一个 secret，所以后端可以通过 header 提供的相同的 hash 算法来验证签名是否正确，从而判断应用继续是否有权力调用 API 
 
-## 常见的 session 模型
+## 有状态的对话
 
-让我们回想一下常见的 session 模型是如何工作的：
-- 用户在浏览器登陆之后，服务端为用户生成唯一的 session id，存储在服务端的 Redis 中
+因为 HTTP 是无状态的，所以客户端和服务端需要解决的如何让之间的对话变得有状态。例如只有是登陆状态的用户才有权限调用某些接口，那么在用户登陆之后，需要记住该用户是已经登陆的状态。常见的方法是使用 session 机制
+
+常见的 session 模型是这样工作的：
+
+![how session work](./images/token-as-session/how-session-work.png)
+
+- 用户在浏览器登陆之后，服务端为用户生成唯一的 session id，存储在服务端的存储服务（例如 MySql, Redis）中
 - 该 session id 也同时返回给浏览器，通常以 SESSION_ID 为 KEY 存储在浏览器的 cookie 中
-- 如果用户再次访问该网站，cookie 里的 SESSIO_ID 会随着请求一同发往服务端
+- 如果用户再次访问该网站，cookie 里的 SESSION_ID 会随着请求一同发往服务端
 - 服务端通过判断 SESSION_ID 是否已经在 Redis 中判断用户是否处于登陆状态
+
+很明显后端的存储服务是非常重要的一个环节，存储服务需要稳定运行，需要扩容，需要进行备份和健康检查
+
+相信你已经察觉了，**理论上来说**，JWT 机制可以取代 session 机制。用户不需要提前进行登陆，后端也不需要 Redis 记录用户的登陆信息。当用户需要调用接口时，必须上传一个合法的 JWT，每一次调用接口，后端每一次都使用请求中附带的 JWT 做一次合法性的验证。
+
+然而 JWT 真的能取代 session 机制吗？这么做有哪些好处和坏处？这些问题我们留在下一篇再讨论
 
 ## 参考资料
 
@@ -254,14 +265,6 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZ
 * https://stackoverflow.com/questions/38986005/what-is-the-purpose-of-a-refresh-token
 * https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/
 * https://auth0.com/learn/refresh-tokens/
-
-### TOKEN EXPIRED AND UPDATE
-
-* https://stackoverflow.com/questions/39825953/handling-jwt-expiration-and-jwt-payload-update
-* https://github.com/brahalla/Cerberus/issues/5
-* https://softwareengineering.stackexchange.com/questions/338337/handling-token-renewal-session-expiration-in-a-restful-api
-* https://www.zhihu.com/question/41248303
-* https://news.ycombinator.com/item?id=11929267
 
 ### Token VS Cookie
 
@@ -286,7 +289,3 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZ
 * https://www.ubisecure.com/uncategorized/difference-between-saml-and-oauth/
 * https://www.mutuallyhuman.com/blog/2013/05/09/choosing-an-sso-strategy-saml-vs-oauth2/
 * https://spin.atomicobject.com/2016/05/30/openid-oauth-saml/
-
-### TOKEN SESSION VS COOKIE SESSION
-
-* https://ponyfoo.com/articles/json-web-tokens-vs-session-cookies
