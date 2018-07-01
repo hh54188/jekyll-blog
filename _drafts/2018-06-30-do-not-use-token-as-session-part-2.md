@@ -38,7 +38,7 @@
 
   很明显 CSRF 就是针对 session 机制而设计的。但是 JWT 机制就对于 CSRF 免疫了吗？不一定，这和 JWT 的存储方式。在浏览器中，JWT 的存储方式无非只有两种选择：(Local/Session) Storage 和 Cookie。绝大部分人会存储在 storage 中，需要使用时再从 storage 中取出然后附着再 HTTP Header 上。如但是如果存储在 cookie 里，你还会从 cookie 里取出并且附着在 HTTP Header 上吗？如果是那么就意味着 JWT 会被发送两份；如果不是，那么 JWT 就变成了一个类似于 session id 的角色，总是随着请求自动发出，又落入了 CSRF 的陷阱中。
 
-  至于 XSS 攻击，无论是 session id 和 JWT 风险都是一致的：既然攻击者都能在你的浏览器里执行脚本了，那么他既可以从 storage 和 cookie 里读取数据（cookie 可以启用 HttpOnly 选项 ），也可以主动发出请求
+  至于 XSS 攻击，无论是 session id 和 JWT 风险都是一致的：既然攻击者都能在你的浏览器里执行脚本了，那么他既可以从 storage 和 cookie 里读取数据（cookie 可以启用 HttpOnly 选项来阻止 ），也可以主动向服务端发出伪造的请求。
 
 
 
