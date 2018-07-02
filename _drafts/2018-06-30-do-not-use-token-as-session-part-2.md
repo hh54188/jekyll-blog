@@ -18,6 +18,10 @@
 
 session 机制和 JWT 机制本质上的区别的是前者是有状态的（stateful），因为它需要使用 Redis 管理每一个用户的状态，是否登陆，是否登出，是否过期，用户每一次的访问都和当前的状态有关；而后者是无状态的（stateless），因为你的每一次访问都是独立的，和之前是否访问过无关（但token 还是存在过期时间的，稍后谈如何处理这个问题）
 
+更重要的是，这种“无状态”，恰恰也与 RESTful API 的特性不谋而合。我没法找到一个官方对于 RESTful API 无状态的定义， 但无状态确实是一种约定。比如在 [REST API Tutorial](https://restfulapi.net/statelessness/) 网站上关于无状态的定义如下
+
+>As per the REST (REpresentational “State” Transfer) architecture, the server does not store any state about the client session on the server side. This restriction is called Statelessness. Each request from client to server must contain all of the information necessary to understand the request, and cannot take advantage of any stored context on the server. Session state is therefore kept entirely on the client. client is responsible for storing and handling all application state related information on client side.
+
 接下来我们要对标这两种身份认证策略。同时我们还是以 Google API 作为 API 调用和实现的示例
 
 我们先聊一些你会担心的，但是不成问题的问题
@@ -42,7 +46,32 @@ session 机制和 JWT 机制本质上的区别的是前者是有状态的（stat
 
 至于 XSS 攻击，无论是 session id 和 JWT 风险都是一致的：既然攻击者都能在你的浏览器里执行脚本了，那么他既可以从 storage 和 cookie 里读取数据（cookie 可以启用 HttpOnly 选项来阻止 ），也可以主动向服务端发出伪造的请求。
 
-JWT 和 cookie 非常相似，它们都会面临一些同样的问题，例如它们都会面容量上的限制（无论在存储方面还是在携带方面），它们都不允许在其中存储敏感信息（信用卡卡号）。最重要的，它们还要解决过期（expire）和认证撤回（revoke）的问题。
+JWT 和 cookie 非常相似，它们都会面临一些同样的问题，例如它们都会面容量上的限制（无论在存储方面还是在携带方面），它们都不允许在其中存储敏感信息（信用卡卡号）。最重要的，**它们还要解决过期（expire）和认证撤回（revoke）的问题**。这两点才是不要使用 JWT 作为 session 管理的重要原因
+
+## 过期问题
+
+JWT 和普通 token 一样，都会面临过期的问题（在这里我们不考虑不会过期的场景，不过期的 token 是毫无意义且对安全不负责任的）。而如果真的过期，我们不妨考虑有哪些方案处理这个问题
+
+**Refresh Token**
+
+在上一篇中我们聊到 refresh token 就是用来交换 JWT 的，和 JWT 相比它有更长的生命周期。同时因为直接和身份认证相关，所以它的安全也显得更重要。通常 refresh token 方案适用于服务端和移动应用或者设备应用上，因为在这两者的运行环节隔离并且私密，相反在浏览器中使用该方案就会显得非常的危险，所以这个方案并不适用于 web
+
+**Sliding Session**
+
+从名称上就可以看出，这本应该是针对 session 的解决方案，但也同时适用于 JWT。在 session 机制下，session id 也是存在过期时间的，过期时间同样很短。但是只要用户在尚未过期的期限内使用网站，那么就自动为 session id 续期。这样用户就能够在相当长的一段时间内不间断的使用网站。
+
+同样在 JWT 的机制下，只要用户在还未过期的范围内使用网站，那么也自动为 JWT “续期”。只不过这里续期的方式是生成一个新的签名的 token。这里的续期方式还而可以划分为客户端方案和服务端方案：
+
+  - 客户端方案：在 JWT 中存储过期时间，由客户端自行判断 JWT 是否即将过期，后端提供更换 JWT 的接口。如果客户端判断 JWT 即将过期了，那么自行通过接口更换新的 JWT
+  - 服务端方案：在每个请求的返回响应中自带新的 JWT，这样每一次请求就意味着需要更新 JWT
+
+但话说回来，用 session 的续期机制在 JWT 上进行实现，并且还实现的更加复杂，为什么不直接使用 session 呢？
+
+**不一致的过期时间**
+
+Web 站点和移动应用的过期时间并不一致。通常移动应用的过期时间会更长，例如数日之后你再打开应用仍然处于登陆状态。所以你可以在 JWT 中添加额外的字段来标记这是一个来自移动应用的 JWT，如果后端检测到了这个字段那么就自动忽视它的过期时间。当然移动应用上可以直接使用 refresh token 方案。但是如果用户修改了密码或者手机被偷了怎么办？这里我们就要考虑撤销的问题
+
+## 撤回问题
 
 
 
@@ -65,4 +94,6 @@ JWT 和 cookie 非常相似，它们都会面临一些同样的问题，例如�
 
 ### OTHER
 
+* https://restfulapi.net/statelessness/
+* https://stackoverflow.com/questions/34130036/how-to-understand-restful-api-is-stateless
 * https://www.ibm.com/developerworks/cn/web/1102_niugang_csrf/
