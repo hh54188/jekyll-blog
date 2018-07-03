@@ -1,4 +1,4 @@
-# 不要把 JWT 用作 session 管理（上）：全面了解 Token, JWT, OAuth, SAML, SSO
+# 不要用 JWT 替代 session 管理（上）：全面了解 Token, JWT, OAuth, SAML, SSO
 
 通常为了弄清楚一个概念，我们需要掌握十个概念。在判断 JWT 是否适用于 session 管理之前，我们要了解什么是 token，以及 access_token 和 refresh_token 的区别；了解什么是 OAuth，什么是 SSO，authorisation 和 authentication 的不同，SSO 下不同策略 OAuth 和 SAML 的不同，以及 OAuth 与 OpenID 的不同。最后我们引出 JSON WEB TOKEN，聊聊 JWT　在 session 管理方面的优势和劣势，同时尝试解决这些劣势，看看成本和代价有多少
 
