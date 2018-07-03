@@ -1,12 +1,12 @@
 # 不要用 JWT 替代 session 管理（上）：全面了解 Token, JWT, OAuth, SAML, SSO
 
-通常为了弄清楚一个概念，我们需要掌握十个概念。在判断 JWT 是否适用于 session 管理之前，我们要了解什么是 token，以及 access_token 和 refresh_token 的区别；了解什么是 OAuth，什么是 SSO，authorisation 和 authentication 的不同，SSO 下不同策略 OAuth 和 SAML 的不同，以及 OAuth 与 OpenID 的不同。最后我们引出 JSON WEB TOKEN，聊聊 JWT　在 session 管理方面的优势和劣势，同时尝试解决这些劣势，看看成本和代价有多少
+通常为了弄清楚一个概念，我们需要掌握十个概念。在判断 JWT (Json Web Token) 是否能代替 session 管理之前，我们要了解什么是 token，以及 access token 和 refresh token 的区别；了解什么是 OAuth，什么是 SSO，SSO 下不同策略 OAuth 和 SAML 的不同，以及 OAuth 与 OpenID 的不同，更重要的是区分 authorisation 和 authentication；最后我们引出 JSON WEB TOKEN，聊聊 JWT　在 session 管理方面的优势和劣势，同时尝试解决这些劣势，看看成本和代价有多少
 
 本文关于 OAuth 授权和 API 调用实例都来自 Google API。
 
 ## 关于 Token
 
-token 即使是在计算机领域中也有不同的定义，这里我们说的token，是指**访问资源的凭据**。例如当你调用Google API，需要带上有效 token 来表明你请求的合法性。这个 token 是 Google 给你的，这代表 Google 给你的授权，你有权力调用 API，访问 API 背后的资源。就好比你有权力在图书馆借阅图书之前你需要办理会员卡，并且每次去的时候都要带上会员卡。
+token 即使是在计算机领域中也有不同的定义，这里我们说的token，是指**访问资源的凭据**。例如当你调用Google API，需要带上有效 token 来表明你请求的合法性。这个 token 是 Google 给你的，这代表 Google 给你的授权使得你有能力访问 API 背后的资源。
 
 请求 API 时携带 token 的方式也有很多种，通过 HTTP Header 或者 url 参数 或者 google 提供的类库都可以：
 
@@ -26,9 +26,9 @@ drive = build('drive', 'v2', credentials=credentials)
 
 更具体的说，上面用于调用 API 的 token 我们称为细分为 access token。通常 access token 是有有效期限的，如果过期就需要重新获取。那么如何重新获取？现在我们要让时光倒流一会，回顾第一次获取 token 的流程是怎样的:
 
-1. 首先你需要向 Google API 注册你的应用程序，注册完毕之后你会拿到证书信息（credentials）包括
+1. 首先你需要向 Google API 注册你的应用程序，注册完毕之后你会拿到认证信息（credentials）包括
  ID 和 secret。不是所有的程序类型都有 secret, 比如 JavsScript 程序就没有。
-2. 接下来就要向 Google 请求 access token。这里我们先忽略一些细节，例如请问参数（当然需要上面申请到的 secret）以及不同类型的程序的请求方式等。重要的是，如果你想访问的是用户资源，这里就会提醒用户进行授权。
+2. 接下来就要向 Google 请求 access token。这里我们先忽略一些细节，例如请求参数（当然需要上面申请到的 secret）以及不同类型的程序的请求方式等。重要的是，如果你想访问的是用户资源，这里就会提醒用户进行授权。
 3. 如果用户授权完毕。Google 就会返回 access token。又或者是返回授权代码（authorization code），你再通过代码取得 access token
 4. token 获取到之后，就能够带上 token 访问 API 了
 
@@ -43,26 +43,26 @@ drive = build('drive', 'v2', credentials=credentials)
 
 这里又会引起另外的两个问题：
 1. 如果 refesh token 也过期了怎么办？这就需要用户重新登陆授权了
-2. 为什么要区分 refrsh token 和 access token ？如果合并成一个 token 然后调整过期时间稍长，并且每次失效之后用户重新登陆授权就好了？这个问题会和后面谈的相关概念有关，稍后再回答
+2. 为什么要区分 refresh token 和 access token ？如果合并成一个 token 然后把过期时间调整的更长，并且每次失效之后用户重新登陆授权就好了？这个问题会和后面谈的相关概念有关，稍后再回答
 
 ## OAuth
 
-从获取 token 到使用 token 访问接口。这其实是一个标准的 OAuth 2.0 机制下访问 API 的流程。这一节我们聊一聊 OAuth 里外相关的概念，更深入的理解 token 的作用。
+从获取 token 到使用 token 访问接口。这其实是标准的 OAuth 2.0 机制下访问 API 的流程。这一节我们聊一聊 OAuth 里外相关的概念，更深入的理解 token 的作用。
 
 ### SSO (Single sign-on)
 
 通常公司内部会有非常多的工具平台供大家使用，比如人力资源，代码管理，日志监控，预算申请等等。如果每一个平台都实现自己的用户体系的话无疑是巨大的浪费，所以公司内部会有一套公用的用户体系，用户只要登陆之后，就能够访问所有的系统。这就是**单点登录（SSO: Single Sign-On）**
 
-SSO 是一类解决方案的统称，而在具体的实施方面，我们有两种策略可供选择：1) SAML 2.0 ; 2) OAuth 2.0。接下来我们区别一下这两种授权方式有什么不同。
+SSO 是一类解决方案的统称，而在具体的实施方面，我们有两种策略可供选择：1) SAML 2.0 ; 2) OAuth 2.0。接下来我们区别这两种授权方式有什么不同。
 
-但是在描述不同的策略之前，我们先叙述几个公共的，并且相当重要的概念。
+但是在描述不同的策略之前，我们先叙述几个共有的，并且相当重要的概念。
 
 **Authentication VS Authorisation**
 
 - Authentication: 身份鉴别，以下简称认证
 - Authorisation: 授权
 
-**认证**的作用在于认可你有权限访问系统，用于鉴别访问者是否是合法用户；而**授权**用于决定你有访问哪些资源的权限。包括我的大多数人不会区分这两者的区别，因为我们是站在用户的立场上，当我们登陆一个系统之后我们能访问的资源就已经确定了。而作为系统的设计者来说，这两者是有差别的，这是不同的两个工作职责，我们完全可以只需要认证功能，而不需要授权功能；甚至我们不需要自己实现认证功能，我们可以借助 Google 的认证系统，即用户可以用 Google 的账号进行登陆。
+**认证**的作用在于认可你有权限访问系统，用于鉴别访问者是否是合法用户；而**授权**用于决定你有访问哪些资源的权限。包括我的大多数人不会区分这两者的区别，因为我们是站在用户的立场上，当你登陆一个系统之后你能访问的资源就已经确定了。而作为系统的设计者来说，这两者是有差别的，这是不同的两个工作职责，我们可以只需要认证功能，而不需要授权功能，甚至不需要自己实现认证功能，而借助 Google 的认证系统，即用户可以用 Google 的账号进行登陆。
 
 **Authorization Server/Identity Provider(IdP) VS Service Provider(SP)/Resource Server**
 
@@ -74,7 +74,7 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 ![smal flow](./images/token-as-session/smalflow.png)
 
-- 还未登陆的用户打开浏览器访问你的网站（SP，以下都简称 SP），网站提供服务但是并不负责用户认证（或者说认证功能是另一个独立的服务）。
+- 还未登陆的用户打开浏览器访问你的网站（SP，以下都简称 SP），网站提供服务但是并不负责用户认证。
 - 于是 SP 向 IdP 发送了一个 SAML 认证请求，同时  SP 将用户浏览器重定向到 IdP 。
 - IdP 在验证完来自 SAML 的请求无误之后，在浏览器中呈现登陆表单让用户进行填写用户名和密码进行登陆
 - 一旦用户登陆成功，IdP 会生成一个包含用户信息（用户名或者密码）的 SAML token （SAML token 又称为 SAML Assertion，本质上是 XML 节点），IdP 向 SP 返回 token, 并且将用户重定向到 SP (token 的返回是在重定向步骤中实现的，下面会详细说明)
@@ -106,7 +106,7 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 那么 OAuth 是如何避免 SAML 流程下无法解析 POST 内容的信息的呢？用户从 IdP 返回客户端的方式是通过 URL 重定向，这里的 URL 允许自定义schema，所以即使在手机上也能拉起应用；另一方面因为 IdP 向客户端传递的是 code，而不是 XML 信息，所以 code 可以很轻易的附着在重定向 URL 上进行传递
 
-但以上的 SSO 流程体现不出 OAuth 的本意。**OAuth 的本意是一个应用允许另一个应用在用户授权的情况下访问自己的数据,OAuth 的设计本意更倾向于授权而非认证（当然授权用户信息就间接实现了认证）**, 虽然Google 的 OAuth 2.0 API 同时支持授权和认证，所以你在使用 Facebook 或者 Gmail 账号登陆第三方站点时，会出授权对话框告诉你第三方站点可以访问你的哪些信息，需要征得你的同意：
+但以上的 SSO 流程体现不出 OAuth 的本意。**OAuth 的本意是一个应用允许另一个应用在用户授权的情况下访问自己的数据,OAuth 的设计本意更倾向于授权而非认证（当然授权用户信息就间接实现了认证）**, 虽然 Google 的 OAuth 2.0 API 同时支持授权和认证。所以你在使用 Facebook 或者 Gmail 账号登陆第三方站点时，会出授权对话框告诉你第三方站点可以访问你的哪些信息，需要征得你的同意：
 
 ![OAuth2Consent](./images/token-as-session/OAuth2Consent.png)
 
@@ -120,14 +120,14 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 这听上去似乎和 OAuth 很像。但本质上来说它们是截然不同用户的两个东西：
 
-- OpenID 通常是用于身份认证（Authentication），允许你以同一个账户在多个网站登陆。它仅仅是为你的合法身份背书，当你以 Facebook 账号登陆某个站点之后，该站点无权访问你的在 Facebook 上的数据
-- OAuth 用于授权（Authorisation），允许被授权方访问 SP 的用户数据
+- OpenID 只用于身份认证（Authentication），允许你以同一个账户在多个网站登陆。它仅仅是为你的合法身份背书，当你以 Facebook 账号登陆某个站点之后，该站点无权访问你的在 Facebook 上的数据
+- OAuth 用于授权（Authorisation），允许被授权方访问授权方的用户数据
 
 ### Refresh Token
 
 现在我们可以回答本篇第一小节的那个问题了：为什么我们需要 refresh token？
 
-这样的处理本质上还是为了职责的分离：refresh token 负责身份认证，access token 负责请求资源。虽然 refresh token 和 access token 都由 IdP 发出，但是 access token 还要和 SP 进行数据交换，如果公用的话这样就会有身份泄露的可能。并且 IdP 和 SP 可能是完全不同的服务提供的。而在第一小节中我们之所以没有这样的顾虑是因为 IdP 和 SP 都是 Google
+这样的处理是为了职责的分离：refresh token 负责身份认证，access token 负责请求资源。虽然 refresh token 和 access token 都由 IdP 发出，但是 access token 还要和 SP 进行数据交换，如果公用的话这样就会有身份泄露的可能。并且 IdP 和 SP 可能是完全不同的服务提供的。而在第一小节中我们之所以没有这样的顾虑是因为 IdP 和 SP 都是 Google
 
 ![refresh token](./images/token-as-session/refresh-token.png)
 
@@ -161,14 +161,14 @@ JWT 顾名思义，它是 JSON 结构的 token，由三部分组成：1) header 
 
 **header**
 
-header 用于描述产生 signature 的算法，比如：
+header 用于描述元信息，例如产生 signature 的算法：
 ```json
 {
     "typ": "JWT",
     "alg": "HS256"
 }
 ```
-`alg`关键字就指定了使用哪一种哈希算法来创建 signature
+其中`alg`关键字就指定了使用哪一种哈希算法来创建 signature
 
 **payload**
 
@@ -209,7 +209,7 @@ signature = Hash( data, secret );
   "userId": "b08f86af-35da-48f2-8fab-cef3904660bd"
 }
 ```
-密钥是字符串`secret`，那么最终 JWT 的结果就是这样的
+如果密钥是字符串`secret`的话，那么最终 JWT 的结果就是这样的
 ```
 eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZhYi1jZWYzOTA0NjYwYmQifQ.-xN_h82PHVTCMA9vdoHrcZxH-x5mb11y1537t3rGzcM
 ```
@@ -217,15 +217,15 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZ
 
 ### JWT 究竟带来了什么
 
-**JWT 的目的不是为了隐藏或者保密数据，而是为了确保数据确实来自被授权的人创建的**
+**JWT 的目的不是为了隐藏或者保密数据，而是为了确保数据确实来自被授权的人创建的（不被篡改）**
 
-回想一下，当你拿到 JWT 时候，你完全可以在没有 secret 的情况下解码出 header 和 payload，因为 header 和 payload 只是经过了 base64 编码（encode）而已，编码的目的在于利于数据结构的传输。虽然创建 signature 的过程近似于加密 (encrypt)，但本质其实是一种签名 (sign) 的行为，用于保证数据的完整性，实际上也并且并没有加密到任何数据
+回想一下，当你拿到 JWT 时候，你完全可以在没有 secret 的情况下解码出 header 和 payload，因为 header 和 payload 只是经过了 base64 编码（encode）而已，编码的目的在于利于数据结构的传输。虽然创建 signature 的过程近似于加密 (encrypt)，但本质其实是一种签名 (sign) 的行为，用于保证数据的完整性，实际上也并且并没有加密任何数据
 
 关于 Encoding, Encryption, Hashing之间的差异，可以参考这篇文章：[Encoding vs. Encryption vs. Hashing vs. Obfuscation](https://danielmiessler.com/study/encoding-encryption-hashing-obfuscation/#encoding)
 
 ### 用于接口调用
 
-在 API 调用中就可以附上 JWT （通常是在 HTTP Header 中）。又因为SP会与程序共享一个 secret，所以后端可以通过 header 提供的相同的 hash 算法来验证签名是否正确，从而判断应用继续是否有权力调用 API 
+接下来在 API 调用中就可以附上 JWT （通常是在 HTTP Header 中）。又因为 SP 会与程序共享一个 secret，所以后端可以通过 header 提供的相同的 hash 算法来验证签名是否正确，从而判断应用是否有权力调用 API 
 
 ## 有状态的对话
 
@@ -236,11 +236,11 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZ
 ![how session work](./images/token-as-session/how-session-work.png)
 
 - 用户在浏览器登陆之后，服务端为用户生成唯一的 session id，存储在服务端的存储服务（例如 MySql, Redis）中
-- 该 session id 也同时返回给浏览器，通常以 SESSION_ID 为 KEY 存储在浏览器的 cookie 中
+- 该 session id 也同时返回给浏览器，以 SESSION_ID 为 KEY 存储在浏览器的 cookie 中
 - 如果用户再次访问该网站，cookie 里的 SESSION_ID 会随着请求一同发往服务端
 - 服务端通过判断 SESSION_ID 是否已经在 Redis 中判断用户是否处于登陆状态
 
-相信你已经察觉了，**理论上来说**，JWT 机制可以取代 session 机制。用户不需要提前进行登陆，后端也不需要 Redis 记录用户的登陆信息。当用户需要调用接口时，必须上传一个合法的 JWT，每一次调用接口，后端都使用请求中附带的 JWT 做一次合法性的验证。这样也间接达到了认证用户的目的
+相信你已经察觉了，**理论上来说**，JWT 机制可以取代 session 机制。用户不需要提前进行登陆，后端也不需要 Redis 记录用户的登陆信息。客户端的本地保存一份合法的 JWT, 当用户需要调用接口时，附带上该合法的 JWT，每一次调用接口，后端都使用请求中附带的 JWT 做一次合法性的验证。这样也间接达到了认证用户的目的
 
 然而 JWT 真的能取代 session 机制吗？这么做有哪些好处和坏处？这些问题我们留在下一篇再讨论
 
