@@ -1,4 +1,15 @@
-# 不要用 JWT 替代 session 管理（上）：全面了解 Token, JWT, OAuth, SAML, SSO
+---
+layout: post
+title: 不要用JWT替代session管理（上）：全面了解Token,JWT,OAuth,SAML,SSO
+modified: 2018-06-24
+tags: [back-end]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
 
 通常为了弄清楚一个概念，我们需要掌握十个概念。在判断 JWT (Json Web Token) 是否能代替 session 管理之前，我们要了解什么是 token，以及 access token 和 refresh token 的区别；了解什么是 OAuth，什么是 SSO，SSO 下不同策略 OAuth 和 SAML 的不同，以及 OAuth 与 OpenID 的不同，更重要的是区分 authorisation 和 authentication；最后我们引出 JSON WEB TOKEN，聊聊 JWT　在 session 管理方面的优势和劣势，同时尝试解决这些劣势，看看成本和代价有多少
 
@@ -33,7 +44,7 @@ drive = build('drive', 'v2', credentials=credentials)
 4. token 获取到之后，就能够带上 token 访问 API 了
 
 流程如下图所示：
-![google token flow](./images/token-as-session/webflow.png)
+![google token flow](../images/token-as-session/webflow.png)
 
 注意在第三步通过 code 兑换 access token 的过程中，Google 并不会仅仅返回 access token，还会返回额外的信息，这其中和之后更新相关的就是 refresh token
 
@@ -72,7 +83,7 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 下图是 SMAL 2.0 的流程图，看图说话
 
-![smal flow](./images/token-as-session/smalflow.png)
+![smal flow](../images/token-as-session/smalflow.png)
 
 - 还未登陆的用户打开浏览器访问你的网站（SP，以下都简称 SP），网站提供服务但是并不负责用户认证。
 - 于是 SP 向 IdP 发送了一个 SAML 认证请求，同时  SP 将用户浏览器重定向到 IdP 。
@@ -97,7 +108,7 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 我们先简单了解 SSO 下的 OAuth 2.0 的流程。
 
-![oauth flow](./images/token-as-session/oauthflow.png)
+![oauth flow](../images/token-as-session/oauthflow.png)
 
 - 用户通过客户端（可以是浏览器也可以是手机应用）想要访问 SP 上的资源，但是 SP 告诉用户需要进行认证，将用户重定向至 IdP
 - IdP 向用户询问 SP 是否可以访问用户信息，如果用户同意，IdP 向客户端返回 access code
@@ -108,7 +119,7 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 但以上的 SSO 流程体现不出 OAuth 的本意。**OAuth 的本意是一个应用允许另一个应用在用户授权的情况下访问自己的数据,OAuth 的设计本意更倾向于授权而非认证（当然授权用户信息就间接实现了认证）**, 虽然 Google 的 OAuth 2.0 API 同时支持授权和认证。所以你在使用 Facebook 或者 Gmail 账号登陆第三方站点时，会出授权对话框告诉你第三方站点可以访问你的哪些信息，需要征得你的同意：
 
-![OAuth2Consent](./images/token-as-session/OAuth2Consent.png)
+![OAuth2Consent](../images/token-as-session/OAuth2Consent.png)
 
 在上面 SSO 的 OAuth 流程中涉及三方角色: SP, IdP 以及 Client。但在实际工作中 Client 可以是不存在的，例如你编写了一个后端程序定时的通过 Google API 从 Youtube 拉取最新的节目数据，那么你的后端程序需要得到 Youtube 的 OAuth 授权即可。
 
@@ -116,7 +127,7 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 如果你有留心的话，你会在某些站点看到允许以 OpenID 的方式登陆，其实也就是以 Facebook 账号或者 Google 账号登陆站点：
 
-![openid](./images/token-as-session/openid-logo.png)
+![openid](../images/token-as-session/openid-logo.png)
 
 这听上去似乎和 OAuth 很像。但本质上来说它们是截然不同用户的两个东西：
 
@@ -129,7 +140,7 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 这样的处理是为了职责的分离：refresh token 负责身份认证，access token 负责请求资源。虽然 refresh token 和 access token 都由 IdP 发出，但是 access token 还要和 SP 进行数据交换，如果公用的话这样就会有身份泄露的可能。并且 IdP 和 SP 可能是完全不同的服务提供的。而在第一小节中我们之所以没有这样的顾虑是因为 IdP 和 SP 都是 Google
 
-![refresh token](./images/token-as-session/refresh-token.png)
+![refresh token](../images/token-as-session/refresh-token.png)
 
 
 ### 总结
@@ -144,7 +155,7 @@ SSO 是一类解决方案的统称，而在具体的实施方面，我们有两�
 
 Google 的一些 API 诸如 Prediction API 或者 Google Cloud Storage，是不需要访问用户的个人数据的，因而不需要经过用户的授权这一步骤，应用程序可以直接访问。就像上一节 OAuth 中没有 Client 没有参与的流程类似。这就要借助 JWT 完成访问了, 具体流程如下
 
-![serviceaccount](./images/token-as-session/serviceaccount.png)
+![serviceaccount](../images/token-as-session/serviceaccount.png)
 
 - 首先你需要再 Google API 上创建一个服务账号（service account）
 - 获取服务账号的认证信息（credential），包括邮箱地址，client ID，以及一对公钥/私钥
@@ -233,7 +244,7 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZ
 
 常见的 session 模型是这样工作的：
 
-![how session work](./images/token-as-session/how-session-work.png)
+![how session work](../images/token-as-session/how-session-work.png)
 
 - 用户在浏览器登陆之后，服务端为用户生成唯一的 session id，存储在服务端的存储服务（例如 MySql, Redis）中
 - 该 session id 也同时返回给浏览器，以 SESSION_ID 为 KEY 存储在浏览器的 cookie 中
