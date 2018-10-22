@@ -168,3 +168,125 @@ const getSelectedUsers = ({ selectedUserIds, usersById }) => {
 
 在 Redux 中共享 reducer 逻辑需要一些小技巧。默认情况下，当一个新的 action 发起时所有的 reducer 函数都会被调用。如果我们在多个 reducer 函数中共享同一个 reducer 函数，那么当 action 被发起时它会引起所有的 reducer 被触发。这不是我们重用 reducer 期望的行为。也就是说当我们请求用户列表并且取得了500条数据，我们不希望域名列表的个数也变成500
 
+我们推荐是两种方式来实现共享，两者都针对动作类型（types）使用了特殊的作用域（scope）或者前缀（prefix）。第一种方式需要在 action 携带的信息种传递一个作用域。action 使用动作类型来推断状态中的哪个字段需要发生更改。为了便于说明，让我们假设我有一个拥有多个不同区域（section）的页面，所有都从接口处异步进行加载。我们追踪加载情况的状态像这个样子：
+
+```javascript
+const initialLoadingState = {
+  usersLoading: false,
+  domainsLoading: false,
+  subDomainsLoading: false,
+  settingsLoading: false,
+};
+```
+有了这个状态，我们接下来需要 reducer 和 action 来控制每个区域视图加载状态。我们可以写拥有不同 action 的四个 reducer，每一个都有独立的动作类型。但那是一大堆的重复代码。取而代之的是，让我们尝试使用具有作用域的 reducer 和 action。我们只创建一个动作类型`SET_LOADING`, 和一个像这样的 reducer 函数：
+
+```javascript
+const loadingReducer = (state = initialLoadingState, action) => {
+  const { type, payload } = action;
+  if (type === SET_LOADING) {
+    return Object.assign({}, state, {
+      // sets the loading boolean at this scope
+      [`${payload.scope}Loading`]: payload.loading,
+    });
+  } else {
+    return state;
+  }
+}
+```
+我们也需要提供一个带有作用域的 action creator 函数来调用我们的作用域 reducer。action 看起来像：
+
+```javascript
+const setLoading = (scope, loading) => {
+  return {
+    type: SET_LOADING,
+    payload: {
+      scope,
+      loading,
+    },
+  };
+}
+// example dispatch call
+store.dispatch(setLoading('users', true));
+```
+通过使用一个像这样带有作用域的 reducer，我们解决需要在不同 reducer 函数和 action 中重复相同逻辑的问题。这显著降低了重复代码的数量以及帮助我们编写更小的 action 和 reducer 文件。如果我们需要在页面中添加另一个区域视图，我们只需要简单的在初始状态中添加一个新索引，然后使用不同的作用域调用`setLoading`。这个解决办法在我们拥有几个需要以同样方式更新的相似字段时非常有效
+
+有时候尽管需要在状态的不同处共享 reducer 逻辑，不同于使用同一个 reducer 和 action 更新状态中的多个字段，我们想要在调用`combineReducers`时插拔式的重用 reducer 函数。那么 reducer 需要通过调用 reducer 工厂函数返回，它将返回一个带有类型前缀的 reducer 函数。
+
+一个重用 reducer 逻辑很好的例子是处理翻译信息时。回到我们请求用户信息的例子中，我们的接口或许包含上千个用户。接口也将提供将用户分页之后的翻页信息。或许我们接收到的接口返回长这个样子：
+
+```javascript
+{
+  "users": ...,
+  "count": 2500, // the total count of users in the API
+  "pageSize": 100, // the number of users returned in one page of data
+  "startElement": 0, // the index of the first user in this response
+  ]
+}
+```
+如果我们想要下一页的数据，我们需要发起一个带着`startElement=100`参数的 GET 请求。我们刚好为每一个打交道的服务构建了一个 reducer 函数，但是那也意味着在我们的代码中重复了相同的逻辑。相反，我们可以创建一个独立的翻页 reducer。这个 reducer 来自 reducer 工厂函数，工厂函数接受一个类型前缀参数，然后返回一个新的 reducer 函数
+
+```javascript
+
+const initialPaginationState = {
+  startElement: 0,
+  pageSize: 100,
+  count: 0,
+};
+const paginationReducerFor = (prefix) => {
+  const paginationReducer = (state = initialPaginationState, action) => {
+    const { type, payload } = action;
+    switch (type) {
+      case prefix + types.SET_PAGINATION:
+        const {
+          startElement,
+          pageSize,
+          count,
+        } = payload;
+        return Object.assign({}, state, {
+          startElement,
+          pageSize,
+          count,
+        });
+      default:
+        return state;
+    }
+  };
+  return paginationReducer;
+};
+// example usages
+const usersReducer = combineReducers({
+  usersData: usersDataReducer,
+  paginationData: paginationReducerFor('USERS_'),
+});
+const domainsReducer = combineReducers({
+  domainsData: domainsDataReducer,
+  paginationData: paginationReducerFor('DOMAINS_'),
+});
+```
+reducer 工厂函数`paginationReducerFor`接收类型前缀参数，该参数将会被添加在该 reducer 函数内所有的类型前。工厂返回一个所有类型都已添加前缀的新的 reducer。现在当我们发起一个类似于 `USERS_SET_PAGINATION` 的 action 时，它只会引起用户信息的翻页 reducer 的更新。域名的翻页 reducer 仍然保持不变。这有效的让我们在 store 的多处重用 reducer 函数。为了完整性，这有一个带有前缀的 action creator 工厂函数：
+
+```javascript
+const setPaginationFor = (prefix) => { 
+  const setPagination = (response) => {
+    const {
+      startElement,
+      pageSize,
+      count,
+    } = response;
+    return {
+      type: prefix + types.SET_PAGINATION,
+      payload: {
+        startElement,
+        pageSize,
+        count,
+      },
+    };
+  };
+  return setPagination;
+};
+// example usages
+const setUsersPagination = setPaginationFor('USERS_');
+const setDomainsPagination = setPaginationFor('DOMAINS_');
+```
+
+## 5. 整合 React
