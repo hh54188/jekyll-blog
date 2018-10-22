@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 不要用JWT替代session管理（上）：全面了解Token,JWT,OAuth,SAML,SSO
+title: 不要用JWT替代session管理（上1）：全面了解Token,JWT,OAuth,SAML,SSO
 modified: 2018-06-24
 tags: [back-end]
 image:
