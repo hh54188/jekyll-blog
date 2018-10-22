@@ -328,6 +328,6 @@ const ConnectedComponent = connect(
 
 - 刚刚讨论的状态管理类库 [Redux](http://redux.js.org/)
 - 用于创建选择器的 [Reselect](https://github.com/reactjs/reselect) 类库
-- [Normalizr](https://github.com/paularmstrong/normalizr) 是一个用于「扁平化」（normalizing）JSON 数据的类库。对使用索引存储数据非常有帮助
+- [Normalizr](https://github.com/paularmstrong/normalizr) 是一个用于「标准化」（normalizing）JSON 数据的类库。对使用索引存储数据非常有帮助
 - 用于在 Redux 中使用异步 action 的中间件类库 [Redux-Thunk](https://github.com/gaearon/redux-thunk) 
 - 使用 ES2016 generator 实现的异步 action 的另一个中间件类库 [Redux-Saga](https://github.com/redux-saga/redux-saga)
