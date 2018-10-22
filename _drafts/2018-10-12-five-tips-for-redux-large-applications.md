@@ -290,3 +290,44 @@ const setDomainsPagination = setPaginationFor('DOMAINS_');
 ```
 
 ## 5. 整合 React
+
+有一些 Redux 应用永远也不需要给用户渲染视图（像接口一样），但是大部分情况下你需要视图将数据渲染出来。目前最受欢迎的与 Redux 配合的渲染 UI 类库是 React，这也是我们接下来用于展示如何与 Redux 整合的 UI 类库。我们可以使用上面几个小节中学习到的策略来让我们的视图代码更友好。为了实现整合，我们将使用 `react-redux` 类库
+
+UI 整合的一个有用的模式是在视图中使用访问器访问状态中的数据, 在`react-redux`中便于放置访问器的地方是`mapStateToProps`函数中。这个函数被传递进`connect`函数（用于将 React 组件连接至 Redux store 的函数）调用的过程中。在这里你能将状态中的数据映射为组件接收到的属性。这是一个完美的使用选择器从状态获取数据，然后以属性的形式传递给组件的地方。整合的例子如下：
+
+```javascript
+const ConnectedComponent = connect(
+  (state) => {
+    return {
+      users: selectors.getCurrentUsers(state),
+      editingUser: selectors.getEditingUser(state),
+      ... // other props from state go here
+    };
+  }),
+  mapDispatchToProps // another `connect` function
+)(UsersComponent);
+```
+这种在 React 和 Redux 之间整合也为我们提供了使用作用域和类型封装 action 的场所。我们要使得组件的处理函数有能力唤起 store 调用 action creator。为了完成这项任务，在`react-redux`中调用`connect`时，我们传入`mapDispatchToProps`函数。函数`mapDispatchToProps`是我们调用 Redux 的 `bindActionCreators` 函数用于将咩歌 action 和 dispatch 方法绑定起来的地方。在其中我们还可以像上一节展示的那样给 action 绑定作用域。举个例子，如果我们在用户列表页面中使用带有作用域的 reduer 模式的翻页功能，代码如下所示：
+
+```javascript
+const ConnectedComponent = connect(
+  mapStateToProps,
+  (dispatch) => {
+    const actions = {
+      ...actionCreators, // other normal actions
+      setPagination: actionCreatorFactories.setPaginationFor('USERS_'),
+    };
+    return bindActionCreators(actions, dispatch);
+  }
+)(UsersComponent);
+```
+
+现在从我们`UsersPage`组件的角度来说，它接收到了用户列表和其他的状态碎片，以及被绑定的 action creator 作为属性传递给它。组件不需要关心它需要带有什么作用域的 action 又或者如何访问状态；在整合的层面我们已经对这些问题进行了处理。这种机制让我们能够创建不需要依赖状态内部工作机制的非常松耦合的组件。希望借助我们在这里讨论的各类模式，我们都能以可伸缩，可维护，以及合理的方式创建 Redux 应用。
+
+**更多参考**：
+
+- 刚刚讨论的状态管理类库 [Redux](http://redux.js.org/)
+- 用于创建选择器的 [Reselect](https://github.com/reactjs/reselect) 类库
+- [Normalizr](https://github.com/paularmstrong/normalizr) 是一个用于「扁平化」（normalizing）JSON 数据的类库。对使用索引存储数据非常有帮助
+- 用于在 Redux 中使用异步 action 的中间件类库 [Redux-Thunk](https://github.com/gaearon/redux-thunk) 
+- 使用 ES2016 generator 实现的异步 action 的另一个中间件类库 [Redux-Saga](https://github.com/redux-saga/redux-saga)
