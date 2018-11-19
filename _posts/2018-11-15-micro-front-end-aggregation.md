@@ -1,4 +1,15 @@
-# 从美团这篇文章聊聊微前端的聚合问题
+---
+layout: post
+title: 从美团这篇文章聊聊微前端的聚合问题
+modified: 2018-11-15
+tags: [javascript]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
 
 最近我打算在我的面试题库里加一道题，用于考验候选人的应用的设计能力，这个问题也来源于最近经历的真实的业务问题：
 
@@ -10,11 +21,11 @@
 
 但是这样的拆分有很多，最常见的，是将单个应用拆分为多个独立的应用，通过导航栏和动态加载来实现无缝的切换，这样的 app 甚至可以采用不同的技术栈进行构建:
 
-![](./images/micro-front-end/multi-app.png)
+![](../images/micro-front-end/multi-app.png)
 
 单个页面上的模块也可以拆分为不同的微前端由不同的团队使用不同的技术栈进行开发：
 
-![](./images/micro-front-end/three-teams.png)
+![](../images/micro-front-end/three-teams.png)
 
 这是两个极端。其他场景包括但不限于
 
