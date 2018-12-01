@@ -150,11 +150,88 @@ ReactDOM.render(
 );
 ```
 
-如果你分别运行这两个版本的代码，你不会感受到任何的差异。但是如果我们把需要展示的 Mobx 中最终渲染的 `<StopWatchApp />` 实例和 Redux 中最终渲染的 `<WrappedStopWatch />` 实例扩展为 20 个。你会感受到 Redux 明显出现了卡顿，或者说变化速率明显比 Mobx 版本更慢。这里就不贴视频或者是 gif 图了。各位运行代码就能一目了然
+注意在上面的 Redux 版本代码中，每一个 `StopWatch` 直接订阅 store 中的 currentTimestamp 状态。在后面我们会尝试另一种方式
 
-为什么呢，通过 Chrome 的开发工具我们就能看出端倪：
+如果你分别运行这两个版本的代码，你不会感受到任何的差异。但是如果我们把需要展示的 Mobx 中最终渲染的 `<StopWatchApp />` 实例和 Redux 中最终渲染的 `<WrappedStopWatch />` 实例扩展为 20 个（这里也就有了 20 次对 store 状态的订阅）：
 
+```javascript
+ReactDOM.render(
+  <Provider store={store}>
+    <div>
+      <WrappedStopWatch />
+      <WrappedStopWatch />
+      <WrappedStopWatch />
+      <WrappedStopWatch />
+      <WrappedStopWatch />
+      // ...省略后面的15个
+    </div>
+  </Provider>,
+  document.querySelector("#app")
+);
+```
 
+你会感受到 Redux 明显出现了卡顿（通过肉眼就能观察出来，这里就不需要使用精确的时间显示差别了），或者说变化速率明显比 Mobx 版本更慢。这里就不贴视频或者是 gif 图了。各位运行代码就能一目了然
+
+为什么呢，通过 Chrome 的开发工具我们就能看出端倪，这是运行中的脚本的执行情况：
+
+![](./images/mobx-redux-performance/redux-performance-issue-trace.png)
+
+注意下方源码中最耗时的可以追溯的`Event`操作，追溯到源码中，我们能够看到它的调用栈本质上来自`dispatch`：
+
+![](./images/mobx-redux-performance/redux-performance-dispatch-issue.png)
+
+也就是说，我们有理由怀疑，Redux 的 `dispatch` 会造成性能的损耗（该死，这可是最核心的机制）。我们不妨先做一个假设:在上面的代码中，因为我们使用了独立订阅 store 的 20 个组件，间接使用了`disaptch`，最终导致性能下降。接下来我们要验证这个假设是否正确，原理非常简单，我们实现相同的效果，即同时在页面上显示20个秒表，但是只使用一个订阅——我们使用一个父容器订阅 store，然后把状态传递给子组件。store 部分不用修改，组件部分修改如下：
+
+```javascript
+const StopWatch = ({ currentTimestamp }) => {
+  return <div>{currentTimestamp}</div>;
+};
+
+class Container extends React.Component {
+  constructor(props) {
+    super(props);
+    const { update } = this.props;
+    setInterval(update);
+  }
+  render() {
+    const { currentTimestamp } = this.props;
+    return (
+      <div>
+        <StopWatch currentTimestamp={currentTimestamp} />
+        // 省略剩下的 19 个
+      </div>
+    );
+  }
+}
+
+const WrappedContainer = connect(
+  function mapStateToProps(state, props) {
+    const {
+      stopWatch: { currentTimestamp }
+    } = state;
+    return {
+      currentTimestamp
+    };
+  },
+  function(dispatch) {
+    return {
+      update: () => {
+        dispatch(createUpdateAction());
+      }
+    };
+  }
+)(Container);
+
+ReactDOM.render(
+  <Provider store={store}>
+    <div>
+      <WrappedContainer />
+    </div>
+  </Provider>,
+  document.querySelector("#app")
+);
+```
+这段代码验证了我们的想法，修改之后变得健步如飞了，达到了和 Mobx 相同的显示速率。
 
 ## 参考资料
 
