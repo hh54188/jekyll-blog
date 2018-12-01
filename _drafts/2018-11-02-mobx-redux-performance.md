@@ -14,14 +14,11 @@
 
 提问者做了一个测试，往`observable.array`装饰过的数组（Mobx 自己的数据结构）中`push`200个元素，计算总共花费的时间，并且和原生的操作进行能比较。结果是使用 Mobx 的方式一共花费了 120ms, 而原生的操作只花费了不到 1ms。这是不是说明了 Mobx 性能非常糟糕？
 
-理论上来说提问者的测试方法没有错，测试的结果也是正确的。但问题在于单纯数值上的对比是有失公允的，虽然原生数组`push`方法更快，但是它无法提供单向数据流、无法提供状态管理不是？同时 Mobx 也能与React 进行配合优化组件的渲染。所以我们不能仅仅考量数值上的大小，还要考虑整体利益的得失
+理论上来说提问者的测试方法没有错，测试的结果也是正确的。但问题在于单纯数值上的对比是有失公允的，虽然原生数组`push`方法更快，但是它无法提供单向数据流、无法提供状态管理不是？同时 Mobx 也能与React 进行配合优化组件的渲染。所以我们不能仅仅考量数值上的大小，还要考虑整体利益的得失。Mobx 在这项操作上慢了 120 倍，首先 120ms 的差距用户几乎是感知不到的，其次它换来的是给我们开发项目带来便利，为以后的维护节省成本，要知道这些花费可是按照人月计算的。
 
-在我做优化工作的早期，我习惯于使用工程上的指标，比如 DOMContentLoaded 时间，onLoad 时间，软性一点的是 Speed Index。但目前我更倾向于使用业务性质的指标，因为你要想清除一个问题是，工程的指标真的和业务指标正相关吗？如果 onLoad 时间边长，页面的 PV 就真的会下降吗？理论上是，但并不一定，相反如果你顽皮一点，你完全能够做到让 onLoad 的时间边长，但是 PV 上升，只要保证 above fold content 足够快和可用就好了
+在我做优化工作的早期，我习惯于使用工程上的指标，比如 DOMContentLoaded 时间，onLoad 时间，软性一点的是 Speed Index。但目前我更倾向于使用业务性质的指标，因为你要想清除一个问题是，工程的指标真的和业务指标正相关吗？如果 onLoad 时间边长，bounce rate 就真的会升高吗？理论上是，但并不一定，相反如果你顽皮一点，你完全能够做到让 onLoad 的时间边长，但是 bounce rate 下降，只要保证 above fold content 足够快和可用就好了
 
-做优化的目的
-
-
-[https://www.exp-platform.com/Documents/2014%20experimentersRulesOfThumb.pdf](https://www.exp-platform.com/Documents/2014%20experimentersRulesOfThumb.pdf)
+说到底技术还是为业务服务的。最后以一篇阅读到的论文[Seven Rules of Thumb for Web Site Experimenters](https://www.exp-platform.com/Documents/2014%20experimentersRulesOfThumb.pdf)上的一个例子来结束这个小节。简单来说我只想强调两点：1) 不要盲目的、绝对的衡量性能的好坏；2) 多从业务出发考虑问题
 
 >At Bing, we use multiple performance metrics for diagnostics, but
 our key time-related metric is Time-To-Success (TTS) [24], which
@@ -37,3 +34,128 @@ metrics. It is highly robust to changes, and very sensitive. Its main
 deficiency is that it only works for clickable elements. For queries
 where the SERP has the answer (e.g., for “time” query), users can
 be satisfied and abandon the page without clicking.
+
+## 性能对比
+
+为什么需要进行比较是因为我在为下一个项目寻找技术选型。在新的项目中有一个重要的用户场景类似于 Photoshop，屏幕中央有很大一块区域用于拖拽和摆放物品。当某个物品被选中之后，四周的属性面板现实该物品的各种相关属性，当物品在实时被拖动时，面板的显示内容也要实时进行修改。
+
+这个场景可以抽象为：多个对象订阅同一个对象的属性并且展示。我分别使用 Mobx 和 Redux 通过实现一个实时的显示的秒表来模拟这个场景
+
+Mobx 版本：
+
+```javascript
+class StopWatch {
+  @observable
+  currentTimestamp = 0;
+
+  @action
+  updateCurrentTimestamp = value => {
+    this.currentTimestamp = value;
+  };
+}
+
+const stopWatch = new StopWatch();
+
+@inject("store")
+@observer
+class StopWatchApp extends React.Component {
+  constructor(props) {
+    super(props);
+    const stopWatch = this.props.store;
+    setInterval(() => stopWatch.updateCurrentTimestamp(Date.now()));
+  }
+  render() {
+    const stopWatch = this.props.store;
+    return <div>{stopWatch.currentTimestamp}</div>;
+  }
+}
+
+ReactDOM.render(
+  <Provider store={stopWatch}>
+    <div>
+      <StopWatchApp />
+    </div>
+  </Provider>,
+  document.querySelector("#app")
+);
+```
+
+Redux 版本：
+
+```javascript
+const UPDATE_ACTION = "UPDATE_ACTION";
+
+const createUpdateAction = () => ({
+  type: UPDATE_ACTION
+});
+
+const stopWatch = function(
+  initialState = {
+    currentTimestamp: 0
+  },
+  action
+) {
+  switch (action.type) {
+    case UPDATE_ACTION:
+      initialState.currentTimestamp = Date.now();
+      return Object.assign({}, initialState);
+    default:
+      return initialState;
+  }
+};
+
+const store = createStore(
+  combineReducers({
+    stopWatch
+  })
+);
+
+class StopWatch extends React.Component {
+  constructor(props) {
+    super(props);
+    const { update } = this.props;
+    setInterval(update);
+  }
+  render() {
+    const { currentTimestamp } = this.props;
+    return <div>{currentTimestamp}</div>;
+  }
+}
+
+const WrappedStopWatch = connect(
+  function mapStateToProps(state, props) {
+    const {
+      stopWatch: { currentTimestamp }
+    } = state;
+    return {
+      currentTimestamp
+    };
+  },
+  function(dispatch) {
+    return {
+      update: () => {
+        dispatch(createUpdateAction());
+      }
+    };
+  }
+)(StopWatch);
+
+ReactDOM.render(
+  <Provider store={store}>
+    <div>
+      <WrappedStopWatch />
+    </div>
+  </Provider>,
+  document.querySelector("#app")
+);
+```
+
+如果你分别运行这两个版本的代码，你不会感受到任何的差异。但是如果我们把需要展示的 Mobx 中最终渲染的 `<StopWatchApp />` 实例和 Redux 中最终渲染的 `<WrappedStopWatch />` 实例扩展为 20 个。你会感受到 Redux 明显出现了卡顿，或者说变化速率明显比 Mobx 版本更慢。这里就不贴视频或者是 gif 图了。各位运行代码就能一目了然
+
+为什么呢，通过 Chrome 的开发工具我们就能看出端倪：
+
+
+
+## 参考资料
+
+- [Seven Rules of Thumb for Web Site Experimenters](https://www.exp-platform.com/Documents/2014%20experimentersRulesOfThumb.pdf)
