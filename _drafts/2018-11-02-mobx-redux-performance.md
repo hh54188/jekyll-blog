@@ -41,6 +41,8 @@ be satisfied and abandon the page without clicking.
 
 这个场景可以抽象为：多个对象订阅同一个对象的属性并且展示。我分别使用 Mobx 和 Redux 通过实现一个实时的显示的秒表来模拟这个场景
 
+我一直反对在文章中贴出整段整段的代码，但是这次没有办法，为了保证阅读的完整性，似乎没有一部分的代码是可以省略的，于是用两个框架写的版本都完整的贴出来
+
 Mobx 版本：
 
 ```javascript
@@ -231,7 +233,37 @@ ReactDOM.render(
   document.querySelector("#app")
 );
 ```
-这段代码验证了我们的想法，修改之后变得健步如飞了，达到了和 Mobx 相同的显示速率。
+这段代码验证了我们的想法，修改之后程序变得健步如飞了，达到了和 Mobx 相同的显示速率。这也验证了我们的假设，`dispatch`确实会带来性能上的损失，但可怕的事情是`dispatch`是 Redux 事件机制的意志体现。这里我们不继续探究为什么`dispatch`的变慢的原因
+
+**但切记, 通过父容器渲染这不是常规的优化方案**
+
+在差不多在一年前的文章[「React + Redux 性能优化（一）：理论篇」](http://qingbob.com/redux-performance-01-basic/) 里，我提到过由父容器统一渲染列表其实是下下策。因为 immutable data 的关系，一旦列表中某一项数据内容发生了渲染，会导致整个列表都会被重新渲染，包括那些没有被修改的
+
+我给出的建议是，当你在渲染一个列表时，将列表的数据结构划分为两个部分，id列表和项目字典：父容器只根据id列表负责渲染每一项的外层容器，而每一项的具体内容，则是每一个项目组件直接访问 store 获得：
+
+```javascript
+class App extends Component {
+  render() {
+    const { ids } = this.props;
+    return (
+      <div>
+        {ids.map(id => {
+          return <Item key={id} id={id} />;
+        })}
+      </div>
+    );
+  }
+}
+```
+
+另一个关于 Mobx 与 Redux 性能对比测试的例子是来自于 Mobx 的作者 Michel Weststrate（好吧，这听上去就有失公允了），来自他的这篇 [twitter](https://twitter.com/mweststrate/status/718444275239882753)
+
+![](./images/mobx-redux-performance/redux-mobx-benchmark.jpg)
+
+这份测试的源码位于 [https://github.com/mweststrate/redux-todomvc](https://github.com/mweststrate/redux-todomvc)
+
+测试中展示了在 Mobx 和 Redux 同一个操作下（在 todo mvc 中修改一个 todo 或者是新增一个 todo）所需要的时间（另一个变量是 todo 的数量）。
+从图中可以看出，无论是哪一种情况，Mobx 花费的时间最少。
 
 ## 参考资料
 
