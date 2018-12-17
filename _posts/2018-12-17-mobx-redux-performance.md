@@ -1,4 +1,15 @@
-# Mobx 与 Redux 的性能对比
+---
+layout: post
+title: Mobx 与 Redux 的性能对比
+modified: 2018-12-17
+tags: [javascript, redux, mobx, performance]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
 
 在本文中你将看到我最终得出的结论是 Mobx 的性能优于 Redux。但很明显这样的结论是片面的，甚至是有失偏颇的，因为我只选取了一个的场景对两者进行测试。可能真实的情况恰恰相反，Mobx 仅仅在我测试的这个场景中优于 Redux，但是在我所有没有测试到的场景中都劣于 Redux，这都是有可能的。性能跑分这类东西从来都不要放在心上，「鲁大师」不也是被戏称为「娱乐大师」嘛。
 
@@ -174,11 +185,11 @@ ReactDOM.render(
 
 为什么呢，通过 Chrome 的开发工具我们就能看出端倪，这是运行中的脚本的执行情况：
 
-![](./images/mobx-redux-performance/redux-performance-issue-trace.png)
+![](../images/mobx-redux-performance/redux-performance-issue-trace.png)
 
 注意下方源码中最耗时的可以追溯的`Event`操作，追溯到源码中，我们能够看到它的调用栈本质上来自`dispatch`：
 
-![](./images/mobx-redux-performance/redux-performance-dispatch-issue.png)
+![](../images/mobx-redux-performance/redux-performance-dispatch-issue.png)
 
 也就是说，我们有理由怀疑，Redux 的 `dispatch` 会造成性能的损耗（该死，这可是最核心的机制）。我们不妨先做一个假设:在上面的代码中，因为我们使用了独立订阅 store 的 20 个组件，间接使用了`disaptch`，最终导致性能下降。接下来我们要验证这个假设是否正确，原理非常简单，我们实现相同的效果，即同时在页面上显示20个秒表，但是只使用一个订阅——我们使用一个父容器订阅 store，然后把状态传递给子组件。store 部分不用修改，组件部分修改如下：
 
@@ -256,7 +267,7 @@ class App extends Component {
 
 另一个关于 Mobx 与 Redux 性能对比测试的例子是来自于 Mobx 的作者 Michel Weststrate（好吧，这听上去就有失公允了），来自他的这篇 [twitter](https://twitter.com/mweststrate/status/718444275239882753)
 
-![](./images/mobx-redux-performance/redux-mobx-benchmark.jpg)
+![](../images/mobx-redux-performance/redux-mobx-benchmark.jpg)
 
 这份测试的源码位于 [https://github.com/mweststrate/redux-todomvc](https://github.com/mweststrate/redux-todomvc)
 
@@ -297,11 +308,11 @@ const profileView = observer(props => {
 
 从代码中我们得到的依赖关系如下：
 
-![](./images/mobx-redux-performance/observe-origin.png)
+![](../images/mobx-redux-performance/observe-origin.png)
 
 而实际上对于 Mobx 来说它会简化为
 
-![](./images/mobx-redux-performance/observe-mini.png)
+![](../images/mobx-redux-performance/observe-mini.png)
 
 这样自然就减少了非常多的计算量
 
