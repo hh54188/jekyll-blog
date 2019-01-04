@@ -122,6 +122,73 @@ export default function withMobx(injectFunction) {
 
 ## 准守性能规则
 
+虽然从某些方面来说 Mobx 比 Redux 性能更好，但是 Mobx 仍然有罩门的。举个例子：
+
+```javascript
+class Person extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+  render() {
+    console.log('Person Render')
+    const {name} = this.props
+    return <li>{name}</li>
+  }
+}
+
+@inject("store")
+@observer
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    setInterval(this.props.store.updateSomeonesName, 1000 * 1)
+  }
+  render() {
+    console.log('App Render')
+    const list = this.props.store.list
+    return <ul>
+      {list.map((person) => {
+        return <Person key={person.name} name={person.name} ></Person>
+      })}
+    </ul>
+  }
+}
+```
+`updateSomeonesName`方法会随机的更改列表中某个对象的`name`字段。从实际运行的状态看，即使只有一个对象的字段发生了更改，整个`<App />`和其他未修改的对象的`<Person />`组件都会重新进行渲染。
+
+改善这个问题的方法之一，就是给`Person`组件同样以`mobx-react`类库的`observer`进行“装饰”：
+
+```javascript
+@observer
+class Person extends React.Component {
+```
+`observer`的作用用原文的话说就是：
+> Function (and decorator) that converts a React component definition, React component class or stand-alone render function into a reactive component, which tracks which observables are used by render and automatically re-renders the component when one of these values changes.
+
+经过“装饰”之后的组件`Person`，只有在`name`发生更改之后才会进行重新渲染
+
+然而我们可以做的更好，用官方的话说就是**Dereference values late**，用中文话说就是**当需要的时候再对值进行引用**
+
+在上面的代码的例子中，假设我们不会在`Person`组件中使用（渲染）`name`字段，而是通过另一个名为`PersonName`的组件进行渲染，那么在`App`里，`Person`里，都不应该访问`name`字段。否则会造成无意义的渲染。简单来说，就是下面 1 和 2 的区别：
+
+```javascript
+@observer
+class Person extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+  render() {
+    // 1:
+    return <PersonName person={this.props.person}></PersonName>
+    // 2:
+    return <PersonName name={this.props.person.name}></PersonName>
+  }
+}
+```
+- 如果你使用了 1 的写法，那么当`person.name`发生更改时，`<Person />`组件不会重新渲染，只有 `<PersonName />` 会重新渲染
+- 如果你使用了 2 的写法，那么当`person.name`发生更改时，`<Person />`组件会重新渲染，`<PersonName />`组件也会重新渲染
+
+当然直接传递整个对象到组件中也存在问题，会造成数据的冗余，给今后的维护者造成困难
 
 
 
