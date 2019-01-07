@@ -1,4 +1,15 @@
-# 构建大型 Mobx 应用的几个建议
+---
+layout: post
+title:  构建大型 Mobx 应用的几个建议
+modified: 2019-01-02
+tags: [javascript, mobx, performance]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
 
 Mobx 与 Redux 相似，都是适用于状态管理的出色工具。它同样遵循单向数据流，同样能与 React 搭档配合。与 Redux 不同的是，它的学习成本更低，框架体系更加完善（比如它自带异步操作的解决方案，而 Redux 只提供了中间件体系，必须借助第三方类库实现）。如果说 Redux 只是继承了 Flux 的衣钵的话，那么 Mobx 则是基于 Flux 的再一次进化
 
