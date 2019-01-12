@@ -102,3 +102,96 @@ const PersonSchema = Schema({
   })
 })
 ```
+
+## 实现
+
+### `Types`
+
+首先关于 Types 的链式调用 `Types().string().required()` 让我想到了什么？jQuery. jQuery 是如何实现链式调用的？函数调用的结束始终返回对 jQuery 的引用。我们也可以这么做，用于实现链式调用
+
+`Types`是一个类，`Types()`用于生成一个实例。你可能注意到没有使用关键词`new`，因为我认为使用关键词`new`是很鸡肋很累赘的事情。技术上不使用`new`关键词生成实例也很容易，只要 1) 不用使用 `class` 定义类，使用函数 2) 在构造函数中添加对实例的判断：
+
+```javascript
+function Types() {
+  if (!(this instanceof Types)) {
+    return new Types();
+  }
+}
+```
+而至于对各种数据类型的验证，我们借助并且封装`lodash`的方法进行实现。用户每执行一个验证函数，我们会生成一个内部的验证函数，存储在 `Types` 实例的 `validators` 变量中，用于将来对该字段值的判断
+
+```javascript
+import _ from 'lodash'
+
+const lodashWrap = fn => {
+  return value => {
+    return fn.call(this, value);
+  };
+};
+
+function Types() {
+  if (!(this instanceof Types)) {
+    return new Types();
+  }
+  this.validators = []
+}
+
+Types.prototype = {
+  string: function() {
+    this.validators.push(lodashWrap(_.isString));
+    return this;
+  },
+  number: function() {
+    this.validators.push(lodashWrap(_.isNumber));
+    return this;
+  },
+```
+
+同理，我们也实现了`default`、`required`和`valueof`
+
+```javascript
+
+function Types() {
+  if (!(this instanceof Types)) {
+    return new Types();
+  }
+  this.validators = [];
+  this.isRequired = false;
+  this.defaultValue = void 0;
+  this.possibleValues = [];
+}
+
+
+Types.prototype = {
+  default: function(defaultValue) {
+    this.defaultValue = defaultValue;
+    return this;
+  },
+  required: function() {
+    this.isRequired = true;
+    return this;
+  },
+  valueOf: function() {
+    this.possibleValues = _.flattenDeep(Array.from(arguments));
+    return this
+```
+
+### `Schema`
+
+通过我们之前约定的 `Schema()` 的用法我们不难判断出 `Schema` 的基本结构应该如下：
+
+```javascript
+export const Schema = definition => {
+  return function(inputObj = {}) {
+    return {}
+  }
+}
+```
+
+`Schema` 的代码实现中绝大部分并没有什么特别的，在 `definition` 中我们得到了schema的定义，即对每个字段（key）的约束。通过对字段值的各种判断，就能得到用于想表达的约束信息：
+
+- 如果值不是 `Types` 的实例，表示用户只是定义了字段，但并没有对它进行约束，同时当前值也是默认值。在创建实例或者对实例进行写操作时不需要任何校验
+- 如果值是 `Types` 实例，那么我们就能从实例的属性里取得各种约束信息，就是之前`Types`定义里的意义`validators`、`defaultValue`、`isRequired`、`possibleValues`
+- 如果值是函数，表示用户定义了一个嵌套的 Schema，在校验时需要使用这个定义的 Schema 进行校验
+
+`Schema`类的实现关键在于如何实现`set`访问器，即如何在用户给字段赋值时进行校验，校验通过之后才设置成功
