@@ -1,6 +1,6 @@
 # 不如自己写一个 schema 类库吧
 
-这篇文章里没有传达高深技巧和经验，记录的是一个想法从诞生到实现，以及分享我在编码过程中的喜悦
+这篇文章里没有传达高深技巧和经验，记录的是一个想法从诞生到实现的过程
 
 ## 背景需求
 
@@ -141,10 +141,6 @@ Types.prototype = {
     this.validators.push(lodashWrap(_.isString));
     return this;
   },
-  number: function() {
-    this.validators.push(lodashWrap(_.isNumber));
-    return this;
-  },
 ```
 
 同理，我们也实现了`default`、`required`和`valueof`
@@ -194,4 +190,32 @@ export const Schema = definition => {
 - 如果值是 `Types` 实例，那么我们就能从实例的属性里取得各种约束信息，就是之前`Types`定义里的意义`validators`、`defaultValue`、`isRequired`、`possibleValues`
 - 如果值是函数，表示用户定义了一个嵌套的 Schema，在校验时需要使用这个定义的 Schema 进行校验
 
-`Schema`类的实现关键在于如何实现`set`访问器，即如何在用户给字段赋值时进行校验，校验通过之后才设置成功
+`Schema`类的实现关键在于如何实现`set`访问器，即如何在用户给字段赋值时进行校验，校验通过之后才允许赋值成功。关于如何实现访问器，我们有两种方案进行选择：
+- 使用 `Object.defineProperty` 定义对象的访问器
+- 使用 Proxy 机制
+
+`Object.defineProperty`的本质是对对象进行修改（当然你也能够深度拷贝一份原对象再进行修改，以避免污染）；而 Proxy 从“语义”上来说更适合这个场景，也不存在污染的问题。并且在同时尝试了两个方案之后，使用 Proxy 的成本更低。于是决定使用 Proxy 机制，那么代码结构大致变为：
+
+```javascript
+export const Schema = definition => {
+  return function(inputObj = {}) {
+    const proxyHandler = {
+      get: (target, prop) => {
+        return target[prop];
+      },
+      set: (target, prop, value) => {
+
+      }
+    }
+    return new Proxy(Object.assign({}, inputObj), proxyHandler);
+  }
+}
+```
+
+## 结束语
+
+本文的源码在 [https://github.com/hh54188/schemaor](https://github.com/hh54188/schemaor)
+
+你可以拷贝它，和它玩耍，测试它，修改它。**但千万不要将它用在生产环境中**，它还没有经过充分的测试，以及还有很多细枝末节和边界情况需要处理
+
+欢迎通过 [pull request](https://github.com/hh54188/schemaor/pulls) 和 [issues](https://github.com/hh54188/schemaor/issues) 提出更多的建议
