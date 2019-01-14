@@ -1,5 +1,15 @@
-# 不如自己写一个 schema 类库吧
-
+---
+layout: post
+title:  不如自己写一个 schema 类库吧
+modified: 2019-01-12
+tags: [javascript, schema]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
 这篇文章里没有过多的技巧和经验，记录的是一个想法从诞生到实现的过程
 
 ## 背景需求
