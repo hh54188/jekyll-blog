@@ -63,15 +63,18 @@ const team = new List(jsonData).map(Person) // => List<Person>
 假设类库名为 `Schema`
 
 - 创建 Schema：
+
 ```javascript
 const PersonSchema = Schema({
   name: '',
   age: ''
 })
 ```
+
 虽然我们支持对字段约束，但是你可以不需要约束。那么采用以上的方式即可，仅仅约定了 schema 的字段名词，以及默认值
 
 - 实例化 Schema:
+
 ```javascript
 const person = PersonSchema({
   name: 'Lee',
@@ -80,12 +83,14 @@ const person = PersonSchema({
 ```
 
 - 对字段进行约束：
+
 ```javascript
 const PersonSchema = Schema({
   name: Types().string().default('').required(),
   age: Types().number().required()
 })
 ```
+
 解释一下，理想状态下应该使用 React 中`PropTypes`的方式对字段进行约束，例如`PropTypes.func.isRequired`，但是一时想不到如何实现，于是提供`Types`类辅佐以链式调用的方式曲线救国，可以约束的条件如下：
 
 - 数据类型约束
