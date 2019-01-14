@@ -107,6 +107,7 @@ const PersonSchema = Schema({
 当然还可以添加其他种类的约束，比如`min()`、`max()`、`regex()`等等，这些二期再实现，以上才是目前来说看来是最重要
 
 - 支持 schema 嵌套
+
 ```javascript
 const PersonSchema = Schema({
   name: Types().string().default('').required(),
