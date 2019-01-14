@@ -1,12 +1,12 @@
 # 不如自己写一个 schema 类库吧
 
-这篇文章里没有传达高深技巧和经验，记录的是一个想法从诞生到实现的过程
+这篇文章里没有过多的技巧和经验，记录的是一个想法从诞生到实现的过程
 
 ## 背景需求
 
 在上一篇文章 [构建大型 Mobx 应用的几个建议](https://zhuanlan.zhihu.com/p/54291246) 中，我提到过使用 schema 来约定数据结构。但遗憾的事情是，在浏览器端，我一直没有能找到合适的 schmea 类库，所以只能用 Immutable.js 中的 Record 代替。
 
-如果你还不了解什么是 schema，我在这里简单解释一下: 在应用内部的不同组件之间，应用端与服务端之间，都需要使用消息进行通信，而随着应用复杂度增长，消息的数据结构也变得复杂和庞大。对每一类需要使用的消息或者对象提前定义 schema，有利于确保通信的正确性，防止传入不存在的字段，或者传入字段的类型不正确；同时也具有自解释的文档的作用，有利于今后的维护。我们以 [joi](https://github.com/hapijs/joi) 类库为例
+如果你还不了解什么是 schema，在这里简单解释一下: 在应用内部的不同组件之间，应用端与服务端之间，都需要使用消息进行通信，而随着应用复杂度增长，消息的数据结构也变得复杂和庞大。对每一类需要使用的消息或者对象提前定义 schema，有利于确保通信的正确性，防止传入不存在的字段，或者传入字段的类型不正确；同时也具有自解释的文档的作用，有利于今后的维护。我们以 [joi](https://github.com/hapijs/joi) 类库为例
 
 ```javascript
 const Joi = require('joi');
@@ -27,7 +27,7 @@ const result = Joi.validate({ username: 'abc', birthyear: 1994 }, schema);
 Joi.validate({ username: 'abc', birthyear: 1994 }, schema, function (err, value) { });  // err === null -> valid
 ```
 
-但是就像我在 [npm](https://www.npmjs.com/search?q=schema) 上能找到的所有 schema 类库类似，它们始终在采取一种“事后验证”机制，即事先定义 schema 之后，再将需要验证的对象交给 schema 进行验证，这是让我不满意的。我更希望采取 Reacord 的方式：
+就像能在 [npm](https://www.npmjs.com/search?q=schema) 上能找到的所有 schema 类库类似，它们始终在采取一种“事后验证”机制，即事先定义 schema 之后，再将需要验证的对象交给 schema 进行验证，这是让我不满意的。我更希望采取 Reacord 的方式：
 
 ```javascript
 const Person = Record({
@@ -40,17 +40,17 @@ const person = new Person({
 })
 const team = new List(jsonData).map(Person) // => List<Person>
 ```
-在上面的例子中，schema 俨然拥有了类似于“类”的功能，你能够使用它创建指定数据结构的实例。如果你在创建实例时传入的属性没有事先定义便会报错。但是美中不足的是，Record 不支持更进一步的对每个字段进行约束，指定类型、最大值最小值灯，就像在 joi 里看到的那样。
+在上面的例子中，schema 俨然拥有了类似于“类”的功能，你能够使用它创建指定数据结构的实例。如果你在创建实例时传入的属性没有事先定义便会报错。但是美中不足的是，Record 不支持更进一步的对每个字段进行约束：指定类型、最大值和最小值等，就像在 joi 里看到的那样。
 
-介于找不到令我们满意的 schema 类库，不如我们自己编写一个。它需要具备以下两种能力：
+介于找不到满意的 schema 类库，不如我们自己编写一个。综上它需要具备以下两种能力：
 - 能够根据 schema 创建实例，而不是事后验证
 - 支持对 schema 定义时字段的约束
 
-## 设计用法
+## 设计API
 
-在开发之前，我们需要考虑并且约定将来如何使用它。关于这一点在上一小节中我们已经得出初步的结论了。
+在开发之前，我们需要考虑并且约定将来如何使用它。关于这一点在上一小节中已经得出初步的结论了。
 
-假设类库名为 Schema
+假设类库名为 `Schema`
 
 - 创建 Schema：
 ```javascript
@@ -76,7 +76,7 @@ const PersonSchema = Schema({
   age: Types().number().required()
 })
 ```
-解释一下，理想状态下应该使用 React 中`PropTypes`的接口方式对字段进行约束，例如`PropTypes.func.isRequired`，但是一时想不到如何实现，于是提供`Types`类的方式曲线救国，可以约束的条件如下：
+解释一下，理想状态下应该使用 React 中`PropTypes`的接口方式对字段进行约束，例如`PropTypes.func.isRequired`，但是一时想不到如何实现，于是提供`Types`类辅佐以链式调用的方式曲线救国，可以约束的条件如下：
 
 - 数据类型约束
   - `string()`: 仅限字符串类型
@@ -107,7 +107,7 @@ const PersonSchema = Schema({
 
 ### `Types`
 
-首先关于 Types 的链式调用 `Types().string().required()` 让我想到了什么？jQuery. jQuery 是如何实现链式调用的？函数调用的结束始终返回对 jQuery 的引用。我们也可以这么做，用于实现链式调用
+关于 Types 的链式调用 `Types().string().required()` 让我想到了什么？jQuery. jQuery 是如何实现链式调用的？函数调用的结束始终返回对 jQuery 的引用。
 
 `Types`是一个类，`Types()`用于生成一个实例。你可能注意到没有使用关键词`new`，因为我认为使用关键词`new`是很鸡肋很累赘的事情。技术上不使用`new`关键词生成实例也很容易，只要 1) 不用使用 `class` 定义类，使用函数 2) 在构造函数中添加对实例的判断：
 
