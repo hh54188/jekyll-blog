@@ -1,5 +1,7 @@
 # 仪表盘场景前端优化经验谈
 
+## 事故背景
+
 相信绝大部分公司的中台系统中都存在仪表盘页面，以 [Ant Design Pro](https://pro.ant.design/index-cn) 提供的中台方案分析页面为例，通常仪表盘页面的形式如下。仪表盘由不同的图表卡片组成，并且在创建或者编辑时允许作者添加、删除卡片，拖拽卡片的位置和调整卡片的大小等等：
 
 ![](./images/dashboard-optimize/dashboard_sample.png)
@@ -57,3 +59,29 @@ class Dashboard {
 ![](./images/dashboard-optimize/old_dashboard_cpu_overload.png)
 
 如上图所示，如果我们借助 Chrome 浏览器自带的 Performance 工具观察整个加载的过程，从标注1和标注2可以看出CPU始终处于满载的状态，并且这其中的主要是在执行脚本，并且几乎没有给渲染分配时间，从标注3可以看出，在这段时间内浏览器渲染能力接近 0fps，需要上百秒来渲染一帧
+
+到这里为止事故的现状，原因我都做了简单的介绍，接下来就要着手解决这个问题。
+
+## 分片(Chunk): Old but gold 
+
+在面对 long task （执行时间超过 50ms以上）时，屡试不爽的解决方案是分片（chunk），也就是把长时间连续执行的任务拆分成短暂的可间隔执行的任务。拆分的好处是能够使得浏览器得以有空隙响应其他的请求，比如用户的输入以及页面的绘制。
+
+我最早接触这个方法是在 Nicholas C. Zakas（「JavaScript高级程序设计」原版作者） 十年前发表的一篇[博客](https://humanwhocodes.com/blog/2009/01/13/speed-up-your-javascript-part-1/)，在处理一个占用时间过长的循环时，他编写了一个很简易的分片函数：
+
+```javascript
+function chunk(array, process, context){
+    setTimeout(function(){
+        var item = array.shift();
+        process.call(context, item);
+
+        if (array.length > 0){
+            setTimeout(arguments.callee, 100);
+        }
+    }, 100);
+}
+```
+虽然现在 `callee` 已经 deprecated 了，`setTimeout`也可以使用`requestAnimationFrame`代替。但是它背后的思考方式是没有发生变化的
+
+我们面临的困难并不是一个真实的 long task，而是无数的碎片任务蜂拥而至造成了 long task 的效果。我们的解决思路依然没有变：要设法给浏览器制造喘息的机会。在这个目标之下，我选择的方案是放弃卡片自治的数据加载和渲染方式，而是采用队列的机制，对需要执行的所有任务做到严格的进出控制。这样能够保证从开始就不会给浏览器大压力
+
+## 指标
