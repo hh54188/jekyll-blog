@@ -64,7 +64,7 @@ class Dashboard {
 
 到这里为止事故的现状，原因我都做了简单的介绍，接下来就要着手解决这个问题。
 
-## 思路
+## 方案
 
 我个人的总结，程序的性能问题好比是人体的疾病，对于治病最有效的两个手段就是经验和工具。经验不仅仅是指你个人曾经预见过同样的问题，还包括行业内前人的总结归纳。绝大部分问题通过经验都能迎刃而解，通过页面的所属功能以及异常行为就能判断出问题可能出在哪里以及应该如何解决，就像医生在秋冬季节看到病人发烧流鼻涕咽喉痛，就能判断出是流感引起以及得出治疗方案了。而对于更复杂的难以通过表象判断的问题，这个时候就需要借助于工具，观察问题发生的时机，（代码）位置，影响面有多广，又或者你只是想通过工具验证你的猜想是否正确而已。
 
@@ -110,6 +110,8 @@ function chunk(array, process, context){
 ## 实施
 
 回到我们的解决方案中，最后我决定使用一个队列机制严格的控制仪表盘的，其实也是卡片的每一步操作: 1) 请求 meta 信息; 2) 查询报表数据; 3) 渲染卡片
+
+### 队列机制
 
 首先我们需要一个队列，考虑到请求数据和渲染卡片分别是异步和同步操作，准确来说我们需要一个异步和同步通吃的队列机制。实现的方法有很多种，在这里我借助于 Promise 实现，因为 1) Promise 为异步而生; 2) Promise 也可以兼容同步操作; 3) Promise 支持顺序执行
 
@@ -165,5 +167,98 @@ return tasks.reduce((prevPromise, currentTask()) => {
 }, Promise.resolve([]))
 ```
 
-然而需要考虑更复杂的情况是，有时候仅仅是单个依次执行任务又过于节约了，所以我们要允许多个任务“并发”执行
+然而需要考虑更复杂的情况是，有时候仅仅是单个依次执行任务又过于节约了，所以我们要允许多个任务「并发」执行。于是我们决定给允许给 PromiseDispatcher 配置名为 `maxParallelExecuteCount` 的参数，用于控制最大可并行的执行个数。针对这个需求，代码上也要做一些修改，使用 `Promise.all` 来处理多个并发的异步操作情况：
 
+```javascript
+import _ from 'lodash'
+
+const { maxParallelExecuteCount = 1 } = this.config;
+const chunkedTasks = _.chunk(this.tasks, maxParallelExecuteCount);
+
+return chunkedTasks.reduce((prevPromise, curChunkedTask) => {
+  return prevPromise.then(prevResult => {
+    return Promise.all(
+      curChunkedTask.map(curTask => {
+        let curPromise = curTask()
+        curPromise = !isPromiseObj(curPromise) ? Promise.resolve(curPromise) : curPromise
+        return curPromise
+      })
+    ).then(curChunkedResults => [ ...chainResults, curChunkedResults ])
+  })
+}, Promise.resolve([]))
+
+```
+
+以上就是队列机制的核心代码，整个项目的完整代码会在本文的最后给出
+
+### 与组件整合
+
+因为这个项目使用了 Mobx 的关系，这里只展示 Mobx 框架下 Dispatcher 与 Mobx 和 组件配合的代码。相信在其他的框架下也大同小异，关键代码如下：
+
+```javascript
+// Component App.js:
+import { observer, inject } from "mobx-react";
+
+@inject('dashboardStore')
+@observer
+export default class App extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    const { reports } = this.props.dashboardStore;
+    return (
+      <div>
+        {reports.map(({ id, data, loading, rendered }) => {
+          return (
+            <ChartCard key={id} data={data} loading={loading} rendered={rendered} />
+          );
+        })}
+      </div>
+    );
+  }
+}
+// DashboardStore.js：
+export default class DashboardStore {
+  @observable reports = [...Array(30).keys()].map((item, index) => {
+    return {
+      loading: true,
+      id: index,
+      data: [],
+      rendered: false
+    };
+  });
+  constructor() {
+    autorun(() => {
+      this.reports.forEach(report => {
+        const requestMetaJob = () => {
+          report.loading = true;
+          return axios.get("/meta");
+        };
+        const requestDataJob = () => {
+          return axios.get("/api").then(() => {
+            report.loading = false;
+            report.data = randomData();
+          });
+        };
+        const initializeRendering = () => {
+          report.rendered = true;
+        };
+        promiseDispatcher.feed([requestMetaJob, requestDataJob, initializeRendering]);
+      });
+    });
+  }
+}
+```
+注意，因为我们无法手动调用组件的 API 触发组件渲染，所以采用标志位`rendered`的被动的触发卡片的渲染。在组件 `<ChartCard />` 中只要做简单的判断即可:
+
+```javascript
+componentDidUpdate(prevProps) {
+  if (!prevProps.rendered && this.props.rendered) {
+    this.renderChart(this.props.data);
+  }
+}
+```
+
+## 验收
+ 
