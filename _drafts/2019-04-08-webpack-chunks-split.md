@@ -37,4 +37,72 @@
 - 在第5周的时我们给站点新增了一个 npm 包
 - 在第8周时我们更新了现有的一个 npm 包
 
-当然
+当然包括我在内的某些人希望场景尽可能的逼真。不要那么做，实际的场景其实无关紧要，我们随后会解释为什么。
+
+## 基线
+
+假设我们的 JavaScript 打包后的总体积时400KB, 并且目前我们以但文件的形式加载它，命名为`main.js`
+
+我们有一个类似如下的 Webpack 配置（我已经移除了无关的配置项）：
+
+```javascript
+const path = require('path');
+
+module.exports = {
+  entry: path.resolve(__dirname, 'src/index.js'),
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].[contenthash].js',
+  },
+};
+```
+
+（对那些刚接触缓知识的人我解释一下：存任何时候我提及`main.js`的时候，我实际上是在说类似于`main.xMePWxHo.js`这种类似于这种包含一堆带有文件内容哈希字符串的文件名。这意味着当你应用中的代码发生更改时就会生成一个新的文件名，这样就能迫使浏览器下载新的文件）
+
+当每周我向站点发布新的变更时，包的`contenthash`就会发生更改。所以每周 Alice 访问我们站点时不得不下载一个全新的 400KB 大小的文件
+
+![](./images/webpack-chunk-split/001.png)
+
+连续十周**也就是 4.12MB**
+
+我们能做的更好
+
+## 分离vender包
+
+让我们把我们的打包文件划分为`main.js`和`vendor.js`
+
+很简单，类似于：
+
+```javascript
+const path = require('path');
+
+module.exports = {
+  entry: path.resolve(__dirname, 'src/index.js'),
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].[contenthash].js',
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+    },
+  },
+};
+```
+
+在你没有告诉它你想如何拆分打包文件的情况下， Webpack 4 在尽它最大的努力把这件事最的最好
+
+这就导致一些正面的声音：“太惊人了，Webpack 做的真不错！”
+
+也带了许多反面的声音：“你对我的打包文件做了什么！”
+
+无论如何，添加`optimization.splitChunks.chunks = 'all'`配置也就是再说“把所有`node_modules`里的东西都放到`vendors~main.js`的文件中去”
+
+
+
+
+
+
+
+
+
