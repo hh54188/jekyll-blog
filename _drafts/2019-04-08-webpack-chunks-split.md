@@ -92,11 +92,153 @@ module.exports = {
 
 在你没有告诉它你想如何拆分打包文件的情况下， Webpack 4 在尽它最大的努力把这件事最的最好
 
-这就导致一些正面的声音：“太惊人了，Webpack 做的真不错！”
+这就导致一些声音在说：“太惊人了，Webpack 做的真不错！”
 
-也带了许多反面的声音：“你对我的打包文件做了什么！”
+而另一些声音在说：“你对我的打包文件做了什么！”
 
 无论如何，添加`optimization.splitChunks.chunks = 'all'`配置也就是再说“把所有`node_modules`里的东西都放到`vendors~main.js`的文件中去”
+
+在实现基本的打包分离条件后，Alice 在每次访问时仍然需要下载 200KB 大小的 `main.js` 文件， 但是只需要在第一周、第五周、第八周下载 200KB 的 `vendors.js`脚本
+
+![](./images/webpack-chunk-split/002.png)
+
+**也就是 2.64MB**
+
+体积减少了 36%。对于配置里新增的五行代码来说结果还不错。在继续阅读之前你可以立刻就去试试。如果你需要将 Webpack 3 升级到 4，也不要着急，升级不会带来痛苦（而且是免费的！）
+
+## 分离每一个 npm 包
+
+我们的 `vendors.js`承受着和开始`main.js`文件同样的问题——部分的修改会意味着重新下载所有的文件
+
+所以为什么不把每一个 npm 包都分割为单独的文件？做起来非常简单
+
+让我们把我们的`react`，`lodash`，`redux`，`moment`等分离为不同的文件
+
+```javascript
+
+const path = require('path');
+const webpack = require('webpack');
+
+module.exports = {
+  entry: path.resolve(__dirname, 'src/index.js'),
+  plugins: [
+    new webpack.HashedModuleIdsPlugin(), // so that file hashes don't change unexpectedly
+  ],
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].[contenthash].js',
+  },
+  optimization: {
+    runtimeChunk: 'single',
+    splitChunks: {
+      chunks: 'all',
+      maxInitialRequests: Infinity,
+      minSize: 0,
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name(module) {
+            // get the name. E.g. node_modules/packageName/not/this/part.js
+            // or node_modules/packageName
+            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+
+            // npm package names are URL-safe, but some servers don't like @ symbols
+            return `npm.${packageName.replace('@', '')}`;
+          },
+        },
+      },
+    },
+  },
+};
+```
+
+[这份文档](https://webpack.js.org/guides/caching/) 非常好的解释了这里做的事情，但是我仍然需要解释一下其中精妙的部分，因为它们花了我相当长的时间才搞明白
+
+- Webpack 有一些那么智能配置的默认“智能”配置，比如当分离打包输出文件时只允许最多3个文件，并且最小文件的尺寸是30KB（如果存在更小的文件就把它们拼接起来）。所以我把这些配置都覆盖了
+- `cacheGroups`是我们用来制定规则告诉 Webpack 应该如何组织 chunks 到打包输出文件的地方。我在这里对所有加载自`node_modules`里的 module 制定了一条名为 "vendor" 的规则。通常情况下，你只需要为你的输出文件的 `name`定义一个字符串。但是我把`name`定义为了一个函数（当文件被解析时会被调用）。在函数中我会根据 module 的路径返回包的名称。结果就是，对于每一个包我都会得到一个单独的文件，比如`npm.react-dom.899sadfhj4.js`
+- 为了能够正常发布[npm 包的名称必须是合法的URL](https://docs.npmjs.com/files/package.json#name)，所以我们不需要`encodeURI`对包的名词进行处理。但是我遇到一个问题是.NET服务器不会给名称中包含`@`的文件提供文件服务，所以我在代码片段中进行了替换
+- 整个步骤的配置设置之后就不需要维护了——我们不需要使用名称引用任何的类库
+
+Alice 每周都要重新下载 200KB 的 `main.js` 文件，并且再她首次访问时仍然需要下载 200KB 的 npm 包文件，但是她再也不用重复的下载同一个包两次
+
+![](./images/webpack-chunk-split/003.png)
+
+也就是**2.24MB**
+
+相对于基线减少了 44%，这是一段你能够从文章里粘贴复制的非常酷的代码。
+
+我好奇我们能超越 50%？
+
+那不是很棒吗
+
+## 把应用代码进行分离
+
+现在让我们把目光转向 Alice 一遍又一遍下载的 `main.js` 文件
+
+我之前提到过我们的站点里又两个完全不同的部分：一个产品列表页面和一个详情页面。每个页面独立的代码提及大概是 25KB（共享 150KB 的代码）
+
+我们的“产品详情”页面目前不会进行更改，因为它非常的完美。所以如果我们把它划分为独立文件，大部分时候它都能够从缓存中进行加载
+
+并且你知道我们还有一个用于渲染 icon 用的 25KB 的几乎不发生修改的 SVG 文件吗？
+
+我们应该对做些什么
+
+我们仅仅手动的增加一些 entry 入口，告诉 Webpack 给它们都创建独立的文件：
+
+```javascript
+
+
+module.exports = {
+  entry: {
+    main: path.resolve(__dirname, 'src/index.js'),
+    ProductList: path.resolve(__dirname, 'src/ProductList/ProductList.js'),
+    ProductPage: path.resolve(__dirname, 'src/ProductPage/ProductPage.js'),
+    Icon: path.resolve(__dirname, 'src/Icon/Icon.js'),
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].[contenthash:8].js',
+  },
+  plugins: [
+    new webpack.HashedModuleIdsPlugin(), // so that file hashes don't change unexpectedly
+  ],
+  optimization: {
+    runtimeChunk: 'single',
+    splitChunks: {
+      chunks: 'all',
+      maxInitialRequests: Infinity,
+      minSize: 0,
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name(module) {
+            // get the name. E.g. node_modules/packageName/not/this/part.js
+            // or node_modules/packageName
+            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+
+            // npm package names are URL-safe, but some servers don't like @ symbols
+            return `npm.${packageName.replace('@', '')}`;
+          },
+        },
+      },
+    },
+  },
+};
+```
+
+并且 Webpack 为它们之间的共享代码也创建了独立的文件，也就是说`ProductList`和`ProductPage`不会拥有重复的代码
+
+这回 Alice 在大多数周里都会节省下 50KB 的下载量
+
+![](./images/webpack-chunk-split/004.png)
+
+**只有 1.815MB 了**
+
+我们已经为 Alice 节省了 56% 的下载量，并且节省工作一直会持续下去（在我们的理论场景中）
+
+并且所有这些都是通过修改 Webapck 配置实现的——我们还没有修改任何一行应用程序的代码。
+
+我之前提到测试之下是什么样具体的场景并不重要。因为无论你遇见的是什么场景，结论始终是一致的：把你的代码划分为更多更有意义的小文件，用户需要下载的代码也就越少
 
 
 
