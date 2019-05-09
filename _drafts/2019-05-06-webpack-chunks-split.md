@@ -105,6 +105,16 @@ module.exports = {
 
 所以在 Webpack 中配置的 `filename: [name]:[contenthash].js` 就是为了每次发布时自动生成新的文件名。
 
+然而如果你对 Webpack 稍有了解的话，你应该知道 Webpack 还提供了另外两种哈希算法供开发者使用：`hash`和`chunkhash`。那么为什么不使用它们而是使用`contenthash`？这要从它们的区别说起。
+
+原则上来说，它们是为不同目的服务的，但在实际操作中，也可以交替使用
+
+- [hash]
+- [chunkhash]
+- [contenthash]
+
+
+
 
 
 
