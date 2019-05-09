@@ -67,7 +67,7 @@ module.exports = {
 
 我们能做的更好
 
-## 分离vender包
+## 分离第三方类库（vendor）包
 
 让我们把我们的打包文件划分为`main.js`和`vendor.js`
 
