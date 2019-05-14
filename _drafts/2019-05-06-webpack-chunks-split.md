@@ -259,7 +259,17 @@ Alice 每周都要重新下载 200KB 的 `main.js` 文件，并且再她首次�
 
 接下来的这一小节会针对 Webpack 的 Optimization 选项做讲解。不过需要提前打预防针的是，我个人并非 Webpack 的专家，配置和对应的描述功能也并非一一经过验证，如果有纰漏的地方还请大家谅解。
 
-`optimization`配置如其名所示，是为优化代码而生
+`optimization`配置如其名所示，是为优化代码而生。如果你再仔细观察，大部分配置又在`splitChunk`字段下，因为它间接使用 SplitChunkPlugin 在实现对块拆分的功能。这些都是在 Webpack 4 中引入的新的机制。在 Webpack 3 中使用的是 CommonsChunkPlugin，在 4 中已经不再使用了。所以我们这里我们也主要关注的是 SplitChunkPlugin 的配置
+
+在最初分离 vendor 代码时，我们只使用了一个配置 
+
+```javascript
+splitChunks: {
+  chunks: 'all',
+},
+```
+
+`chunks`的选项
 
 
 
