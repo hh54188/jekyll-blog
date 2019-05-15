@@ -10,7 +10,7 @@
 
 在探寻最佳实践的过程中，最让我疑惑的不是我们能不能做，而是我们应该如何做：我们因该采取什么样的特征拆分脚本？我们应该使用什么样的缓存策略？使用懒加载和分块是否有异曲同工之妙？拆分之后究竟能带来多大的性能提升？最重要的是，在面多诸多的方案和工具以及不确定的因素时，我们应该如何开始？这篇文章就是对以上问题的梳理和回答。文章的内容大体分为两个方面，一方面在思路制定模块分离的策略，另一方面从技术上对方案进行落地。
 
-本文的部分内容翻译自 [The 100% correct way to split your chunks with Webpack](https://hackernoon.com/the-100-correct-way-to-split-your-chunks-with-webpack-f8a9df5b7758)。 这篇文章很好的循序渐进的引导开发者步步为营的对代码进行拆分优化，所以它的译文是作为本文的线索存在。同时在它的基础上，我会对某些知识点做纵向扩展，对方案进行落地。
+本文的部分内容翻译自 [The 100% correct way to split your chunks with Webpack](https://hackernoon.com/the-100-correct-way-to-split-your-chunks-with-webpack-f8a9df5b7758)。 这篇文章很好的循序渐进的引导开发者步步为营的对代码进行拆分优化，所以它的译文是作为本文的线索存在。同时在它的基础上，我会对 Webpack 及其他的知识点做纵向扩展，对方案进行落地。
 
 以下开始正文
 
@@ -257,9 +257,9 @@ Alice 每周都要重新下载 200KB 的 `main.js` 文件，并且再她首次�
 
 此时你的疑惑可能是，optimization 选项里的配置怎么就把 vendor 代码分离出来了？
 
-接下来的这一小节会针对 Webpack 的 Optimization 选项做讲解。不过需要提前打预防针的是，我个人并非 Webpack 的专家，配置和对应的描述功能也并非一一经过验证，如果有纰漏的地方还请大家谅解。
+接下来的这一小节会针对 Webpack 的 Optimization 选项做讲解。不过需要提前打预防针的是，我个人并非 Webpack 的专家，配置和对应的描述功能也并非一一经过验证，也并非全部都覆盖到，如果有纰漏的地方还请大家谅解。
 
-`optimization`配置如其名所示，是为优化代码而生。如果你再仔细观察，大部分配置又在`splitChunk`字段下，因为它间接使用 SplitChunkPlugin 在实现对块拆分的功能。这些都是在 Webpack 4 中引入的新的机制。在 Webpack 3 中使用的是 CommonsChunkPlugin，在 4 中已经不再使用了。所以我们这里我们也主要关注的是 SplitChunkPlugin 的配置
+`optimization`配置如其名所示，是为优化代码而生。如果你再仔细观察，大部分配置又在`splitChunk`字段下，因为它间接使用 SplitChunkPlugin 在实现对块拆分的功能（这些都是在 Webpack 4 中引入的新的机制。在 Webpack 3 中使用的是 CommonsChunkPlugin，在 4 中已经不再使用了。所以我们这里我们也主要关注的是 SplitChunkPlugin 的配置）从整体上看，SplitChunksPlugin 的功能只有一个，就是**split**——把代码分离出来。分离是相对于把所有模块都打包成一个文件而言，把单个大文件分离为多个小文件。所以其下所有的配置也都是围绕做这件事的。
 
 在最初分离 vendor 代码时，我们只使用了一个配置 
 
@@ -269,7 +269,40 @@ splitChunks: {
 },
 ```
 
-`chunks`的选项
+`chunks`有三个选项：`initial`、`async`和`all`。它指示应该优先分离同步（initial）、异步（async）还是所有的代码模块。这里的异步指的是通过动态加载方式（`import()`）加载的模块。
+
+这里的重点是**优先**二字。假如你有两个模块 a 和 b，两者都引用了 jQuery，但是 a 模块还通过动态加载的方式引入了 lodash。那么在 `async` 模式下，插件在打包时会分离出`lodash~for~a.js`的 chunk 模块，而 a 和 b 的公共模块 jQuery 并不会被（优化）分离出来，所以它可能还同时存在于打包后的`a.bundle.js`和`b.bundle.js`文件中。因为`async`告诉插件优先考虑的是动态加载的模块
+
+接下来聚焦第二段分离每个 npm 包的 Webpack 配置中
+
+`maxInitialRequests`和`minSize`确实就是插件自作多情的杰作了。插件自带一些分离 chunk 的规则：如果即将分离的 chunk 文件体积小于 30KB 的话，那么就不会将该 chunk 分离出来；并且限制并行下载的 chunk 最大请求个数为 3 个。通过覆盖 `minSize` 和 `maxInitialRequests` 配置就能够重写这两个参数。注意这里的`maxInitialRequests`和`minSize`是在`splitChunks`根目录中的，我们暂且称它为全局配置
+
+`cacheGroups`配置才是最重要，它允许自定义规则分离 chunk。并且每条`cacheGroups`规则下都允许定义上面提到的`chunks`和`minSize`字段用于覆盖全局配置（又或者将`cacheGroups`规则中`enforce`参数设为`true`来忽略全局配置）
+
+`cacheGroups`里默认自带`vendors`配置来分离`node_modules`里的类库模块，它的默认配置如下：
+
+```javascript
+cacheGroups: {
+  vendors: {
+    test: /[\\/]node_modules[\\/]/,
+    priority: -10
+  },
+```
+
+如果你不想使用它的配置，你可以把它设为`false`又或者覆盖它。这里我选择覆盖，并且加入了额外的配置`name`和`enforce`:
+
+```javascript
+vendors: {
+  test: /[\\/]node_modules[\\/]/,
+  name: 'vendors',
+  priority: 19,
+  enforce: true,
+},
+```
+
+
+
+
 
 
 
