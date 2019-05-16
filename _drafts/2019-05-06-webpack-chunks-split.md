@@ -8,7 +8,7 @@
 
 幸运的是，我们目前手头上的工具已经完全赋予我们实现以上需求的能力。例如 Webpack 允许我们在打包时将脚本分块；利用浏览器缓存我们能够有的放矢的加载脚本。
 
-在探寻最佳实践的过程中，最让我疑惑的不是我们能不能做，而是我们应该如何做：我们因该采取什么样的特征拆分脚本？我们应该使用什么样的缓存策略？使用懒加载和分块是否有异曲同工之妙？拆分之后究竟能带来多大的性能提升？最重要的是，在面多诸多的方案和工具以及不确定的因素时，我们应该如何开始？这篇文章就是对以上问题的梳理和回答。文章的内容大体分为两个方面，一方面在思路制定模块分离的策略，另一方面从技术上对方案进行落地。
+在探寻最佳实践的过程中，最让我疑惑的不是我们能不能做，而是我们应该如何做：我们因该采取什么样的特征拆分脚本？我们应该使用什么样的缓存策略？使用懒加载和分块是否有异曲同工之妙？拆分之后究竟能带来多大的性能提升？最重要的是，在面多诸多的方案和工具以及不确定的因素时，我们应该如何开始？这篇文章就是对以上问题的梳理和回答，同时也是在为我思考和解决问题时捋清思路。文章的内容大体分为两个方面，一方面在思路制定模块分离的策略，另一方面从技术上对方案进行落地。
 
 本文的部分内容翻译自 [The 100% correct way to split your chunks with Webpack](https://hackernoon.com/the-100-correct-way-to-split-your-chunks-with-webpack-f8a9df5b7758)。 这篇文章很好的循序渐进的引导开发者步步为营的对代码进行拆分优化，所以它的译文是作为本文的线索存在。同时在它的基础上，我会对 Webpack 及其他的知识点做纵向扩展，对方案进行落地。
 
@@ -289,16 +289,169 @@ cacheGroups: {
   },
 ```
 
-如果你不想使用它的配置，你可以把它设为`false`又或者覆盖它。这里我选择覆盖，并且加入了额外的配置`name`和`enforce`:
+如果你不想使用它的配置，你可以把它设为`false`又或者重写它。这里我选择重写，并且加入了额外的配置`name`和`enforce`:
 
 ```javascript
 vendors: {
   test: /[\\/]node_modules[\\/]/,
   name: 'vendors',
-  priority: 19,
   enforce: true,
 },
 ```
+最后介绍以上并没有出现但是仍然常用的两个配置：`priority`和`reuseExistingChunk`
+
+- `reuseExistingChunk`: 该选线只会出现在`cacheGroups`的分离规则中，意味重复利用现有的 chunk。例如 chunk 1 拥有模块 A、B、C；chunk 2 拥有模块 B、C。如果再 `reuseExistingChunk` 为 `false` 的情况下，在打包时插件会为我们单独创建一个 chunk 名为 `common~for~1~2`，它包含公共模块 B 和 C。而如果该值为`true`的话，因为 chunk 2 中已经拥有公共模块 B 和 C，所以插件就不会再为我们创建新的模块
+
+- `priority`: 很容易想象到我们会在`cacheGroups`中配置多个 chunk 分离规则。如果同一个模块同时匹配多个规则怎么办，`priority`解决的这个问题。注意所有默认配置的`priority`都为负数，所以自定义的`priority`必须大于等于0才行
+
+### 小结
+
+截至目前为止，我们已经看出了一套分离代码的模式：
+
+- 首先决定我们想要解决什么样的问题（避免用户在每次访问时下载额外的代码）；
+- 再决定使用什么样的方案（通过将修改频率低、重复的代码分离出来，并配上恰当的缓存策略）；
+- 最后决定实施的方案是什么（通过配置 Webpack 来实现代码的分离）
+
+
+
+-------------------------------------------------------------------
+
+
+
+## 把应用代码进行分离
+
+现在让我们把目光转向 Alice 一遍又一遍下载的 `main.js` 文件
+
+我之前提到过我们的站点里又两个完全不同的部分：一个产品列表页面和一个详情页面。每个页面独立的代码提及大概是 25KB（共享 150KB 的代码）
+
+我们的“产品详情”页面目前不会进行更改，因为它非常的完美。所以如果我们把它划分为独立文件，大部分时候它都能够从缓存中进行加载
+
+并且你知道我们还有一个用于渲染 icon 用的 25KB 的几乎不发生修改的 SVG 文件吗？
+
+我们应该对做些什么
+
+我们仅仅手动的增加一些 entry 入口，告诉 Webpack 给它们都创建独立的文件：
+
+```javascript
+module.exports = {
+  entry: {
+    main: path.resolve(__dirname, 'src/index.js'),
+    ProductList: path.resolve(__dirname, 'src/ProductList/ProductList.js'),
+    ProductPage: path.resolve(__dirname, 'src/ProductPage/ProductPage.js'),
+    Icon: path.resolve(__dirname, 'src/Icon/Icon.js'),
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].[contenthash:8].js',
+  },
+  plugins: [
+    new webpack.HashedModuleIdsPlugin(), // so that file hashes don't change unexpectedly
+  ],
+  optimization: {
+    runtimeChunk: 'single',
+    splitChunks: {
+      chunks: 'all',
+      maxInitialRequests: Infinity,
+      minSize: 0,
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name(module) {
+            // get the name. E.g. node_modules/packageName/not/this/part.js
+            // or node_modules/packageName
+            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+
+            // npm package names are URL-safe, but some servers don't like @ symbols
+            return `npm.${packageName.replace('@', '')}`;
+          },
+        },
+      },
+    },
+  },
+};
+```
+
+并且 Webpack 为它们之间的共享代码也创建了独立的文件，也就是说`ProductList`和`ProductPage`不会拥有重复的代码
+
+这回 Alice 在大多数周里都会节省下 50KB 的下载量
+
+![](./images/webpack-chunk-split/004.png)
+
+**只有 1.815MB 了**
+
+我们已经为 Alice 节省了 56% 的下载量，并且节省工作一直会持续下去（在我们的理论场景中）
+
+并且所有这些都是通过修改 Webapck 配置实现的——我们还没有修改任何一行应用程序的代码。
+
+我之前提到测试之下是什么样具体的场景并不重要。因为无论你遇见的是什么场景，结论始终是一致的：把你的代码划分为更多更有意义的小文件，用户需要下载的代码也就越少
+
+---
+
+很快我们就将谈到“代码分离”——另一种分割文件的方式——但是首先我想首先解决你现在正在考虑的问题
+
+### 网络请求变多的时候是不是会变得更慢？
+
+答案非常明确是否定的
+
+在 HTTP/1.1 的情况下确实会如此，但是在 HTTP/2 中不会
+
+尽管如此，[这篇来自 2016 年的文章](https://medium.com/@asyncmax/the-right-way-to-bundle-your-assets-for-faster-sites-over-http-2-437c37efe3ff)和来自于[Khan Academy 2015 年的文章](http://engineering.khanacademy.org/posts/js-packaging-http2.htm)都得出结论说即使有 HTTP/2 下载太多文件的话仍然会导致变慢。但是在这两篇文章里“太多”意味着上百个文件。所以只要记住如果你有上百个文件，你或许达到了并行的上限
+
+如果你在好奇如何在 Windows 10 的 IE11 上支持 HTTP/2。我对那些还在使用古董机器的人做了调查，他们出奇一致的让我放心他们根本不关心网站的加载速度
+
+### 每一个 webpack 打包后的文件里会不会有多余的模板代码？
+
+有的
+
+### 如果我有多个小文件的话是不是压缩的效果就减弱了
+
+是的
+
+事实确实是：
+
+- 多文件 = 多 Webpack 模板代码
+- 多文件 = 压缩减小
+
+让我们把其中的损耗的都明确下来
+
+我刚刚做了一个测试，一个 190 KB 的站点文件被划分为了19个文件，发送给浏览器的字节数大概多了 2%
+
+所以……首次访问的文件提及增加了 2%  但是直到世界末日其他的每次访问文件体积都减小了 60%
+
+所以损耗的正确数字是：一点都不。
+
+当我在测试 1 个文件对比 19 个文件情况时，我想我应该赋予测试一些不同的网络环境，包括 HTTP/1.1
+
+下面这张表格给予了“文件越多越好”的有力支持
+
+![](./images/webpack-chunk-split/005.png)
+
+在 3G 和 4G 的情况下当有19个文件时加载实践减少了 30%
+
+但真的是这样吗？
+
+这份数据看上去“噪点”很多，举个例子，在 4G 场景下第二次运行时，网站加载花费了 646ms，但是之后的第二轮运行则花费了 1116ms——时间增加了73% 。所以宣称 HTTP/2 快了 30% 有一些心虚
+
+我创建这张表格是为了试图量化 HTTP/2 究竟能带来多大的差异，但是我唯一能说的是“并没有太大的区别”
+
+真正令人惊喜的是最后两行，旧版本的 Windows 和 HTTP/1.1 我本以为会慢非常多。我猜我需要更慢的网络环境
+
+---
+
+故事时间！我从[微软网站](https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/)下载了一个 Windows 7 的虚拟机来测试这些东西
+
+我想把默认的 IE8 升级至 IE9
+
+所以我前往微软下载 IE9 的页面然后发现：
+
+![](./images/webpack-chunk-split/006.png)
+
+最后提一句 HTTP/2，你知道它已经集成进 Node 中了吗？如果你想尝试，我[用100行写了一段 HTTP/2 服务](https://gist.github.com/davidgilbertson/e5690c04e06c4882cf5761f8acff36ec)，能够为你的测试带来缓存上的帮助
+
+---
+
+以上就是我想说的关于打包分离的一切。我想这个实践唯一的坏处是需要税赋人们加载如此多的小文件是没有问题的
+
 
 
 
@@ -308,9 +461,22 @@ vendors: {
 
 ## 参考资料
 
+### Bundle VS Chunk
+
 - [What are module, chunk and bundle in webpack?](https://stackoverflow.com/questions/42523436/what-are-module-chunk-and-bundle-in-webpack)
 - [Concepts - Bundle vs Chunk](https://github.com/webpack/webpack.js.org/issues/970)
 - [SurviveJS: Glossary](https://survivejs.com/webpack/appendices/glossary/)
+
+### Hash
+
 - [What is the purpose of webpack hash and chunkhash?](https://stackoverflow.com/questions/35176489/what-is-the-purpose-of-webpack-hash-and-chunkhash)
 - [Hash vs chunkhash vs ContentHash](https://medium.com/@sahilkkrazy/hash-vs-chunkhash-vs-contenthash-e94d38a32208)
 - [Adding Hashes to Filenames](https://survivejs.com/webpack/optimizing/adding-hashes-to-filenames/)
+
+## SplitChunksPlugin
+
+- [Webpack 4 — Mysterious SplitChunks Plugin](https://medium.com/dailyjs/webpack-4-splitchunks-plugin-d9fbbe091fd0)
+- [Webpack (v4) Code Splitting using SplitChunksPlugin](https://itnext.io/react-router-and-webpack-v4-code-splitting-using-splitchunksplugin-f0a48f110312)
+- [Reduce JavaScript Payloads with Code Splitting](https://developers.google.com/web/fundamentals/performance/optimizing-javascript/code-splitting/)
+- [Webpack v4 chunk splitting deep dive](https://www.chrisclaxton.me.uk/chris-claxtons-blog/webpack-chunksplitting-deepdive)
+- [what reuseExistingChunk: true means, can give a sample?](https://github.com/webpack/webpack.js.org/issues/2122)
