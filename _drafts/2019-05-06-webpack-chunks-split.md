@@ -403,6 +403,14 @@ module.exports = {
 
 有的
 
+然后顺带解释一下什么是“模板代码”
+
+想象一下如果整个项目只有文件`app.js`，那么最终的输出的打包文件也只是`app.js`的文件内容而已。
+
+但是如果`app.js`文件内容是空的话（一行代码都没有），那么最终的打包文件也是空的吗？
+
+不是，为了实现编译之后的模块化，它会将你的代码进行一次封装，这些用于封装的代码会占用一部分体积，是每个模块都必须存在的，所以成为模板代码
+
 ### 如果我有多个小文件的话是不是压缩的效果就减弱了
 
 是的
@@ -452,11 +460,202 @@ module.exports = {
 
 以上就是我想说的关于打包分离的一切。我想这个实践唯一的坏处是需要税赋人们加载如此多的小文件是没有问题的
 
+## 代码分离（不必加载你不需要的代码）
+
+这个特殊的实践只对某些站点有效
+
+我乐意重申一下我发明的 20/20 理论：如果站点的某些部分只有 20% 用户会访问，并且这部分的脚本量大于你整个站点的 20% 的话，你应该考虑按需加载代码了
+
+你可以对数值进行调整来适配更复杂的场景。重点是平衡使用是存在的，需要决策将对站点无意义的代码分离出来
+
+### 如何决策 
+
+假设你有拥有一个购物网站，你在纠结是否应该把“结账”功能的代码分离出来，因为只有 30% 的用户会走到那一步
+
+**首先是要让卖的更好**
+
+其次计算出“结账”功能的独立代码有多少。因为在做“代码分离”之前你常常做“打包文件分离”，你或许已经知道了这部分代码量有多少
+
+（它可能比你想象的还要小，所以计算之后你可能获得惊喜。如果你有一个 React 站点，你的 store，reducer，routing，actions 可能会被整个网站共享，独立的部分可能大部分是组件和帮助类库）
+
+假设你注意到结算页面独立代码一共只有 7KB，其他部分的代码 300KB。看到这种情况我会建议不把这些代码分开，有以下几个原因
+
+- 它并不会让加载变得更慢。记得你之前并行的加载这些文件，你可以试着记录加载 300KB 和 307KB 的文件是否有变化
+- 如果你延迟加载这部分代码，用户在点击“付款”之后仍然需要等待文件的加载——你并不希望给用户带来任何的阻力
+- 代码分离会导致程序代码的更改，这需要将之前同步逻辑的地方改为异步逻辑。这并不复杂，但是对于改善用户体验这件事的性价比来说还是过于复杂了
+
+这些就是我说的“这项令人振奋的技术或许不适合你”
+
+让我们看看两个代码分离的例子
+
+### 回滚方案（Polyfills）
+
+我们从这个例子开始是因为它适用于大多数站点，并且是一个非常好的入门
+
+我给我的站点使用了一堆酷炫的功，所以我使用了一个文件导入了我需要的所有回滚方案。它只需要八行代码：
+
+```javascript
+require('whatwg-fetch');
+require('intl');
+require('url-polyfill');
+require('core-js/web/dom-collections');
+require('core-js/es6/map');
+require('core-js/es6/string');
+require('core-js/es6/array');
+require('core-js/es6/object');
+```
 
 
 
+我在我的入口文件`index.js`顶部引入了这个文件
+
+```javascript
+import './polyfills';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App/App';
+import './index.css';
+
+const render = () => {
+  ReactDOM.render(<App />, document.getElementById('root'));
+}
+
+render(); // yes I am pointless, for now
+```
 
 
+
+在 Webpack 配置关于打包分离的小节配置中，我的回滚代码会自动被分为四个不同的文件因为有四个 npm 包。它们一共大小 25KB 左右，并且 90% 的浏览器都不需要它们，所以它们值得动态的进行加载。
+
+在 Webpack 4 以及 `import()` 语法（不要和`import`语法混淆了）的支持下，有条件的加载回滚代码变得非常简单了
+
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App/App';
+import './index.css';
+
+const render = () => {
+  ReactDOM.render(<App />, document.getElementById('root'));
+}
+
+if (
+  'fetch' in window &&
+  'Intl' in window &&
+  'URL' in window &&
+  'Map' in window &&
+  'forEach' in NodeList.prototype &&
+  'startsWith' in String.prototype &&
+  'endsWith' in String.prototype &&
+  'includes' in String.prototype &&
+  'includes' in Array.prototype &&
+  'assign' in Object &&
+  'entries' in Object &&
+  'keys' in Object
+) {
+  render();
+} else {
+  import('./polyfills').then(render);
+}
+```
+
+
+
+现在是不是更有意义了？如果浏览器支持所有的新特性，那么渲染页面。否则加载回滚代码渲染页面。当代码在运行在浏览器中时，Webpack 的运行时会负责这四个包的加载，并且当它们被下载并且解析完毕时，`render()`函数才会被调用，并且其它工作继续运行
+
+（顺便说一声，如果需要使用`import()`的话，你需要 [Babel 的 dynamic-import 插件](https://babeljs.io/docs/en/babel-plugin-syntax-dynamic-import/) 。并且如 Webpack 文档解释的，`import()`使用 Promises，所以你需要把这部分的回滚代码独立出来）
+
+非常简单不是吗？
+
+有一些更棘手的场景
+
+### 基于路由的动态加载（针对 React）
+
+回到 Alice 的例子，假设网站现在多了一个“管理”页面，产品的卖家可以登陆并且他们卖的产品
+
+这个页面有很多有用的功能，很多的图表，需要安装一个来自 npm 的表单类库。因为我已经实现了打包代码分离，目测至少已经节省了100KB 的大小文件
+
+现在我设置了一份当用户访问呢`/admin`时渲染`<AdminPage>`的路由。当 Webpack 把一切都打包完毕之后，它会去查找`import AdminPage from './AdminPage.js'`，并且说“嘿，我需要把它包含到初始化的加载文件中”
+
+但是我们不想这么做，我们希望在动态加载中加载管理页面，比如`import('./AdminPage.js')`，这样 Webpack 就知道需要动态加载它。
+
+非常酷，不需要任何的配置
+
+与直接引用`AdminPage`不同，当用户访问`/admin`时我使用另外一个组件用于实现如下功能：
+
+核心思想非常简单，当组件加载时（也就意味着用户访问`/admin`时），我们动态的加载`./AdminPage.js`然后再组件 state 中保存对它的引用
+
+在渲染函数中，在等待`<AdminPage`>加载的过程中我们简单的渲染出`<div>Loading...</div>`，一旦加载成功则渲染出`<AdminPage>`
+
+为了好玩我想自己实现它，但是在真实的世界里你只需要像[React 关于 代码分离的文档](https://reactjs.org/docs/code-splitting.html)描述的那样使用 `react-loadable`即可
+
+---
+
+以上就是所有内容了。以上我说的每一个观点，还能说的更精简吗？
+
+- 如果人们会不止一次的访问你的站点，把你的代码划分为不同的小文件
+- 如果你的站点有很大一部分用户不会访问到，动态的加载它们
+
+谢谢阅读，祝你有愉快的一天
+
+完蛋了我忘记提 CSS 了
+
+## 关于开发体验
+
+以上我们都是在针对 production 对代码进行分割。但事实上我们在开发过程中也会面临同样的问题：当代码量增多时，打包的时间也在不断增长。但是例如 node_modules 里的代码千年不变，完全不需要被重新编译。这部分我们也可以通过代码分离的思想对代码进行分离。比如 DLL 技术
+
+通常我们说的 DLL 指的是 Windows 系统的下的动态链接库文件，它的本意是将公共函数库提取出来给大家公用以减少程序体积。我们的 DLL 也是借助了这种思想，将常用的类库分离出来。
+
+使用 DLL 简单来说分为两部：
+
+### 输出 DLL 文件
+
+我们将我们需要分离的文件到打包为 DLL 文件，以分离 node_modules 类库为例，关键配置如下。注意这段配置仅仅是用于分离 dll 文件，并非打包应用脚本
+
+```javascript
+module.exports = {
+   entry: {
+      library: [
+         'react',
+         'redux',
+         'jquery',
+         'd3',
+         'highcharts',
+         'bootstrap',
+         'angular'
+      ]
+   },
+   output: {
+      filename: '[name].dll.js',
+      path: path.resolve(__dirname, './build/library'),
+      library: '[name]'
+   }，
+   plugins: [
+    new webpack.DllPlugin({
+        name: '[name]',
+        path: './build/library/[name].json'
+    })
+  ]
+};
+```
+关键在于使用 DLLPlugin 输出的 json 文件，用于告诉 webpack 从哪找到预编译的类库代码
+
+### 引入 DLL 文件
+
+在正式打包应用脚本的 Webpack 配置中引入 DLL 即可：
+
+```javascript
+plugins: [
+  new webpack.DllReferencePlugin({
+    context: __dirname,
+    manifest: require('./build/library/library.json')
+  })
+]
+```
+
+不过美中不足的是，你仍然需要在你最终的页面里引入 dll 文件
+
+如果你的觉得手动配置 dll 仍然觉得繁琐，那么可以尝试使用 [AutoDllPlugin](https://github.com/asfktz/autodll-webpack-plugin)
 
 
 ## 参考资料
@@ -480,3 +679,7 @@ module.exports = {
 - [Reduce JavaScript Payloads with Code Splitting](https://developers.google.com/web/fundamentals/performance/optimizing-javascript/code-splitting/)
 - [Webpack v4 chunk splitting deep dive](https://www.chrisclaxton.me.uk/chris-claxtons-blog/webpack-chunksplitting-deepdive)
 - [what reuseExistingChunk: true means, can give a sample?](https://github.com/webpack/webpack.js.org/issues/2122)
+
+## DLL
+
+- [How To Use The Dll Plugin to Speed Up Your Webpack Build](https://medium.com/@emilycoco/how-to-use-the-dll-plugin-to-speed-up-your-webpack-build-dbf330d3b13c)

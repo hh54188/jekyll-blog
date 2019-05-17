@@ -186,8 +186,6 @@ Alice 每周都要重新下载 200KB 的 `main.js` 文件，并且再她首次�
 我们仅仅手动的增加一些 entry 入口，告诉 Webpack 给它们都创建独立的文件：
 
 ```javascript
-
-
 module.exports = {
   entry: {
     main: path.resolve(__dirname, 'src/index.js'),
