@@ -82,7 +82,7 @@ module.exports = {
 
 这回 Alice 在大多数周里都会节省下 50KB 的下载量
 
-![](./images/webpack-chunk-split/004.png)
+![](../images/webpack-chunk-split/004.png)
 
 **只有 1.815MB 了**
 
@@ -139,7 +139,7 @@ module.exports = {
 
 下面这张表格给予了“文件越多越好”的有力支持
 
-![](./images/webpack-chunk-split/005.png)
+![](../images/webpack-chunk-split/005.png)
 
 在 3G 和 4G 的情况下当有19个文件时加载时间减少了 30%
 
@@ -159,7 +159,7 @@ module.exports = {
 
 所以我前往微软下载 IE9 的页面然后发现：
 
-![](./images/webpack-chunk-split/006.png)
+![](../images/webpack-chunk-split/006.png)
 
 最后提一句 HTTP/2，你知道它已经集成进 Node 中了吗？如果你想尝试，我[用100行写了一段 HTTP/2 服务](https://gist.github.com/davidgilbertson/e5690c04e06c4882cf5761f8acff36ec)，能够为你的测试带来缓存上的帮助
 
@@ -373,7 +373,7 @@ plugins: [
 - [Hash vs chunkhash vs ContentHash](https://medium.com/@sahilkkrazy/hash-vs-chunkhash-vs-contenthash-e94d38a32208)
 - [Adding Hashes to Filenames](https://survivejs.com/webpack/optimizing/adding-hashes-to-filenames/)
 
-## SplitChunksPlugin
+### SplitChunksPlugin
 
 - [Webpack 4 — Mysterious SplitChunks Plugin](https://medium.com/dailyjs/webpack-4-splitchunks-plugin-d9fbbe091fd0)
 - [Webpack (v4) Code Splitting using SplitChunksPlugin](https://itnext.io/react-router-and-webpack-v4-code-splitting-using-splitchunksplugin-f0a48f110312)
@@ -381,6 +381,6 @@ plugins: [
 - [Webpack v4 chunk splitting deep dive](https://www.chrisclaxton.me.uk/chris-claxtons-blog/webpack-chunksplitting-deepdive)
 - [what reuseExistingChunk: true means, can give a sample?](https://github.com/webpack/webpack.js.org/issues/2122)
 
-## DLL
+### DLL
 
 - [How To Use The Dll Plugin to Speed Up Your Webpack Build](https://medium.com/@emilycoco/how-to-use-the-dll-plugin-to-speed-up-your-webpack-build-dbf330d3b13c)

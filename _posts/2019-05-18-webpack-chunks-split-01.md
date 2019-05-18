@@ -336,7 +336,7 @@ vendors: {
 - [Hash vs chunkhash vs ContentHash](https://medium.com/@sahilkkrazy/hash-vs-chunkhash-vs-contenthash-e94d38a32208)
 - [Adding Hashes to Filenames](https://survivejs.com/webpack/optimizing/adding-hashes-to-filenames/)
 
-## SplitChunksPlugin
+### SplitChunksPlugin
 
 - [Webpack 4 — Mysterious SplitChunks Plugin](https://medium.com/dailyjs/webpack-4-splitchunks-plugin-d9fbbe091fd0)
 - [Webpack (v4) Code Splitting using SplitChunksPlugin](https://itnext.io/react-router-and-webpack-v4-code-splitting-using-splitchunksplugin-f0a48f110312)
@@ -344,6 +344,6 @@ vendors: {
 - [Webpack v4 chunk splitting deep dive](https://www.chrisclaxton.me.uk/chris-claxtons-blog/webpack-chunksplitting-deepdive)
 - [what reuseExistingChunk: true means, can give a sample?](https://github.com/webpack/webpack.js.org/issues/2122)
 
-## DLL
+### DLL
 
 - [How To Use The Dll Plugin to Speed Up Your Webpack Build](https://medium.com/@emilycoco/how-to-use-the-dll-plugin-to-speed-up-your-webpack-build-dbf330d3b13c)
