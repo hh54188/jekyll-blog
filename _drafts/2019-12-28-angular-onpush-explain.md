@@ -179,7 +179,53 @@ export class CounterComponent {
 * `ChangeDetectorRef.markForCheck()`: （这个方法我不确定我理解的是否正确）它不会立即触发 CD, 而是把当前的组件标记为需要 check 的状态，在未来当父组件被 check 时才触发当前组件的 CD
 * `NgZone.run(() => {})`: 指定在 zone 里运行代码触发 CD
 
-除了上面的三种主流情况以外，还有一些特殊情况，比如 `async`，`Observable<>`可以触发 CD，出于篇幅考虑就不详述了，以上的几个方案足够应付大多数情况 
+除了上面的三种主流情况以外，还有一些特殊情况，比如 `async`，`Observable<>`可以触发 CD，出于篇幅考虑就不详述了，可以在我最后给出的参考资料里找到说明。以上的几个方案足够应付大多数情况 
+
+但是即使在尝试了上面各种能够触发 CD 的方法，甚至移除 `ChangeDetectionStrategy.OnPush` 之后都无法触发 AngularJS 组件的渲染之后。我们陷入了僵局。
+
+## 因为降级
+
+于是我们决定重新审视我们代码，追踪代码的实现。我们目前出现问题的代码是通过一个封装之后的 service 触发 AngularJS 的 message box 功能（即你们在出现问题时 Tiger 上方看到哪条 banner），调用代码类似如下:
+
+```javascript
+constructor(private messageBox: MessageBox) {
+    this.messageBox.error(error);
+}
+```
+
+而 AngularJS 那边的实现主要代码如下，以上面的 `error` 方法为例，实际上只是给 `message` 变量赋值而已：
+
+```javascript
+// Scripts/common/message-box.mjs
+export function messageBoxFactory(i18n) {
+  let messageStore = null;
+  return {
+    error(message) {
+      messageStore = { description: message, type: 'error' };
+    },
+```
+
+而在另一端代码里，正用着 `$watch` 监视着 `messageStore` 变量是否发生变化，如果发生了变化则在页面上提示消息：
+
+```javascript
+// Scripts/shared/directives/my_message_box.es6
+(((coreModule) => {
+  coreModule.directive('myMessageBox', ['messageBox', '$sanitize', function MyMessageBox(messageBox, $sanitize) {
+    return {
+      link(scope, iElement) {
+        scope.$watch(() => {
+          if (!messageBox.hasMessage()) {
+            return;
+          }
+          fadeInMessageBox();
+          const message = messageBox.retrieveMessage();
+          // ...
+          showMessageBox();
+```
+
+我们猜想问题可能是因为 `scope.$watch` 并没有监视到 `messageStore` 的变化。就是没有主动的进行 DC(dirty check)于是我们尝试将 scope 赋值到全局 windows 上，然后手动调用 `scope.$apply()` ：
+
+后来发现在任意时候用鼠标点击页面一下也能触发 messageBox 的显示。我们就能很肯定是因为 AngularJS 没有主动运行 DC 导致的。但是为什么？这也许和 Angular 和 AngularJS 的混用有关。
 
  
 
@@ -188,4 +234,8 @@ export class CounterComponent {
 * [Angular Change Detection - How Does It Really Work?](https://blog.angular-university.io/how-does-angular-2-change-detection-really-work/)
 * [what is the use of Zone.js in Angular 2](https://stackoverflow.com/a/40903120/508236)
 * [A Comprehensive Guide to Angular onPush Change Detection Strategy](https://netbasal.com/a-comprehensive-guide-to-angular-onpush-change-detection-strategy-5bac493074a4)
+* [Angular OnPush Change Detection and Component Design - Avoid Common Pitfalls](https://blog.angular-university.io/onpush-change-detection-how-it-works/)
+* [Angular Performances Part 4 - Change detection strategies](https://blog.ninja-squad.com/2018/09/27/angular-performances-part-4/)
+* [Using Zones in Angular for better performance](https://blog.thoughtram.io/angular/2017/02/21/using-zones-in-angular-for-better-performance.html)
 * [What's the difference between markForCheck() and detectChanges()](https://stackoverflow.com/questions/41364386/whats-the-difference-between-markforcheck-and-detectchanges)
+* [Triggering change detection manually in Angular](https://stackoverflow.com/questions/34827334/triggering-change-detection-manually-in-angular)
