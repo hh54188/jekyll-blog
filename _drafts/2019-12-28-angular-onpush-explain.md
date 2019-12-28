@@ -54,7 +54,7 @@ function addEventListener(eventName, callback) {
 
 几乎所有的浏览器 API 都被 patch 了，比如你能想到的所有浏览器事件，以及 `setTimeout` 、`setInterval`，还有 Ajax 请求等等。
 
-所有的 patch 工作都交给 Angular 自带的 zone.js 完成， 同时 zone.js 还提供代码的执行上下文。zone.js 是另一个话题不这次的重点，你只需要记住 zone.js 的目的是告诉 Angular 何时该进行渲染重绘。
+所有的 patch 工作都交给 Angular 自带的 zone.js （NgZone 和 zone.js 是有差别的，为了便于说明理解，这里统一为一个概念）完成， 同时 zone.js 还提供代码的执行上下文。zone.js 是另一个话题不这次的重点，你只需要记住 zone.js 的目的是告诉 Angular 何时该进行渲染重绘。
 
 Angular 的默认 CD 策略也非常简单：它判断每个组件模板里表达式使用到的值前后是否发生了变化。对于对象类型，Angular 也不会进行深度比较，它只会对对象里使用到值进行值比较
 
@@ -91,19 +91,95 @@ export class DemoComponent {
 
 ### OnPush  策略
 
-回到主线，`changeDetection: ChangeDetectionStrategy.OnPush` 意味我们将默认的 CD 策略改为 OnPush。这个策略意味着只有在以下几种情况下才会触发 CD:
+回到主线，`changeDetection: ChangeDetectionStrategy.OnPush` 意味我们将默认的 CD 策略改为 OnPush。这个策略只有在以下几种情况下才会触发 CD:
 
-* 组件的任意一个 input 属性发生了修改
+* 组件的任意一个 inputs 的**引用**发生了修改
 
+Angular 组件支持类似于 React 父组件传递属性给子组件的机制，OnPush 策略下将 Angular 组件变成了类似于 React 中 PureComponent ，即仅在属性引用发生改变时才重新渲染。例如我们有一个 UserName 子组件用于展示用户的名称：
 
+```javascript
+@Component({
+    selector: 'app-user-name'，
+    template: `<div>{{userName.lastName}}, {userName.firstName}</div>`
+    changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class UserName {
+    @Input userName: object;
+}
+```
+
+在父组件中我们使用它：
+
+```javascript
+@Component({
+    selector: 'app-user',
+    tempalte: `<app-user-name [userName]="">`
+})
+export class User {
+    userNameInParentComponent = {
+        firstName: 'firstName',
+        lastName: 'lastName'
+    }
+	onClick() {
+        this.userNameInParentComponent.fistName = Math.random()
+    }
+}
+```
+
+即使 `onClick` 回调函数执行后 `userNameInParentComponent` 发生了更改，但子组件在页面上并不会进行更新。因为我们只是修改了这个对象的内部状态，它的引用却没有发生变化。如果想要生效，应该重新给 `userNameInParentComponent` 赋值：
+
+```javascript
+onClick() {
+    this.userNameInParentComponent = {
+        fistName: Math.random(),
+        lastName: 'lastName'
+    }
+}
+```
+
+和 React 一样，这个特性同样也是常被作为性能优化的手段之一，我们需要在代码中引入 Immutable.js 机制
 
 * 组件的事件处理函数被触发调用
-* 显式的调用 CD
-* `async` pipe
 
+注意这里仅限于**事件处理函数**，比如下面的代码：
 
+```javascript
 
+@Component({
+ template: `
+    <button (click)="add()">Add</button>
+    {{count}}
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class CounterComponent {
+  count = 0;
+  constructor() {
+    setTimeout(() => this.count = 5, 0);
+    setInterval(() => this.count = 5, 100);
+    Promise.resolve().then(() => this.count = 5); 
+    this.http.get('https://count.com').subscribe(res => {
+      this.count = res;
+    });
+  }
+  add() {
+    this.count++;
+  }
+}
+```
 
+除了 `click` 事件调用了 `add` 方法之外，构造函数中 `setTimeout`，`setInterval`等等也调用了 `add` 方法，但只有 click 之后页面上的 count 才会更新，其他的方式虽然更改了 `count` 的值，但并不会触发 CD, 也就不会造成重新渲染
+
+* 显式的触发 CD
+
+刚刚在上面我提到过我们可以通过 ``ChangeDetectorRef.detach()`` 和 `zone.runOutsideAngular` 使得代码游离在 CD 之外，但终归我们需要触发 CD 来重新渲染页面，此时我们可以通过已有的 API 来显式的触发 CD：
+
+* `ChangeDetectorRef.detectChanges()`: 在组件和它的所有子组件上运行 CD
+* `ApplicationRef.tick()`: 运行整个程序的 CD
+* `ChangeDetectorRef.markForCheck()`: （这个方法我不确定我理解的是否正确）它不会立即触发 CD, 而是把当前的组件标记为需要 check 的状态，在未来当父组件被 check 时才触发当前组件的 CD
+* `NgZone.run(() => {})`: 指定在 zone 里运行代码触发 CD
+
+除了上面的三种主流情况以外，还有一些特殊情况，比如 `async`，`Observable<>`可以触发 CD，出于篇幅考虑就不详述了，以上的几个方案足够应付大多数情况 
 
  
 
@@ -111,3 +187,5 @@ export class DemoComponent {
 
 * [Angular Change Detection - How Does It Really Work?](https://blog.angular-university.io/how-does-angular-2-change-detection-really-work/)
 * [what is the use of Zone.js in Angular 2](https://stackoverflow.com/a/40903120/508236)
+* [A Comprehensive Guide to Angular onPush Change Detection Strategy](https://netbasal.com/a-comprehensive-guide-to-angular-onpush-change-detection-strategy-5bac493074a4)
+* [What's the difference between markForCheck() and detectChanges()](https://stackoverflow.com/questions/41364386/whats-the-difference-between-markforcheck-and-detectchanges)
