@@ -1,4 +1,21 @@
-# 如果 Angular 组件无法更新，这篇文章能帮到你
+---
+layout: post
+title: 如果 Angular 组件无法更新，这篇文章能帮到你
+modified: 2019-12-28
+tags: [javascript, angular]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
+
+这原本不是一篇文章，是一封对内的邮件。在我们的项目里有一个传统：如果你发现了任何对他人有帮助的事情，不仅于技术上，可以通过邮件的形式告诉大家，邮件上需要加上 tag: #Aha moment#
+
+虽然说这封邮件看上去只是为了解决某个特定问题，但实际上它涉及到了 Angular 和 AngularJS 后的运行原理和优化技巧，如果你感兴趣，对你也许有帮助
+
+---
 
 为了避免歧义，事先声明在接下来的内容中 AngularJS 代指 Angular 1.x 版本，Angular 代指 Angular 8 版本
 
@@ -14,9 +31,9 @@
 
 ```javascript
 @Component({
-  selector: 'app-general-system-template',
+  selector: 'app-system',
   template: ``,
-  styles: [require('./system-template-header.component.scss')],
+  styles: [require('./system.component.scss')],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SystemTemplateSectionsComponent {}
@@ -112,7 +129,7 @@ $scope.$watch('myModel', function(newValue, oldValue) {
 
 最后 dirty checking  与 change detection 相比特殊的地方在于，它会遍历 `$watch` 列表多次直到确保没有新的更改发生，因为它担心某个 `watcher` 的回调里会级联的修改另一个变量。而 Angular 的 change detection 因为遵循的是单向数据流的缘故并不会出现这样的行为
 
-![](C:\Users\ligunagyi\Desktop\jekyll-blog\_drafts\images\angular-onpush-explain\digest.png)
+![](../images/angular-onpush-explain\digest.png)
 
 ### OnPush  策略
 
@@ -262,7 +279,7 @@ export function messageBoxFactory(i18n) {
 > * Everything that happens in the application runs inside the Angular zone. This is true whether the event originated in AngularJS or Angular code. The zone triggers Angular change detection after every event.
 > * The `UpgradeModule` will invoke the AngularJS `$rootScope.$apply()` after every turn of the Angular zone. This also triggers AngularJS change detection after every event.
 
-![](./images/angular-onpush-explain/change_detection.png)
+![](../images/angular-onpush-explain/change_detection.png)
 
 过于频繁的 CD / DC 是造成性能问题的主要原因
 
@@ -308,7 +325,7 @@ export class MessageBoxService extends MessageBox {
 * [what is the use of Zone.js in Angular 2](https://stackoverflow.com/a/40903120/508236)
 * [Understanding Angular’s $apply() and $digest()](https://www.sitepoint.com/understanding-angulars-apply-digest/)
 * [The Digest Loop and $apply](https://www.ng-book.com/p/The-Digest-Loop-and-apply/)
-* [[Angular $scope.$digest vs $scope.$apply](https://stackoverflow.com/questions/35826219/angular-scope-digest-vs-scope-apply)]
+* [Angular $scope.$digest vs $scope.$apply](https://stackoverflow.com/questions/35826219/angular-scope-digest-vs-scope-apply)]
 * [A Comprehensive Guide to Angular onPush Change Detection Strategy](https://netbasal.com/a-comprehensive-guide-to-angular-onpush-change-detection-strategy-5bac493074a4)
 * [Angular OnPush Change Detection and Component Design - Avoid Common Pitfalls](https://blog.angular-university.io/onpush-change-detection-how-it-works/)
 * [Angular Performances Part 4 - Change detection strategies](https://blog.ninja-squad.com/2018/09/27/angular-performances-part-4/)
