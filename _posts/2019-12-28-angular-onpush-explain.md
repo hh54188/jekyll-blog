@@ -15,6 +15,8 @@ share: true
 
 虽然说这封邮件看上去只是为了解决某个特定问题，但实际上它涉及到了 Angular 和 AngularJS 后的运行原理和优化技巧，如果你感兴趣，对你也许有帮助
 
+文章提到的项目 T 是一个 Angular 1.x 版本和 Angular 8 框架共存的应用，问题就发生在其中
+
 ---
 
 为了避免歧义，事先声明在接下来的内容中 AngularJS 代指 Angular 1.x 版本，Angular 代指 Angular 8 版本
