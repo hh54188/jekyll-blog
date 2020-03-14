@@ -187,11 +187,15 @@ export class SettingsFacade {
 
 但是我们应该记住抽象层不是实现业务逻辑的地方。这里我们只是将表现层和业务逻辑*联系（connect）*在了一起，并且把联系的*方式*抽象了出来
 
+> 译者注：Angular 采用了 reactive 编程思想，使用了 RxJS 作为基础类库。“流（stream）”是其中一个重要概念，接下来也会涉及其他和 RxJS 相关的函数和概念 
+
 #### 状态
 
 至于状态，抽象层使得组件独立于状态管理解决方案。组件的模板上被赋值带有数据的 Observable 但并不关心数据是如何产生以及从哪来的。为了管理状态我们能够使用任何支持 RxJS (像 NgRx) 的状态管理类库，又或者仅仅使用 BehaviorSubject 对我们的状态建模。在上面的例子中我们的使用的状态对象的内部实现借助于 BehaviorSubjects （状态对象是我们核心层的一部分）。在 NgRx 的场景下，我们从 store 发起操作。
 
 拥有这样的抽象给了我们很大的灵活性，并且允许我们在更改状态管理方式式而不触碰表现层。甚至可能无缝的迁移到像 Firebase 这样的实时后端，让我们的应用变得**实时（real-time）**。我个人喜欢一开始使用 BehaviorSubjects 来管理状态。如果之后在开发系统的某个时间点有需要使用其他东西，在这个架构下，重构起来非常容易
+
+> 译者注：“状态解决方案”不是必须的，状态管理可以有，架构可以有，但不一定要借助于第三方类库来实现。React 可以有 Redux 架构，但是不一定需要 Redux 框架。仅仅依赖 React 自己的 hook 机制和 provider 就足以实现一套状态管理机制。另一个我想吐槽的是，我不认为 Redux 是一个好的框架，而 NgRx 和 NGXS 并不会却也没有更好的创新 
 
 #### 同步策略
 
@@ -246,7 +250,7 @@ export class RecordsFacade {
 
 ### 核心层
 
-最后一层是核心层，这也是应用的核心逻辑实现的地方。所有的**数据操作（data manipulation）**和与**外界的沟通（outside world communication）**都发生在这里。如果我们使用 NgRx 作为状态管理方案的话，这里就是放置状态定义，行为和 reducer 的地方。因为我们的例子中使用 BehaviorSubjiect 对状态建模的缘故，我们可以把它封装在一个便携的状态类中。你可以在下面找到来自核心层的 `SettingsState` 的例子
+最后一层是核心层，这也是应用的核心逻辑实现的地方。所有的**数据操作（data manipulation）**和与**外界的沟通（outside world communication）**都发生在这里。如果我们使用 NgRx 作为状态管理方案的话，这里就是放置 state，actions 和 reducer 的地方。因为我们的例子中使用 BehaviorSubjiect 对状态建模的缘故，我们可以把它封装在一个便携的状态类中。你可以在下面找到来自核心层的 `SettingsState` 的例子
 
 ```javascript
 @Injectable()
@@ -334,6 +338,68 @@ export class CashflowCategoryApi {
 
 无论何时我们应用中的模型值发生了变化，Angular 的变化监测系统都能够处理变化的传播。它通过对整棵组件树**自顶向下（the top to bottom）**的输入属性绑定实现。它意味着孩子组件只能依赖父组件，并且永远不会依赖反转。这也是为什么我们称它为单向数据流。这允许 Angular 只会遍历组件树**一次（only once）**（因为树的结构中不存在循环）就能够取得一个稳定的状态，也意味着绑定里的值都能都能得到周知
 
-> 译者注：如果你有 Angular 1.x （又被称为 AngularJS）的经验的话，AngularJS 的类似的脏检查机制并非如此。
+> 译者注：
+>
+> 1) 这里直接介绍和安利自顶向下的单向数据流机制。为什么不是能自低向上？为什么不能通过事件？
+>
+> 2) 如果你有 Angular 1.x （又被称为 AngularJS）的经验的话，AngularJS 的类似的脏检查机制并非如此。AngularJS 中脏检查被称为 Dirty Check，而 Angular 中被称为 Change Detection. Dirty Check 会不停的轮询所有被检视的变量直到没有变化发生。具体可以参考我的[上一篇文章](https://zhuanlan.zhihu.com/p/100038957)
 
-从前几章我们得知在表现层之前还有核心层，也就是我们应用逻辑实现的地方。那里有 services 和 providers 服务于我们的数据。如果我们把同样的原则也应用于那一层的数据处理上会怎么样？我们把应用数据（状态）放一个一个所有组件“之上”的地方，并且让值借助 Observable 流（Redux 和 NgRx 称之为 store）向下进行传播。状态能够传播到多个组件并且显示在多个地方，但是从不会在展示处发生修改。这些更改只会“来自上方”并且下方的组件只会“反映”系统的当前状态。这给予了我们系统上面提到的最重要的特性——**数据一致性（data consistency）**——状态对象变成了**单一数据来源（the single source of truth）**。实际上说，我们可以多个地方展示同一份数据然后不用担心值会不同
+从前几章我们得知在表现层之前还有核心层，也就是我们应用逻辑实现的地方。那里有 services 和 providers 服务于我们的数据。如果我们把同样的原则也应用于那一层的数据处理上会怎么样？我们把应用数据（状态）放一个一个所有组件“之上”的地方，并且让值借助 Observable 流（Redux 和 NgRx 称之为 store）向下进行传播。状态能够传播到多个组件并且显示在多个地方，但是从不会在展示处发生修改。这些更改只会“来自上方”并且下方的组件只会“反映”系统的当前状态。这给予了我们系统上面提到的最重要的特性——**数据一致性（data consistency）**——状态对象变成了**唯一数据来源（the single source of truth）**。实际上说，我们可以多个地方展示同一份数据然后不用担心值会不同
+
+我们的对象状态为了核心层的各种服务提供方法用于操作状态。当有需要改变状态时，只需要调用状态对象上的一个方法（在 NgRx 的例子里时触发一个 action）。接着，变更就会通过流“向下”传播给表现层（或者其他的服务）。这种方式就意味着状态管理是*反应式（reactive）*的了。不仅如此，因为严格的操作和共享状态的规则，我们可以增加我们系统的可预测性。下方是使用 BehaviorSubject 对状态建模的代码片段
+
+```javascript
+@Injectable()
+export class SettingsState {
+
+  private updating$ = new BehaviorSubject<boolean>(false);
+  private cashflowCategories$ = new BehaviorSubject<CashflowCategory[]>(null);
+
+  isUpdating$() {
+    return this.updating$.asObservable();
+  }
+
+  setUpdating(isUpdating: boolean) {
+    this.updating$.next(isUpdating);
+  }
+
+  getCashflowCategories$() {
+    return this.cashflowCategories$.asObservable();
+  }
+
+  setCashflowCategories(categories: CashflowCategory[]) {
+    this.cashflowCategories$.next(categories);
+  }
+
+  addCashflowCategory(category: CashflowCategory) {
+    const currentValue = this.cashflowCategories$.getValue();
+    this.cashflowCategories$.next([...currentValue, category]);
+  }
+
+  updateCashflowCategory(updatedCategory: CashflowCategory) {
+    const categories = this.cashflowCategories$.getValue();
+    const indexOfUpdated = categories.findIndex(category => category.id === updatedCategory.id);
+    categories[indexOfUpdated] = updatedCategory;
+    this.cashflowCategories$.next([...categories]);
+  }
+
+  updateCashflowCategoryId(categoryToReplace: CashflowCategory, addedCategoryWithId: CashflowCategory) {
+    const categories = this.cashflowCategories$.getValue();
+    const updatedCategoryIndex = categories.findIndex(category => category === categoryToReplace);
+    categories[updatedCategoryIndex] = addedCategoryWithId;
+    this.cashflowCategories$.next([...categories]);
+  }
+
+  removeCashflowCategory(categoryRemove: CashflowCategory) {
+    const currentValue = this.cashflowCategories$.getValue();
+    this.cashflowCategories$.next(currentValue.filter(category => category !== categoryRemove));
+  }
+}
+```
+
+让我们基于我们已经学习到的原则复习一遍处理用户交互的步骤。首先让我们想象在表现发生了一些事件（比如点击按钮）。组件把执行委托给了抽象层，调用外观上的 `settingsFacade.addCategory()`方法。接着外观调用核心层里服务上的方法——`categoryApi.create()`和`settingsState.addCategory()`。这两个方法调用的顺序取决于我们选择的同步策略。最终，应用状态通过 observable 流传递给表现层。这整个流程**清晰明确（well-defined）**
+
+![](./images/angular-architecture-best-practices/flow.gif)
+
+## 模块设计
+
