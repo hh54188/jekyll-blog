@@ -73,7 +73,7 @@
 
 > **软件架构**是关于如何组织它部分的方式以及部分之间通信的*规则*和*约束*
 
-> 译者注：在上面的翻译中我将 parts 翻译成了“部分”。你或许会认为或者翻译为“组件”听上去更合适，但“组件（components）”在不同的编程语言中有更特定的指向。在 React 中很特殊，一个类就就代表一个组件，但是在 Angular 可能是一个 moudle，在 Java 里可以是一个 jar 包。通常来说它是比类大的单位。思考题是，如果技术上允许在 React 应用内存在比类大但又比应用小的这么一个单位，我们应该按照什么规则组织它？
+> 译者注：在上面的翻译中我将 parts 翻译成了“部分”。你或许会认为或者翻译为“组件”听上去更合适，但“组件（components）”在不同的编程语言中有更特定的指向。在 React 中很特殊，一个类就就代表一个组件，但是在 Angular 可能是一个 module，在 Java 里可以是一个 jar 包。通常来说它是比类大的单位。思考题是，如果技术上允许在 React 应用内存在比类大但又比应用小的这么一个单位存在，我们应该按照什么规则组织它？我认为打包时产出的 chunk 或者 bundle 不算，它们是打包优化的产物，而并非是你思考后刻意产生的结果
 
 ## 高层次抽象层
 
@@ -183,3 +183,157 @@ export class SettingsFacade {
 
 #### 抽象接口
 
+我们已经知道了这一层的主要职责：为组件提供状态流和接口。让我们从接口开始。公有方法 `loadCashflowCategories()` ， `addCashflowCategory()` 和 `updateCashflowCategory()`从组件中抽离出了状态管理的细节以及外部的 API 调用。我们不在组件中直接使用 API provider (比如 `CashflowCategoryApi`) 因为它们存在于核心层中。组件也并不关心状态是如何变化的。表现层不应该关心工作是**如何（how）**完成的，组件在必要的时候**只需要调用（just call）**抽象层的方法即可（委托）。查看抽象层的公共方法能够让我们快速了解系统这部分的用户用例概况
+
+但是我们应该记住抽象层不是实现业务逻辑的地方。这里我们只是将表现层和业务逻辑*联系（connect）*在了一起，并且把联系的*方式*抽象了出来
+
+#### 状态
+
+至于状态，抽象层使得组件独立于状态管理解决方案。组件的模板上被赋值带有数据的 Observable 但并不关心数据是如何产生以及从哪来的。为了管理状态我们能够使用任何支持 RxJS (像 NgRx) 的状态管理类库，又或者仅仅使用 BehaviorSubject 对我们的状态建模。在上面的例子中我们的使用的状态对象的内部实现借助于 BehaviorSubjects （状态对象是我们核心层的一部分）。在 NgRx 的场景下，我们从 store 发起操作。
+
+拥有这样的抽象给了我们很大的灵活性，并且允许我们在更改状态管理方式式而不触碰表现层。甚至可能无缝的迁移到像 Firebase 这样的实时后端，让我们的应用变得**实时（real-time）**。我个人喜欢一开始使用 BehaviorSubjects 来管理状态。如果之后在开发系统的某个时间点有需要使用其他东西，在这个架构下，重构起来非常容易
+
+#### 同步策略
+
+现在让我们更进一步的看看抽象层的重要一面。无论我们选择什么样的状态管理解决方案，我们都可以以乐观或者悲观的方式实现 UI 的更新。想象我们想要在实体的集合中装填一条新记录。集合请求自后端并且在 DOM 中展示；在悲观的实现方式下，我们首先尝试在后端更新状态（比如通过 HTTP 请求），在成功之后我们再更新前端状态。再另一种乐观的实现方式里，我们执行的顺序不同。首先我们会在后端一定会更新成功的假设上立即更新前端。然后我们才发请求更新服务端状态。如果成功了，我们不用做任何事情，但是如果失败了，我们需要回滚前端的更改并且告知用户
+
+> **乐观更新（Optimistic update）**首先改变界面状态然后才尝试更新后端状态。这为我们的用户带来更好的体验，因为不会因为网络延迟看到任何的滞后。如果后的那更新失败了，界面更改必须回滚
+>
+> **悲观更新（Pessimistic update）**首先更改后端状态并且只有在成功的情况下才更改界面状态。因为网络延迟，通常需要在后端的执行的过程中显示加载进度条
+
+#### 缓存
+
+有时候我们也许会认定来自后端的数据并不会成为我们应用状态的一部分。这也许对我们不会执行任何操作只是把它们（通过抽象层）传递给组件的**只读（read-only）**数据有用。在这个场景下，我们可以把数据缓存在外观中。实现它最简单的方式是使用 RxJS 的 `shareReplay()` 操作符，它能够为流的新的订阅者*重放（replay）*最新的数据。看看下面`RecordsFacade`使用`RecordsApi`为组件请求，缓存并且过滤数据的代码片段
+
+```javascript
+@Injectable()
+export class RecordsFacade {
+
+  private records$: Observable<Record[]>;
+
+  constructor(private recordApi: RecordApi) {
+    this.records$ = this.recordApi
+        .getRecords()
+        .pipe(shareReplay(1)); // cache the data
+  }
+
+  getRecords() {
+    return this.records$;
+  }
+
+  // project the cached data for the component
+  getRecordsFromPeriod(period?: Period): Observable<Record[]> {
+    return this.records$
+      .pipe(map(records => records.filter(record => record.inPeriod(period))));
+  }
+
+  searchRecords(search: string): Observable<Record[]> {
+    return this.recordApi.searchRecords(search);
+  }
+}
+```
+
+总结下来，我们在抽象层能做的事情有：
+
+- 为组件提供方法：
+  - 把执行逻辑委托给核心层
+  - 决定数据的同步策略（乐观或者悲观）
+- 为组件提供状态流
+  - 选取一个或多个界面状态流（如果有必要的话把它们结合在一起）
+  - 从外部 API 中缓存数据
+
+正如我们看到的，抽象层我们的分层架构中扮演了一个非常重要的角色。它清晰的定义了能够帮助我们更好理解和推理系统的职责。依据你的具体例子，你可以给每一个 Angular 模块或者每一个实体创建一个外观。举个例子，`SettingsModule`仅有一个`SettingsFacade`。但有时为每一个实体创建更细力度的抽象外观会更好，比如`UserFacade`对于`User`实体而言
+
+### 核心层
+
+最后一层是核心层，这也是应用的核心逻辑实现的地方。所有的**数据操作（data manipulation）**和与**外界的沟通（outside world communication）**都发生在这里。如果我们使用 NgRx 作为状态管理方案的话，这里就是放置状态定义，行为和 reducer 的地方。因为我们的例子中使用 BehaviorSubjiect 对状态建模的缘故，我们可以把它封装在一个便携的状态类中。你可以在下面找到来自核心层的 `SettingsState` 的例子
+
+```javascript
+@Injectable()
+export class SettingsState {
+
+  private updating$ = new BehaviorSubject<boolean>(false);
+  private cashflowCategories$ = new BehaviorSubject<CashflowCategory[]>(null);
+
+  isUpdating$() {
+    return this.updating$.asObservable();
+  }
+
+  setUpdating(isUpdating: boolean) {
+    this.updating$.next(isUpdating);
+  }
+
+  getCashflowCategories$() {
+    return this.cashflowCategories$.asObservable();
+  }
+
+  setCashflowCategories(categories: CashflowCategory[]) {
+    this.cashflowCategories$.next(categories);
+  }
+
+  addCashflowCategory(category: CashflowCategory) {
+    const currentValue = this.cashflowCategories$.getValue();
+    this.cashflowCategories$.next([...currentValue, category]);
+  }
+
+  updateCashflowCategory(updatedCategory: CashflowCategory) {
+    const categories = this.cashflowCategories$.getValue();
+    const indexOfUpdated = categories.findIndex(category => category.id === updatedCategory.id);
+    categories[indexOfUpdated] = updatedCategory;
+    this.cashflowCategories$.next([...categories]);
+  }
+
+  updateCashflowCategoryId(categoryToReplace: CashflowCategory, addedCategoryWithId: CashflowCategory) {
+    const categories = this.cashflowCategories$.getValue();
+    const updatedCategoryIndex = categories.findIndex(category => category === categoryToReplace);
+    categories[updatedCategoryIndex] = addedCategoryWithId;
+    this.cashflowCategories$.next([...categories]);
+  }
+
+  removeCashflowCategory(categoryRemove: CashflowCategory) {
+    const currentValue = this.cashflowCategories$.getValue();
+    this.cashflowCategories$.next(currentValue.filter(category => category !== categoryRemove));
+  }
+}
+```
+
+在核心层里，我们以 provider 类的形式实现 HTTP 查询，这种类有 `Api`或者`Service` 名称后缀。API 服务只有一个职责——除了与 API 端点通信外别无他用。我会应该避免任何的缓存，逻辑又或者数据操作。一个简单的 API 服务的例子如下：
+
+```javascript
+@Injectable()
+export class CashflowCategoryApi {
+
+  readonly API = '/api/cashflowCategories';
+
+  constructor(private http: HttpClient) {}
+
+  getCashflowCategories(): Observable<CashflowCategory[]> {
+    return this.http.get<CashflowCategory[]>(this.API);
+  }
+
+  createCashflowCategory(category: CashflowCategory): Observable<any> {
+    return this.http.post(this.API, category);
+  }
+
+  updateCashflowCategory(category: CashflowCategory): Observable<any> {
+    return this.http.put(`${this.API}/${category.id}`, category);
+  }
+
+}
+```
+
+在这一层中，我也会拥有校验，映射或者更多需要操作界面状态的高级用例。
+
+我们以及涵盖了我们前端应用的关于抽象层的话题。每一层都有它恰当的边界和职责。我们也定义了层之间严格的通信规则。随着时间的推移当系统变得越来越复杂时这些所有都将更好的版主理解和推测它
+
+## 单向数据流和反应式状态管理
+
+下一个我想介绍的我们系统中的另一个原则是数据流和传播变化（propagation of change）。Angular 自身在表现层使用单向数据流（通过输入绑定的方式），但是我们也能在应用层面加以相同的限制。与（基于流式的）状态管理一起，它会赋予我们系统一个非常重要的属性——**数据一致性（data consistency）**。下图呈现了这种单向数据流的大致想法
+
+![](./images/angular-architecture-best-practices/flow abstract.gif)
+
+无论何时我们应用中的模型值发生了变化，Angular 的变化监测系统都能够处理变化的传播。它通过对整棵组件树**自顶向下（the top to bottom）**的输入属性绑定实现。它意味着孩子组件只能依赖父组件，并且永远不会依赖反转。这也是为什么我们称它为单向数据流。这允许 Angular 只会遍历组件树**一次（only once）**（因为树的结构中不存在循环）就能够取得一个稳定的状态，也意味着绑定里的值都能都能得到周知
+
+> 译者注：如果你有 Angular 1.x （又被称为 AngularJS）的经验的话，AngularJS 的类似的脏检查机制并非如此。
+
+从前几章我们得知在表现层之前还有核心层，也就是我们应用逻辑实现的地方。那里有 services 和 providers 服务于我们的数据。如果我们把同样的原则也应用于那一层的数据处理上会怎么样？我们把应用数据（状态）放一个一个所有组件“之上”的地方，并且让值借助 Observable 流（Redux 和 NgRx 称之为 store）向下进行传播。状态能够传播到多个组件并且显示在多个地方，但是从不会在展示处发生修改。这些更改只会“来自上方”并且下方的组件只会“反映”系统的当前状态。这给予了我们系统上面提到的最重要的特性——**数据一致性（data consistency）**——状态对象变成了**单一数据来源（the single source of truth）**。实际上说，我们可以多个地方展示同一份数据然后不用担心值会不同
