@@ -420,3 +420,39 @@ export class SettingsState {
 ![](./images/angular-architecture-best-practices/module.png)
 
 ## 容器组件模式和纯展现组件模式
+
+我们最后一个介绍的架构模式是关于组件它们自己的。我们想根据它们的职责将组件划分为两类。首先**容器组件（smart components aka containers）**。这些组件通常特征有
+
+- 有其他外观和服务的注入
+- 与核心层沟通
+- 传递数据给纯展现组件
+- 响应来自纯展示组件的事件
+- 属于顶层组件（但也不绝对！）
+
+之前展示的`CategoriesComponent`就是**容器**组件。`SettingsFacade`被注入其中并用于和我们应用中的核心层进行沟通
+
+第二个分类就是**纯展示组件（dumb components aka presentational）**。它们的唯一职责就是展示界面元素并且把用户交以事件的形式“向上”委托给容器组件。想象一个类似于`<button>Click me</button>`的原生 HTML 元素。该元素并没有实现特殊的逻辑。我们可以认为文字 “Click me” 作为组件的输入。它也可以订阅一些事件，比如点击事件。下方就是一个简单的包含一个输入零个输出的事件纯展示组件的代码片段
+
+```javascript
+@Component({
+  selector: 'budget-progress',
+  templateUrl: './budget-progress.component.html',
+  styleUrls: ['./budget-progress.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class BudgetProgressComponent {
+
+  @Input()
+  budget: Budget;
+  today: string;
+
+}
+```
+
+## 总结
+
+我们已经叙述了如何设计 Angular 应用架构的几个想法。这些原则如果应用恰当的话，随着事件推移能够帮助维持一个可持续性的开发速率，并且使得交付新功能更加容易。请不要把它们当作一些严格的规则，而是在需要它们的时候可以采纳的建议。
+
+我们已经仔细绅士了抽象层，单向数据流和反应式状态管理，模块设计，容器组件/纯展示组件设计模式。我希望这些概念能对你的项目有所帮助，并且一以贯之的是，如果你有任何的疑问，我很乐意与你交流
+
+最后，我想致敬写了[这篇博客文章](https://blog.strongbrew.io/A-scalable-angular2-architecture/)的 [Brecht Billiet](https://twitter.com/@brechtbilliet)，给了我抽象层和外观的灵感。多谢 Brecht ! 也多谢 [Tomek Sulkowski](https://twitter.com/@sulco)  对我分层架构的观点进行了评审
