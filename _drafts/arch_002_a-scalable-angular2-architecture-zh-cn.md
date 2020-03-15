@@ -20,3 +20,63 @@
 
 ### 原则1：组件
 
+像 React 和 Angular 2 这样的 SPA 技术让我们使用组件。一个组件是 HTML 片段和 JavaScript 和结合。我们不想再使用独立的 view 和 controller。它们会出现爆炸式增长并且相互关联导致难以维护
+
+> 你真的明白这最后一句话 “爆炸式增长” 和 “相互关联导致难以维护” 是什么意思吗？为什么会出现这样的情况以及这究竟是怎样一个场景？
+
+所以最基本的原则是：**万物皆是组件（everything should be a component）**，甚至你的页面和应用也是。一个应用可以长成这个样子：
+
+```javascript
+<application>
+	<navbar fullname="Brecht Billiet" logout="logMeOut()">
+	</navbar>
+	<users-page>
+		...
+		<grid data="users">
+		</grid>
+		...
+	</users-page>
+</application>
+```
+
+一些在设计组件时非常简单但又重要的提示是：
+
+- 保持它们尽可能的小
+- 保持它们尽可能的仅与绘制界面相关
+
+> 译者注："仅与绘制界面相关" 在原文中就一个词：dumb, 即 dumb component。仅负责绘制界面但不包含业务逻辑和数据存储的组件
+
+如果你是设计组件的新手，这篇文章或许能帮助你：[components demystified](http://blog.brecht.io/components-demystified)
+
+**注意：**聪明组件（smart component）也被称为结构组件（structural components），容器组件（containers）或者含状态组件（stateful componnets）
+
+### 原则2：单向数据流
+
+在此之前我们通过一种非常没有效率的方式更新应用的状态：
+
+- 我们尝试让兄弟组件相互通信
+- 父组件尝试通过 action 通知子组件
+- 我们尝试在不同的组件间发送事件
+- 我们使用单向绑定，双向绑定
+- 我们把数据模型注入的到处都是用以共享状态
+
+你有尝试过让兄弟组件相互通信吗？有时候这么做看上去理所应当，但是请不要这么做
+
+![](./images/a-scalable-angular2-architecture/multidirectionaldataflow.png)
+
+**这是一个糟糕的设计！**这样的话几乎不能看清数据的流动方向。这样的代码也非常难以维护，修复 bug 又或者开发功能。我们确切想要的是像 [Flux](https://facebook.github.io/flux/) 和 [Redux](http://redux.js.org/) 的单向数据流
+
+它基本上的工作原理是这样的：子组件只会通知它们的父组件，父组件（容器组件）向包含状态的 store 发送一个 action，action 会更新整个应用状态。当状态被更新之后，我们会重新计算组件树。结果就是数据。结果就是数据朝相同的方向流动（向下）。
+
+![](./images/a-scalable-angular2-architecture/unidirectionaldataflow.png)
+
+这种方式的最大好处是：
+
+- 使得组件之间解耦
+- 好的可维护性
+- 切换为实时应用的代价较小，因为软件是反应式的（reactive）
+- 通过监控 action 我们就知道发生了什么
+
+如果你是单向数据流的新手请访问 [introduction to redux](http://redux.js.org/docs/introduction/) 关于 [单向数据流（unidirectional dataflow）](http://redux.js.org/docs/basics/DataFlow.html) 的部分
+
+## 可拓展架构
