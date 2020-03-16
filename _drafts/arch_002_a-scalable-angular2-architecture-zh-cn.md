@@ -80,3 +80,48 @@
 如果你是单向数据流的新手请访问 [introduction to redux](http://redux.js.org/docs/introduction/) 关于 [单向数据流（unidirectional dataflow）](http://redux.js.org/docs/basics/DataFlow.html) 的部分
 
 ## 可拓展架构
+
+我在设计一些架构时基于的时当今原则（大部分上面都解释过了）以及甚至是十年前的原则，我就能说这对每个 SPA 都是成立的吗？不尽然……每一种软件类型都值得拥有它自己的架构，我只是展示一种对于我而言在大多数场景下都成立的理念。这个架构对于正在受益于依赖注入特性的 Angular 2 开发者而言迟早会有用，但也能适用于其它的框架中
+
+### 有意义的抽象
+
+这个原则部分是基于  [Nicholas Zakas](https://twitter.com/slicknet) 的[沙盒原则（Sandbox principle）](http://www.slideshare.net/nzakas/scalable-javascript-application-architecture)，它已经有一些年头了。对于 Nicholas Zakas 而言，沙盒的扮演着存在于包含一个容器组件的几个不同模块间的调度器（dispatcher）。在那个架构中，没有单向数据流。对我而言一个沙盒是**一种将应用逻辑与表现层解构的方式**，但那并不是它唯一的职责。
+
+但是让我们从头开始……在这个具体的场景中我将假设我们使用 [Redux](http://redux.js.org/)，但其实无论你使用什么样的状态管理，了解它之后的原理非常重要。
+
+### 规则一：不要让你的组件接触到所有的玩具
+
+这和你不能让孩子玩耍所有的东西背后的原因一样：**“可能会变得一团糟”**。容器组件应该遵循一套严格的规则。。不能因为我们能做到而把我们想要的每一个服务都注入进去。举个例子：把游戏引擎注入仅权限模块死似乎就没有任何意义
+
+下面的例子展示了一个拥有非常多依赖的构造函数。在这个场景里**`MyComponent`**可以在应用里做任何它想做的事情。任何它想要的想要做的都被注入其中。这不是好主意
+
+```javascript
+export class MyComponent{
+	constructor(...,private foo:Foo, private bar: Bar, 
+		private store: Store<ApplicationState>, private authService: AuthService,
+		private fooHttpService: FooHttpService, private barMapper: BarMapper, ...){
+	}
+}
+```
+
+上面的例子的构造函数里有大多的依赖了。它与太多应用里的其它部分产生了联系。当你向复盘这是一种怎样的设计时结果看上去像这个样子：（REST 表示 restful 服务，所以它们只是 HTTP 模块）
+
+![](./images/a-scalable-angular2-architecture/abstraction_step1.png)
+
+这看上去就像意大利面代码，一切都是紧耦合的。一个抽象层能够给予一些帮助。下面的例子中我们看到表现层已经完全解耦，抽象层接管了所有事情
+
+![](./images/a-scalable-angular2-architecture/abstraction_step2.png)
+
+抽象层代码大概像这个样子：
+
+```javascript
+export class MyComponent{
+	constructor(private abstraction: SomeAbstractionType){
+	}
+	
+	doSomething(): void{
+	this.abstraction.doSomething();
+}
+```
+
+### 规则二：组件应该对状态管理层不知情
