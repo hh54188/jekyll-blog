@@ -1,5 +1,7 @@
 # 【前端架构鉴赏 02】【译文】：可拓展 Angular 2 架构
 
+原文 [https://blog.strongbrew.io/A-scalable-angular2-architecture/](https://blog.strongbrew.io/A-scalable-angular2-architecture/)
+
 ## 序
 
 这篇文章或许和 [Angular2](http://angular.io/) 开发者更相关，但是我相信它也适用于其它的框架。这只是一本关于编写具有可拓展性和可维护性单页面应用的指南。非常重要的是，这不是达成目标的唯一方式，但是对我个人而言在不少的场景中都行之有效
