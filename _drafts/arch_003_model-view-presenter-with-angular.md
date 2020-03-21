@@ -60,3 +60,50 @@ presenter 会批处理状态的修改，所以当用户填写表单时最终呈�
 ### Angular 变种
 
 受到原始 MVP 模式的启发以及经过一系列的变化，我们创建了适用于 Angular 平台的软件工件，它的关键界面单位就是*组件（component）*
+
+理想情况下，一个组件只聚焦展示和用户交互。在现实中，我们制定了严格的规则来确保我们的组件只关心应用的部分状态给用户以及允许用户影响状态。
+
+这篇文章介绍的 MVP 变种采用的是 [Encapsulated Presenter 模式](https://lostechies.com/derekgreer/2008/11/23/model-view-presenter-styles/#the-encapsulated-presenter-style)。但无论如何，我们的 presenter 不会使用它的视图。取而代之的是，我们会采用 observables 将 presenter 与 model 和视图连接起来，以便 presenter 能够独立于视图进行测试。
+
+我们打算使用 [Supervising Controller](https://www.martinfowler.com/eaaDev/SupervisingPresenter.html) 方式当实现 MVP 模式时。我们的视图（Angular 组件）简单的依赖它们的 presenter 负责用户交互。因为我们的 presenter 被它们的视图所封装，数据和事件在某些时候都会经过组件模型。
+
+在组件模型的帮助下，我们的 presenter 将用户的交互翻译成组件的特定事件。事件被翻译成会被发送到模型的命令。最终的翻译会被接下来会介绍的容器组件来处理
+
+我们的 presenter 会有一些[表现层模型（Presentation Model）](https://martinfowler.com/eaaDev/PresentationModel.html)的特征，也就是说包含一些用于指示 DOM 元素是否启用的布尔属性值的表现层逻辑。一个例子是一个用于指示 DOM 元素应该被渲染成的颜色
+
+我们的视图与 presenter 上的属性绑定，简单将它代表的状态投没有额外逻辑的展示出来。结果形成了一个简单的带有组件模型的组件模板
+
+## 为 Angular 准备的 MVP 概念
+
+为了要将 MVP 模式应用到 Angular 应用里，我们将要介绍 React 社区里常被推崇的概念。我们的组件——在这些文章中——将会被划分为三类
+
+- 纯展现组件（Presentational components）
+- [容器组件（Container components）](https://indepth.dev/container-components-with-angular/)
+- 混合组件（Mixed components）
+
+React 开发者已经从混合组件中提取纯展示组件和容器组件很多年了。我们在 Angular 应用中也可以使用相同的概念。额外的，我们将会介绍 presenter 的概念。
+
+### 纯展示组件
+
+*纯展示组件*纯粹的用于呈现和交互的视图。它们把应用的部分状态展示给用户并且允许用户影响这些状态。
+
+因为 presenter 的存在，纯展示组件完全不理会应用其它部分的存在。它们有数据绑定接口能够描述它们处理的用户交互和它们需要的数据
+
+为了不想对界面进行单元测试，我们需要保证纯展示组件的复杂度胡参与一个绝对的最小值。对于组件模型和组件模板都是如如此
+
+### 容器组件
+
+*容器嘴贱*把应用的状态暴露给纯展示组件。它们通过把组件特定的事件翻译成命令和查询给非展示组件的方式，将纯展示组件与应用的其它部分集成在一起
+
+通常容器组件和纯展示组件的关系是1对1。容器组件的类属性与纯展示组件的输入属性相匹配，方法与展示组件的事件相对应
+
+### 混合组件
+
+如果一个组件不是一个容器组件或者是纯展现组件，它就是*混合组件*。给出一个现有的应用，很大可能它包含混合组件。我们称之为混合组件因为它们混合了两种系统关注点——它们包含了多个横向层的逻辑。
+
+如果你偶遇了一个组件——额外的包含了一组用于展示的领域对象——能够直接访问设备摄像头，发送 HTTP 请求和使用 WebStorage 缓存应用状态请不要惊讶
+
+虽然应用中的逻辑一定存在，到那时把它们组织在单一地方会让它非常难测试，难以推断，重用起来复杂以及紧耦合
+
+### Presenters
+
