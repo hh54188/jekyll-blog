@@ -182,3 +182,26 @@ presenter 是一个完全不会感知应用其它部分的类的实例
 恰当的关注点分离带给我们高性能，特别是在展现层中。性能瓶颈能很简单的被追踪和分离出来。
 
 同时使用 `OnPush` 变更监测策略后，我们可以最小化 Angular 的变更监测循环对应用性能的影响
+
+## 实战：Tour of heros
+
+![](./images/model-view-presenter-with-angular/tour-of-heros.gif)
+
+我们从 Angular.io 的 “[Tour of Heroes” 教程](https://angular.io/tutorial)开始。它被用于我们的出发点是以你为它是被绝大部分 Angular 开发者所知的教程。
+
+所有在教程代码里的组件都是混合组件。事实非常明显，考虑到它们中没有一个有输出属性，而且它们中的一些还会修改应用状态。
+
+在最近的文章中，我们会把 MVP 模式应用到其中的一些组件里，一步步的手写这些代码。我们也会讨论测试 MVP  的正确姿势。
+
+虽然这些文章只是在讨论 Tour of Heroes 里的组件，我已经把 MVP 添加到整个应用里，并且为容器组件和表现组件添加了测试用例，存放在 [这个 GitHub repository](https://github.com/LayZeeDK/ngx-tour-of-heroes-mvp)里
+
+### 知识储备
+
+除了在这篇文章里介绍的这些概念之外，我希望能你只需要熟悉一些关键的 Angular 概念。MVP 的概念也会在相关的文章进一步解释。
+
+我期望你对 Angular 组件有深的理解，比如 [data binding syntax](https://angular.io/guide/template-syntax#binding-syntax-an-overview) 和 [input and output properties](https://angular.io/guide/template-syntax#input-and-output-properties)。我也假设你有了解  [RxJS](https://rxjs-dev.firebaseapp.com/) 的基本知识——对 observable，subjects，operators 和 subscription 有所了解
+
+
+
+
+
