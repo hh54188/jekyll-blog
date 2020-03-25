@@ -67,15 +67,21 @@
 
 ## 软件架构
 
-为了讨论架构的最佳实践和模式，我们首先需要回答一个问题，软件架构是什么。[Martin Fowler](https://martinfowler.com/) 把架构定义为：*“最高层次的将系统拆解为不同的部分（*highest-level breakdown of a system into its parts*）”* 。基于此我会将软件结构描述为关于软件如何将它部分组合在一起并且部分间通信的*规则*和*约束*。通常来说，我们在系统开发中的架构决策在系统演进的过程中很难发生更改。这也是为什么非常重要的是从项目一开始就要对这些决策多加留意，尤其当是我们搭建的软件需要在生产环境中运行多年的话。[Robert C. Martin](https://en.wikipedia.org/wiki/Robert_C._Martin) 曾经说过：软件真正的开销是维护。拥有牢固地基的架构帮助减少系统维护的成本
+为了讨论架构的最佳实践和模式，我们首先需要回答一个问题，软件架构是什么。[Martin Fowler](https://martinfowler.com/) 把架构定义为：*“最高层次的将系统拆解为不同的部分（*highest-level breakdown of a system into its parts*）”* 。基于此我会将软件架构描述为关于软件如何将它部分组合在一起并且相互间通信的*规则*和*约束*。通常来说，我们在系统开发中的架构决策在系统演进的过程中很难发生更改。这也是为什么非常重要的是从项目一开始就要对这些决策多加留意，尤其当是我们搭建的软件需要在生产环境中运行多年的话。[Robert C. Martin](https://en.wikipedia.org/wiki/Robert_C._Martin) 曾经说过：软件真正的开销在于维护。拥有牢固地基的架构能够帮助减少系统维护的成本
 
-> **软件架构**是关于如何组织它部分的方式以及部分之间通信的*规则*和*约束*
+> **软件架构**是关于如何组织它部分的方式以及相互之间通信的*规则*和*约束*
 
-> 译者注：在上面的翻译中我将 parts 翻译成了“部分”。你或许会认为或者翻译为“组件”听上去更合适，但“组件（components）”在不同的编程语言中有更特定的指向。在 React 中很特殊，一个类就就代表一个组件，但是在 Angular 可能是一个 module，在 Java 里可以是一个 jar 包。通常来说它是比类大的单位。思考题是，如果技术上允许在 React 应用内存在比类大但又比应用小的这么一个单位存在，我们应该按照什么规则组织它？我认为打包时产出的 chunk 或者 bundle 不算，它们是打包优化的产物，而并非是你思考后刻意产生的结果
+> 译者注：在上面的翻译中我将 parts 翻译成了“部分”。你或许会认为或者翻译为“组件”听上去更合适，但“组件（components）”在不同的编程语言中有更特定的指向。在 React 和 Angular 是我们最熟悉的那个概念，但在 Java 里可以是一个 jar 包。通常来说它是比类大但是又比应用小的一个单位。思考题是，如果技术上允许在 React 应用内存在这么一个单位存在，我们应该按照什么规则组织它？我认为打包时产出的 chunk 或者 bundle 不算，它们是打包优化的产物，而并非是你思考后刻意产生的结果。Martin 的曾经提出的几个问题能够引导你思考：
+>
+> - What are the best partitioning criteria?
+> - What are the relationships that exist between packages, and what design principles govern their use?
+> - Should packages be designed before classes (Top down)? Or should classes be designed before packages (Bottom up)? 
+> - How are packages physically represented? In C++? In the development environment?
+> - Once created, to what purpose will we put these packages?
 
 ## 高层次抽象层
 
-首先我们将通过抽象层来分解系统。下图描述了这种分解用的常见概念。思考方向子啊与将**适当的职责**放入**适当的层**中：**核心层（Core）**，**抽象层（abstraction）**或者是**表现（presentation）层**。我们独立的检视每一个层并且分析它的职责。这也的系统分解也指明了通信的规则。比如**表现层**只能够通过**抽象层**与**核心层**进行交谈。之后我们学习这种约束带来的优势
+首先我们将通过抽象层来分解系统。下图描述了这种分解中使用的常见概念。根本原理是将**适当的职责**放入**适当的层**中：**核心层（Core）**，**抽象层（abstraction）**或者是**表现（presentation）层**。我们独立的观察每一个层并且分析它的职责。这样的系统分解也明确了通信规则。比如**表现层**只能够通过**抽象层**与**核心层**进行交谈。之后我们学习这种约束带来的优势
 
 ![](./images/angular-architecture-best-practices/layers.png)
 
@@ -83,9 +89,9 @@
 
 让我们从表现层开始拆解分析我们的系统。这里是所有 Angular 组件存在的地方。这一层的唯一职责是**呈现（present）**和**委托（delegate）**。换句话说，它展示界面并且把用户的操作通过抽象层委托给核心层。它知道展示**什么（what）**和做**什么（what）**，但是它不知道用户的交互应该**如何（how）**被处理
 
-> 译者注：这样的处理方式是不是让你想起了什么？是 MVC 还是 MVP ?
+> 译者注：这一部分的开头其实给出了一个结论或者说的假设，已经把表现层的职责限定死了。如果我们把它的一部分职责转移给其它的模块会怎么样？可以转移吗？很多时候假设“没有它会怎么样”的思考问题的方式能帮助你更好的理解某些工作原理
 
-下方代码片段涵盖了`CategoriesComponent`组件将用户的交互委托给了来自抽象层的`SetttingsFacade`实例（通过`addCategory()`和`updateCategory()`），并且将一些数据呈现在模板中（通过`isUpdating$`）
+下方代码片段展现了`CategoriesComponent`组件是如何将用户的交互行为委托给了来自抽象层的`SetttingsFacade`实例（通过`addCategory()`和`updateCategory()`）的，并且将一些状态呈现在模板中（通过`isUpdating$`）
 
 ```javascript
 @Component({
@@ -120,9 +126,13 @@ export class CategoriesComponent implements OnInit {
 
 ### 抽象层
 
-抽象层在结构表现层与核心层的同时也拥有自己的职责。这一层为展现曾的组件提供**状态流（streams of state）**和**接口（interface）**，负责扮演**外观（facade）**。这种外观将组件在系统里的可见和可为都沙盒化。我们能简单的通过 Angular 的 provider 类来实现接口。这些类或者可以加以 **Facade** 后缀，比如`SettingsFacade`。下方就是外观的一个例子
+抽象层除了将表现层与核心层解耦之外同时也拥有自己的职责。这一层为展现层组件提供**状态流（streams of state）**和**接口（interface）**，以及负责扮演**外观（facade）**模块。这种外观模块将组件在系统里的可见和可为都沙盒化。我们能简单的通过 Angular 的 provider 类来实现接口。这些类或者可以加以 **Facade** 后缀，比如`SettingsFacade`。下方就是外观的一个例子
 
-> 译者注：我认为这里的抽象层对应就是 Martin Fowler 在  *[Enterprise Application Architecture](https://martinfowler.com/books/eaa.html)* 里的*[服务层（Service Layer）](https://martinfowler.com/eaaCatalog/serviceLayer.html)* 。并且“沙盒化”对应的就是服务层里定义的*应用边界（application's boundary）*，即说白了这个服务究竟能干些什么，完全由限定在服务层暴露的接口方法里。
+> 译者注：
+>
+> 我不确定 facade 应该如何翻译。直接翻译成“外观”似乎听上去有些奇怪，但又找不到更好的翻译方式。望赐教
+>
+> 我认为这里的抽象层对应就是 Martin Fowler 在  *[Enterprise Application Architecture](https://martinfowler.com/books/eaa.html)* 里的*[服务层（Service Layer）](https://martinfowler.com/eaaCatalog/serviceLayer.html)* 。并且“沙盒化”对应的就是服务层里定义的*应用边界（application's boundary）*，即说白了这个服务究竟能干些什么，完全由限定在服务层暴露的接口方法里。
 
 ```javascript
 @Injectable()
@@ -181,31 +191,31 @@ export class SettingsFacade {
 
 #### 抽象接口
 
-我们已经知道了这一层的主要职责：为组件提供状态流和接口。让我们从接口开始。公有方法 `loadCashflowCategories()` ， `addCashflowCategory()` 和 `updateCashflowCategory()`从组件中抽离出了状态管理的细节以及外部的 API 调用。我们不在组件中直接使用 API provider (比如 `CashflowCategoryApi`) 因为它们存在于核心层中。组件也并不关心状态是如何变化的。表现层不应该关心工作是**如何（how）**完成的，组件在必要的时候**只需要调用（just call）**抽象层的方法即可（委托）。查看抽象层的公共方法能够让我们快速了解系统这部分的用户用例概况
+我们已经知道了这一层的主要职责是：为组件提供状态流和接口。让我们从接口开始讲起。公有方法 `loadCashflowCategories()` ， `addCashflowCategory()` 和 `updateCashflowCategory()`封装了从组件中抽离出了状态管理的细节以及外部的 API 调用。我们不在组件中直接使用 API provider (比如 `CashflowCategoryApi`) 因为它们存在于核心层中。组件也并不关心状态是如何变化的。表现层不应该关心工作是**如何（how）**完成的，组件在必要的时候**只需要调用（just call）**抽象层的方法即可（委托）。查看抽象层的公共方法能够让我们快速了解系统这部分的用户用例概况
 
 但是我们应该记住抽象层不是实现业务逻辑的地方。这里我们只是将表现层和业务逻辑*联系（connect）*在了一起，并且把联系的*方式*抽象了出来
 
-> 译者注：Angular 采用了 reactive 编程思想，使用了 RxJS 作为基础类库。“流（stream）”是其中一个重要概念，接下来也会涉及其他和 RxJS 相关的函数和概念 
+> 译者注：Angular 采用了 reactive 编程思想，使用了 RxJS 作为基础类库。“流（stream）”是其中一个重要概念，接下来也会涉及其他和 RxJS 相关的函数和概念 ，比如 Observable，BehaviorSubjects 
 
 #### 状态
 
-至于状态，抽象层使得组件独立于状态管理解决方案。组件的模板上被赋值带有数据的 Observable 但并不关心数据是如何产生以及从哪来的。为了管理状态我们能够使用任何支持 RxJS (像 NgRx) 的状态管理类库，又或者仅仅使用 BehaviorSubject 对我们的状态建模。在上面的例子中我们的使用的状态对象的内部实现借助于 BehaviorSubjects （状态对象是我们核心层的一部分）。在 NgRx 的场景下，我们从 store 发起操作。
+至于状态，抽象层使得组件独立于状态管理解决方案。带有数据的 Observable 对象赋值给组件模板, 但组件并不关心数据是如何产生以及从哪来的。为了管理状态我们能够使用任何支持 RxJS (像 NgRx) 的状态管理类库，又或者仅仅使用 BehaviorSubject 对我们的状态建模。在上面的例子中我们使用的状态对象内部的实现借助于 BehaviorSubjects （状态对象是我们核心层的一部分）。如果是使用 NgRx 的实现状态管理的化，我们从 store 触发 actions。
 
-拥有这样的抽象给了我们很大的灵活性，并且允许我们在更改状态管理方式式而不触碰表现层。甚至可能无缝的迁移到像 Firebase 这样的实时后端，让我们的应用变得**实时（real-time）**。我个人喜欢一开始使用 BehaviorSubjects 来管理状态。如果之后在开发系统的某个时间点有需要使用其他东西，在这个架构下，重构起来非常容易
+拥有这类的抽象给了我们很大的灵活性，并且允许我们在不触碰表现层的情况下更改状态管理方式。甚至可能无缝的迁移到像 Firebase 这样的实时后端，让我们的应用变得**实时（real-time）**。我个人喜欢一开始使用 BehaviorSubjects 来管理状态。如果之后在开发系统的某个时间点有需要使用其他东西，在这个架构下，重构起来非常容易
 
-> 译者注：“状态解决方案”不是必须的，状态管理可以有，架构可以有，但不一定要借助于第三方类库来实现。React 可以有 Redux 架构，但是不一定需要 Redux 框架。仅仅依赖 React 自己的 hook 机制和 provider 就足以实现一套状态管理机制。另一个我想吐槽的是，我不认为 Redux 是一个好的框架，而 NgRx 和 NGXS 并不会却也没有更好的创新 
+> 译者注：“状态解决方案”不是必须的，状态管理可以有，架构可以有，但不一定要借助于第三方类库来实现。React 可以有 Redux 架构，但是不一定需要 Redux 框架。仅仅依赖 React 自己的 hook 机制和 provider 就足以实现一套状态管理机制。
 
 #### 同步策略
 
-现在让我们更进一步的看看抽象层的重要一面。无论我们选择什么样的状态管理解决方案，我们都可以以乐观或者悲观的方式实现 UI 的更新。想象我们想要在实体的集合中装填一条新记录。集合请求自后端并且在 DOM 中展示；在悲观的实现方式下，我们首先尝试在后端更新状态（比如通过 HTTP 请求），在成功之后我们再更新前端状态。再另一种乐观的实现方式里，我们执行的顺序不同。首先我们会在后端一定会更新成功的假设上立即更新前端。然后我们才发请求更新服务端状态。如果成功了，我们不用做任何事情，但是如果失败了，我们需要回滚前端的更改并且告知用户
+现在让我们更进一步的看看抽象层的重要一面。无论我们选择什么样的状态管理解决方案，我们都可以以乐观或者悲观的方式实现界面的更新。想象我们想要在实体的集合中创建一条新记录。集合请求自后端并且在 DOM 中展示；在悲观的实现方式下，我们首先尝试在更新后端状态（比如通过 HTTP 请求），成功之后我们再更新前端状态。另一种乐观的实现方式是以不同的顺序执行。首先我们会在后端一定会更新成功的假设上立即更新前端。然后我们才发请求更新服务端状态。如果成功了，我们不用做任何事情，但是如果失败了，我们需要回滚前端的更改并且告知用户
 
-> **乐观更新（Optimistic update）**首先改变界面状态然后才尝试更新后端状态。这为我们的用户带来更好的体验，因为不会因为网络延迟看到任何的滞后。如果后的那更新失败了，界面更改必须回滚
+> **乐观更新（Optimistic update）**首先改变界面状态然后才尝试更新后端状态。这为我们的用户带来更好的体验，不会因为网络延迟看到任何的滞后。如果后的那更新失败了，界面更改必须回滚
 >
 > **悲观更新（Pessimistic update）**首先更改后端状态并且只有在成功的情况下才更改界面状态。因为网络延迟，通常需要在后端的执行的过程中显示加载进度条
 
 #### 缓存
 
-有时候我们也许会认定来自后端的数据并不会成为我们应用状态的一部分。这也许对我们不会执行任何操作只是把它们（通过抽象层）传递给组件的**只读（read-only）**数据有用。在这个场景下，我们可以把数据缓存在外观中。实现它最简单的方式是使用 RxJS 的 `shareReplay()` 操作符，它能够为流的新的订阅者*重放（replay）*最新的数据。看看下面`RecordsFacade`使用`RecordsApi`为组件请求，缓存并且过滤数据的代码片段
+有时候我们也许会认定来某些自后端的数据并不会成为我们应用状态的一部分。这通常是那些我们不会对它执行任何操作只是把它们（通过抽象层）传递给组件的**只读（read-only）**数据。在这个场景下，我们可以把数据缓存在外观模块中。实现它最简单的方式是使用 RxJS 的 `shareReplay()` 操作符，它能够为流的新的订阅者*重放（replay）*最新的数据。看看下面`RecordsFacade`使用`RecordsApi`为组件请求，缓存并且过滤数据的代码片段
 
 ```javascript
 @Injectable()
@@ -237,14 +247,14 @@ export class RecordsFacade {
 
 总结下来，我们在抽象层能做的事情有：
 
-- 为组件提供方法：
+- 为组件提供接口方法：
   - 把执行逻辑委托给核心层
   - 决定数据的同步策略（乐观或者悲观）
 - 为组件提供状态流
   - 选取一个或多个界面状态流（如果有必要的话把它们结合在一起）
   - 从外部 API 中缓存数据
 
-正如我们看到的，抽象层我们的分层架构中扮演了一个非常重要的角色。它清晰的定义了能够帮助我们更好理解和推理系统的职责。依据你的具体例子，你可以给每一个 Angular 模块或者每一个实体创建一个外观。举个例子，`SettingsModule`仅有一个`SettingsFacade`。但有时为每一个实体创建更细力度的抽象外观会更好，比如`UserFacade`对于`User`实体而言
+正如我们看到的，抽象层我们的分层架构中扮演了一个非常重要的角色。它清晰的定义了能够帮助我们更好理解和推理系统的职责。依据你的具体例子，你可以给每一个 Angular 模块或者每一个实体创建一个外观模块。举个例子，`SettingsModule`仅有一个`SettingsFacade`。但有时为每一个实体创建更细力度的抽象外观会更好，比如`UserFacade`对于`User`实体而言
 
 ### 核心层
 
