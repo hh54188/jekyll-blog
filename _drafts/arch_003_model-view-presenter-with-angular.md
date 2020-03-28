@@ -23,7 +23,7 @@
 
 但与此同时，我们希望应用是具有可维护的，可测试的，可拓展的和具有良好性能的
 
-复杂的应用很少拥有所有这些宝贵的特征。我们也不能在完成高级功能需求的情况下避免这些所有的特征，但是我们可以通过设计应用来最大化利用它的宝贵特征
+复杂的应用很少拥有所有这些宝贵特征。我们也不能在完成高级功能需求的情况下避免这些所有的特征，但是我们可以通过设计应用来最大化利用它的宝贵特征
 
 > 译者注：我理解这些特征，但是我不理解为什么作者把这些特征称之为“宝贵特征（valuable traits）”。在我看来这些复杂的行为正是应用变得难以维护的原因之一。我们的设计应用的目标是要保证它的**简单**和**清晰**。我们不应该想法设法的去争取这些特征，而是应该想方设法的避免它们
 
@@ -53,69 +53,75 @@
 
 ## MVP（Model-View-Presenter）模式
 
-MVP 是一类实现应用界面的软件架构设计模式。我们用它使得类，函数，和难以测试的模块（软件工件）的复杂逻辑减到最小。特别是我们会避免像 Angular 组件这种界面类型的软件工件的变得复杂。
+MVP 是一类实现程序界面的软件架构设计模式。借助它能使得类，函数，和难以测试的模块（软件部件）的复杂逻辑减到最小。特别是能使得类似于 Angular 组件的软件部件避免变得复杂。
 
-就像它衍生自的 MVC 模式一样，MVP 将领域模型（domain model）和表现（presentation）进行分离。表现层通过观察者模式（Observer Pattern）对领域的变化做出响应，这些在由 Erich Gamma, Richard Helm, Ralph Johnson, and John Vlissides (又称为 “The Gang of Four”) 编写的经典图书 “[Design Patterns: Elements of Reusable Object-Oriented Software](https://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612)” 中具有描述
+像 MVC 模式一样，MVP 将领域模型（domain model）和表现（presentation）进行分离。表现层通过观察者模式（Observer Pattern）对领域的变化做出响应，这在由 Erich Gamma, Richard Helm, Ralph Johnson, and John Vlissides (又称为 “The Gang of Four”) 编写的经典图书 “[Design Patterns: Elements of Reusable Object-Oriented Software](https://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612)” 中有详细描述
 
 在*观察者模式*（Observer Pattern）*中，一个*对象（subject）*维护了一个当状态改变时需要通知的*观察者（observers）*列表。这听起来熟悉吗？你已经猜到了，RxJS 就是基于观察者模式
 
-*视图*（view）*除了在表单的数据绑定和组件组合中并不包含任何的逻辑或者行为。当用户交互发生时它把控制权委托给 presenter
+> 译者注：下面会提到，如何把模型的变化映射到视图上其实还有另一种方式，就是视图提供公开的接口，供 presenter 调用。在我看来这是一种“主动”和“被动”的区别
 
-presenter 会批处理状态的修改，所以当用户填写表单时最终呈现的时一个巨大的修改而不是许多零碎的修改，比如每一个表单会更新应用的状态而不是每一个字段。这使得撤销或者重做状态的改变变得容易。presenter 通过命令更新状态。多亏了 [Observer Synchronization](https://www.martinfowler.com/eaaDev/MediatedSynchronization.html) 状态的改变才得以反馈到视图上
+*视图*（view）*除了负责数据绑定以及把一些组件组合起来以外，它并不包含任何的逻辑或者行为。当用户交互发生时它把控制权委托给 presenter
+
+presenter 会批处理状态的修改，所以当用户填写表单时最终呈现的是一个大型变更而不是许多零碎的修改，比如只能通过每一个表单的提交来更新应用的状态而不是每一个字段。这使得撤销或者重放状态的变更变得容易。presenter 通过命令更新状态。多亏了 [Observer Synchronization](https://www.martinfowler.com/eaaDev/MediatedSynchronization.html) 机制状态的改变才得以反馈到视图上
 
 ### Angular 变种
 
-受到原始 MVP 模式的启发以及经过一系列的变化，我们创建了适用于 Angular 平台的软件工件，它的关键界面单位就是*组件（component）*
+受到原始 MVP 模式的启发以及经过一系列的变化，我们创造了适用于 Angular 平台的软件各类模块，其中关键的界面构成元素就是*组件（component）*
 
-理想情况下，一个组件只聚焦展示和用户交互。在现实中，我们制定了严格的规则来确保我们的组件只关心应用的部分状态给用户以及允许用户影响状态。
+理想情况下，组件只聚焦展示和用户交互。在现实中，我们制定了严格的规则来确保我们的组件只关心展示应用的部分给用户，以及使得用户能够操纵状态。
 
-这篇文章介绍的 MVP 变种采用的是 [Encapsulated Presenter 模式](https://lostechies.com/derekgreer/2008/11/23/model-view-presenter-styles/#the-encapsulated-presenter-style)。但无论如何，我们的 presenter 不会使用它的视图。取而代之的是，我们会采用 observables 将 presenter 与 model 和视图连接起来，以便 presenter 能够独立于视图进行测试。
+这篇文章介绍的 MVP 变种采用的是 [Encapsulated Presenter 模式](https://lostechies.com/derekgreer/2008/11/23/model-view-presenter-styles/#the-encapsulated-presenter-style)。但我们的 presenter 并不会直接引用它的视图。取而代之的是，我们会采用 observables 将 presenter 与 model 和视图连接起来，以便 presenter 能够独立于视图进行测试。
 
-我们打算使用 [Supervising Controller](https://www.martinfowler.com/eaaDev/SupervisingPresenter.html) 方式当实现 MVP 模式时。我们的视图（Angular 组件）简单的依赖它们的 presenter 负责用户交互。因为我们的 presenter 被它们的视图所封装，数据和事件在某些时候都会经过组件模型。
+我们打算使用 [Supervising Controller](https://www.martinfowler.com/eaaDev/SupervisingPresenter.html) 方式实现 MVP 。我们的视图（Angular 组件）只需把用户的交互交由它们的 presenter 负责处理。因为 presenter 被它们的视图所封装，数据和事件流也会经过组件。
 
-在组件模型的帮助下，我们的 presenter 将用户的交互翻译成组件的特定事件。事件被翻译成会被发送到模型的命令。最终的翻译会被接下来会介绍的容器组件来处理
+> 译者注：所以这里我们明白了视图和 presenter 之间的关系：视图知道 presenter 的存在，并且调用 presenter 的方法；但是 presenter 不知道视图的存在，也不能引用视图实例
+>
+> 除了有 supervsing controller 的方式以外，还有 passive view 方式来实现。两者的区别就在于前者通过数据绑定的方式来响应模型的变化，后者需要 presenter 调用 passive 的接口来更新视图。Angular 采用的前一种方式。具体的区别可以在这个[stackoverflow 的问题下](https://stackoverflow.com/questions/2056/what-are-mvp-and-mvc-and-what-is-the-difference)找到答案。
 
-我们的 presenter 会有一些[表现层模型（Presentation Model）](https://martinfowler.com/eaaDev/PresentationModel.html)的特征，也就是说包含一些用于指示 DOM 元素是否启用的布尔属性值的表现层逻辑。一个例子是一个用于指示 DOM 元素应该被渲染成的颜色
+在组件模型（component model）的帮助下，我们的 presenter 将用户的交互行为转换成组件的特定事件。事件又被转换成会被发送给模型的命令。最终的转换会被接下来会介绍的容器组件来处理
 
-我们的视图与 presenter 上的属性绑定，简单将它代表的状态投没有额外逻辑的展示出来。结果形成了一个简单的带有组件模型的组件模板
+我们的 presenter 会有一些[表现层模型（Presentation Model）](https://martinfowler.com/eaaDev/PresentationModel.html)的特征，比如包含一些用于指示 DOM 元素是否显示的布尔值的表现层逻辑。又例如拥有一个属性用于指示 DOM 元素应该被渲染成的颜色
+
+我们将视图与 presenter 上的属性相互绑定，将属性所表达的状态原始的展现出来。这使得组件模型和组件模板变得轻薄了许多
 
 ## 为 Angular 准备的 MVP 概念
 
 为了要将 MVP 模式应用到 Angular 应用里，我们将要介绍 React 社区里常被推崇的概念。我们的组件——在这些文章中——将会被划分为三类
 
-- 纯展现组件（Presentational components）
+- 展现组件（Presentational components）
 - [容器组件（Container components）](https://indepth.dev/container-components-with-angular/)
 - 混合组件（Mixed components）
 
-React 开发者已经从混合组件中提取纯展示组件和容器组件很多年了。我们在 Angular 应用中也可以使用相同的概念。额外的，我们将会介绍 presenter 的概念。
+React 开发者已经从混合组件中分离展示组件和容器组件很多年了。我们在 Angular 应用中也可以使用相同的概念。接下俩我们还会介绍 presenter 的概念。
 
-### 纯展示组件
+### 展示组件
 
-*纯展示组件*纯粹的用于呈现和交互的视图。它们把应用的部分状态展示给用户并且允许用户影响这些状态。
+*展示组件*是纯粹用于呈现和交互的视图。它们把应用的部分状态展示给用户并且允许用户更改这些状态。
 
-因为 presenter 的存在，纯展示组件完全不理会应用其它部分的存在。它们有数据绑定接口能够描述它们处理的用户交互和它们需要的数据
+因为 presenter 的存在，展示组件完全不会感知应用其它部分的存在。它们有处理的用户交互和所需的数据的数据绑定接口
 
-为了不想对界面进行单元测试，我们需要保证纯展示组件的复杂度胡参与一个绝对的最小值。对于组件模型和组件模板都是如如此
+为了避免对界面进行单元测试，我们需要保证展示组件的复杂度保持在一个绝对的最小值。对于组件模型和组件模板都是如此。
 
 ### 容器组件
 
-*容器嘴贱*把应用的状态暴露给纯展示组件。它们通过把组件特定的事件翻译成命令和查询给非展示组件的方式，将纯展示组件与应用的其它部分集成在一起
+*容器组件*把应用的状态暴露给展示组件。它们通过把组件特定的事件转换成命令和查询传递给非展示组件的方式，将展示组件与应用的其它部分集成在一起
 
-通常容器组件和纯展示组件的关系是1对1。容器组件的类属性与纯展示组件的输入属性相匹配，方法与展示组件的事件相对应
+通常容器组件和纯展示组件的关系是1对1的。容器组件的类属性与纯展示组件的输入属性相匹配，方法与展示组件的事件相对应
 
 ### 混合组件
 
-如果一个组件不是一个容器组件或者是纯展现组件，它就是*混合组件*。给出一个现有的应用，很大可能它包含混合组件。我们称之为混合组件因为它们混合了两种系统关注点——它们包含了多个横向层的逻辑。
+如果一个组件既不是一个容器组件也不是纯展现组件，那么它就是*混合组件*。大部分应用很大可能都包含混合组件。我们称之为混合组件因为它们混合了两种系统关注点——它们包含了多个横向层的逻辑。
 
-如果你偶遇了一个组件——额外的包含了一组用于展示的领域对象——能够直接访问设备摄像头，发送 HTTP 请求和使用 WebStorage 缓存应用状态请不要惊讶
+如果你偶遇了一个组件——额外的包含了一组展示的领域对象——能够直接访问设备摄像头，发送 HTTP 请求和使用 WebStorage 缓存应用状态时，请不要感到惊讶
 
-虽然应用中的逻辑一定存在，到那时把它们组织在单一地方会让它非常难测试，难以推断，重用起来复杂以及紧耦合
+虽然应用中的逻辑必须存在，但是把它们组织在单一地方会让导致它非常难测试，难以推断，重用起来复杂以及紧耦合
 
 ### Presenters
 
-为了得到一个简单的纯展现组件，行为逻辑和复杂的表现层逻辑被抽离到一个 presenter 中。presenter 没有界面并且通常没有或者极少的包含注入的依赖，便于它容易测试和推断。
+为了得到一个简单的展现组件，行为逻辑和复杂的表现层逻辑被需要被抽离到一个 presenter 中。presenter 没有界面并且通常没有或者极少的包含注入的依赖，便于它容易测试和推断。
 
-Presenter 几乎不会感知应用的其它部分。通常一个纯展示组件只会 引用一个 presenter
+Presenter 几乎不会感知应用的其它部分。通常一个展示组件只会引用一个 presenter
 
 ## MVC 组合
 
