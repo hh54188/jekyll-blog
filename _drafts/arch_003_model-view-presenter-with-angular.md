@@ -239,3 +239,28 @@ presenter 是一个完全不会感知应用其它部分的类的实例
 
 ## 声明
 
+那张数据流动态图片是由我同样是软件开发者的好朋友 [Martin Kayser](https://www.linkedin.com/in/mdkayser/) 制作
+
+实现高度关注点分离的想法是受到 [Robert "Uncle Bob" Martin 文章](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) 的启发，这在他编写的图书  “[Clean Architecture: A Craftsman’s Guide to Software Structure and Design](http://www.informit.com/store/clean-architecture-a-craftsmans-guide-to-software-structure-9780134494166)” 中也有叙述
+
+将 MVP 模式应用于 Angular 应用的想法受到 [Dave M. Bush](https://www.linkedin.com/in/davembush/) 的 “[Model View Presenter, Angular, and Testing](https://davembush.github.io/model-view-presenter-angular-and-testing/)” 两篇文章的启发
+
+在我的最初研究里，我阅读过 [Roy Peled](https://www.linkedin.com/in/roypeled/) 所写的 “[An MVP guide to JavaScript — Model-View-Presenter](http://www.roypeled.com/an-mvp-guide-to-javascript-model-view-presenter/)”，他讲解了如何使用原生JavaScript实现 MVP 模式应用
+
+### 编辑
+
+我想要感谢你 [Max Koretskyi](https://indepth.dev/author/maxkoretskyi/) ，帮助我打造这篇文章。我非常感谢你分享了关于为开发者社区写作的经验。再一次感谢你发表了我的文章，以至于我能把它们和  [Angular INDEPTH](https://indepth.dev/angular/) 的读者进行分享
+
+## 同行评审
+
+感谢亲爱的评审们，帮助我发布这篇文章，你们的反馈是无价的！
+
+- [abaugh](https://twitter.com/synalx)
+- [Brian Melgaard Hansen](https://www.linkedin.com/in/brian-melgaard-hansen-8b7176153/)
+- [Craig Spence](https://medium.com/u/52fa64a71dbc?source=post_page-----3a4dbffe49bb----------------------)
+- [Denise Mauldin](https://www.linkedin.com/in/denisemauldin/)
+- [Kay Khan](https://github.com/KayHS)
+- [Mahmoud Abduljawad](https://twitter.com/ajawadmahmoud)
+- [Martin Kayser](https://www.linkedin.com/in/mdkayser/)
+- [Sandra Willford](https://www.linkedin.com/in/sandra-willford/)
+- [Stephen E. Mouritsen Chiang](https://twitter.com/chiangse)
