@@ -127,25 +127,27 @@ Presenter 几乎不会感知应用的其它部分。通常一个展示组件只�
 
 ![](./images/model-view-presenter-with-angular/model-view-presenter-triad.png)
 
-这三个软件工件结合成了我们所谓的 MVC。模型（model）——由容器组件表示——代表了需要由浏览器展示给用户的应用状态
+这三个软件部件组合成了我们所谓的 MVC。模型（model）——由容器组件表示——代表了需要由浏览器展示给用户的应用状态
 
-视图，由纯展现组件表示，是一个呈现应用状态并且把用户交互翻译为组件级别事件的薄的用户层，通常将控制流借转发给 presenter
+视图，由展现组件表示，是一个用于呈现应用状态并且把用户交互转换为组件级别事件轻量用户界面，通常会把控制流转发给 presenter
 
 presenter 是一个完全不会感知应用其它部分的类的实例
 
 ### 数据流
 
+> 译者注：以下可能会涉及到 Angular 的语法细节，例如 Observable，事件绑定机制，属性传播机制。可以忽略。主要留意数据的流动方向
+
 #### 数据在组件树的向下流动
 
-让我们把 数据和事件是如何在 MVP 中流动的过程可视化出来
+让我们把数据和事件是如何在 MVP 中流动的过程可视化出来
 
 ![](./images/model-view-presenter-with-angular/data-flow.gif)
 
-在上图中，应用的状态更改已经发生在一个服务中。因为容器组件订阅了服务上的一个 observable 属性所以它被通知了
+在上图中，一个服务中的应用状态发生了更改。因为容器组件订阅了服务上的一个 observable 属性所以它感知到了变更的发生
 
-容器组件把被触发的新值转化为新的纯展示组件最容易接受的新格式。Angular 把新的值和引用赋值给纯引用的组件的接收输入属性上
+容器组件把接收到的新值转换为展示组件方便接收的格式。Angular 把新的值和引用赋值给展示组件的用于接收的输入属性
 
-纯展示组件把更新后的数据传递给 presenter ，用于重新计算需要在纯展示组件模板里需要使用的额外属性
+展示组件把更新后的数据传递给 presenter ，用于重新计算需要在展示组件模板里需要使用的额外属性
 
 现在数据已经完成了在组件树向下的流动，然后 Angular 把状态渲染和更新在 DOM 上，在列表里展示给用户
 
@@ -153,15 +155,15 @@ presenter 是一个完全不会感知应用其它部分的类的实例
 
 ![](./images/model-view-presenter-with-angular/event-flow.gif)
 
-在上图种用户点击了一个按钮。由于在模板中的事件绑定，Angular 把控制权转交展示组件模型的事件处理函数。
+在上图种用户点击了一个按钮。由于模板中存在事件绑定，Angular 把事件转交由展示组件模型中的事件处理函数处理。
 
-用户的脚本被 presenter 拦截，并且将它转化成特定的数据结构，随后通过 observable 属性的方式将它传播出去。展示组件模型观察到了这次修改，又通过向外传递的属性将这个值传播出去。
+用户的交互被 presenter 拦截，并且将它转化成特定的数据结构，随后借助 observable 属性将它传播出去。展示组件模型观察到了这次修改，又通过向外传递的属性将这个值传播出去。
 
-因为模板里事件绑定的缘故 Angular 通过组件特定事件告诉容器组件新的值产生了
+因为模板里绑定事件的缘故， Angular 通过组件特定事件告诉容器组件新的值产生了
 
 现在事件已经完成了在组件树中的向上游动，容器组件将数据结构转化为参数传递给服务里的一个方法
 
-接下来一个命令就会用户改变应用状态，服务通过 observable 属性触发状态的改变，之后数据又一次像上上图中那样的流动
+接下来一个命令就会改变应用的状态，服务通过 observable 属性触发状态的改变，之后数据又一次像上上图中那样的流动
 
 ## 一个改进的 Angular 应用
 
@@ -169,25 +171,25 @@ presenter 是一个完全不会感知应用其它部分的类的实例
 
 > 模块化的软件架构让我们变得敏捷
 
-我们在前瞻性的处理用户需求的改变而不是累积技术债。为了避免紧耦合与难以测试，即使经过了数月的重构，也难以达到这个级别的敏捷度
+我们追求的是前瞻性的处理用户需求更迭，而不是累积技术债。如果没有好的架构，即使为了避免紧耦合与测试困难历经数月的重构，也难以实现这个级别的敏捷度
 
 ### 可维护性
 
-尽管最终的系统是由许多的动态部分组成，但是每一个部分都非常的简单并且只关注系统的单个功能点。但额外的我们的到了一个整洁的知道何去何从的系统
+尽管最终系统是由许多的动态部分组成，但是每一个部分都非常的简单并且只关注系统的单个功能点。于是我们的到了一个整洁的知道何去何从的系统
 
 ### 可测试性
 
-我们把 Angular 相关的软件工件里的逻辑尽可能最少化，因为它们测试起来困难的和缓慢。当每一个软件部分只关注唯一的系统功能时，它们变得容易被推断。我们也就能非常容易的在自动测试里验证
+因为 Angular 里的相关的软件部件测试起来困难且缓慢，所以我们应该最少化它们的逻辑。当每一个软件部分只关注唯一的系统功能时，它们变得容易被推断。我们也就能非常容易的在自动测试里验证
 
-界面测试通常缓慢而困难，在这一点上 Angular 也不例外。采用 MVC 之后，我们把展现组件里的逻辑最小化，使它们变得不值得测试。取而代之的使，我们选择跳过单元测试，而是依靠我们的开发工具，集成测试以及端到端测试来捕获像类型错误，语法错误，未初始化之类的错误
+界面测试进行起来缓慢且困难，在这一点上 Angular 也不例外。采用 MVC 之后，我们把展现组件里的逻辑最小化，使它们变得不值得测试。取而代之的是我们选择跳过单元测试，依靠我们的开发工具，进行集成测试以及端到端测试来捕获像类型错误，语法错误，未初始化之类的错误
 
 ### 可拓展性
 
-功能之间可以独立开发，即使在软件中水平层次分割的软件工件也可以独立的测试和开发。我们很清晰的区分每一部分的逻辑片段属于哪。
+现在功能之间可以独立开发，即使是处于同一水平层的软件部件也可以独立的测试和开发。我们能很清晰的区分每一部分的逻辑片段分属于哪。
 
-我们先可以独立开发层，我们可以区分技术开发和前端视觉开发。一名开发人员善于使用 RxJS 实现 behaviour ，同时另一名开发人员热爱后端集成，还有另一名开发人员喜欢完善设计与使用 CSS 和 HTML 解决可访问性
+我们可以在不同层之间独立开发，我们可以区分技术开发和前端视觉开发。一名开发人员善于使用 RxJS 实现 behaviour ，同时另一名开发人员热爱后端集成，还有另一名开发人员喜欢完善设计与使用 CSS 和 HTML 解决可访问性的问题
 
-因为我们能够独立开发功能，任务可以被分配到不同的团队中。一个团队关心产品分类功能，而另一个团队负责电子商务系统里的问题和购物车功能
+因为我们能够独立开发功能，任务可以被分配到不同的团队中。例如一个团队关心产品分类功能，而另一个团队负责电子商务系统里的问题和购物车功能
 
 ### 性能
 
@@ -199,13 +201,13 @@ presenter 是一个完全不会感知应用其它部分的类的实例
 
 ![](./images/model-view-presenter-with-angular/tour-of-heros.gif)
 
-我们从 Angular.io 的 “[Tour of Heroes” 教程](https://angular.io/tutorial)开始。它被用于我们的出发点是以你为它是被绝大部分 Angular 开发者所知的教程。
+我们从 Angular.io 的 “[Tour of Heroes” 教程](https://angular.io/tutorial)开始。我们从它开始是因为它是被绝大部分 Angular 开发者所知的教程。
 
-所有在教程代码里的组件都是混合组件。事实非常明显，考虑到它们中没有一个有输出属性，而且它们中的一些还会修改应用状态。
+所有教程代码里的组件都是混合组件。因为事实非常明显，它们中没有一个带有输出属性，而且它们中的一些还会修改应用状态。
 
-在最近的文章中，我们会把 MVP 模式应用到其中的一些组件里，一步步的手写这些代码。我们也会讨论测试 MVP  的正确姿势。
+在我最近的一些文章中，我们会把 MVP 模式应用到其中的一些组件里，一步步的手写这些代码。我们也会讨论测试 MVP  的正确姿势。
 
-虽然这些文章只是在讨论 Tour of Heroes 里的组件，我已经把 MVP 添加到整个应用里，并且为容器组件和表现组件添加了测试用例，存放在 [这个 GitHub repository](https://github.com/LayZeeDK/ngx-tour-of-heroes-mvp)里
+虽然这些文章只是在讨论 Tour of Heroes 里的组件，我已经把 MVP 应用到整个应用里，并且为容器组件和表现组件添加了测试用例，存放在 [这个 GitHub repository](https://github.com/LayZeeDK/ngx-tour-of-heroes-mvp)里
 
 ### 知识储备
 
@@ -213,7 +215,19 @@ presenter 是一个完全不会感知应用其它部分的类的实例
 
 我期望你对 Angular 组件有深的理解，比如 [data binding syntax](https://angular.io/guide/template-syntax#binding-syntax-an-overview) 和 [input and output properties](https://angular.io/guide/template-syntax#input-and-output-properties)。我也假设你有了解  [RxJS](https://rxjs-dev.firebaseapp.com/) 的基本知识——对 observable，subjects，operators 和 subscription 有所了解
 
+## 资源
 
+[Browse the final Tour of Heroes tutorial code on StackBlitz](https://angular.io/generated/live-examples/toh-pt6/stackblitz.html).
+
+[Download the final Tour of Heroes tutorial code](https://angular.io/generated/zips/toh-pt6/toh-pt6.zip) (zip archive, 30 KB)
+
+[Browse the Tour of Heroes—Model-View-Presenter style repository on GitHub](https://github.com/LayZeeDK/ngx-tour-of-heroes-mvp).
+
+[Watch my talk “Model-View-Presenter with Angular” from ngAarhus May 2018](https://youtu.be/D_ytOCPQrI0)
+
+[View the slides from my talk “Model-View-Presenter with Angular”](https://bit.do/mvp-slides)
+
+## 相关文章
 
 
 
