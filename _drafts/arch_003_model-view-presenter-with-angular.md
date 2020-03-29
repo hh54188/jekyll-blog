@@ -229,5 +229,13 @@ presenter 是一个完全不会感知应用其它部分的类的实例
 
 ## 相关文章
 
+想学习 MVP 模式的历史以及它的兄弟模式 MVC 是如何是如何被引入用户端web界面框架中的，请阅读“[The history of Model-View-Presenter](https://indepth.dev/the-history-of-model-view-presenter/)”
 
+你是否已经厌倦了在组件中塞了一堆后端逻辑以及进行状态管理？想学习如何把非展现逻辑提取到容器组件中去，请阅读“[Container components with Angular](https://indepth.dev/container-components-with-angular/)”
+
+想学习如何快速的用单元测试测试容器组件，请阅读“[Testing Angular container components](https://indepth.dev/testing-angular-container-components)”
+
+在文章“[Lean Angular components](https://indepth.dev/lean-angular-components/)”中，我们会讨论坚固的组件架构的重要性。MVP 模式封装了一些能够帮助我们实现这个目标的设计模式。
+
+## 声明
 
