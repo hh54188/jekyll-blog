@@ -65,5 +65,22 @@ historyView.rollbackTo((historyInfo) => {
 })
 ```
 
-我的第一版代码真的是这么写的，想必此时你也应该感受到我的痛苦了：**我必须手动的更新每一个视图状态信息**
+我的第一版代码真的是这么写的，想必此时你也应该感受到我的痛苦了：**我必须手动的更新每一个视图状态信息**。这会导致更严重的后果：
 
+- 如果需要额外的添加一个视图，比如用户展示文件信息的 FileView。那么在上面三段代码中我都要手动添加一行类似的用户更新 FileView 信息的代码。但实际代码中不可能只存在三段代码，所以我有可能会遗漏这样的修改
+
+- 如果我需要页面不止有一个 InfoView 怎么办？例如 InfoView01 用于展示公制单位，InfoView02 用于展示英制单位。也就是说如果页面上有多出需要展示同一份信息的时候，我的代码需要复制 N 遍：
+
+  ```javascript
+  infoView01.updateHeight(height);
+  infoView01.updateWidth(width);
+  
+  infoView02.updateHeight(height);
+  infoView02.updateWidth(width);
+  ```
+
+如果你想象一下五个 view 之间的调用关系，每一个视图都会和其它四个视图直接沟通，它们之间的关系会类似于一个五角星，你需要维护这 10 层关系。如果再多加入一个 view 将会是一个灾难
+
+![](./images/fe_arch_002_mvc_solved/pentastar.jpg)
+
+## MVC 来拯救
