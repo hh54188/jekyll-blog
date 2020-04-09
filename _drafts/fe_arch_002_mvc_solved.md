@@ -1,14 +1,6 @@
-# MVC 的铠甲和软肋
+# MVC 解决了的和没有解决的
 
-在这个系列里面，我会谈到前端架构的进化；它们解决了什么样的问题以及又是如何面临新的无法解决的问题的；最后这些架构背后常见的组件和模式。 
-
-我知道你们都太熟悉 Flux，Redux 和 Vuex 了，所以我不会对它们着墨太多甚至说刻意避免它们。相反，我会谈论到你们不熟悉和没有听说过的 Backbone.js，Mobx，NgRx 和 Akita 等等。我不会深入这些框架的使用细节，而是在必要时介绍它们框架内的概念和设计思路。最后你会发现其实所有框架背后其实都在用同一种方案解决问题，你也有能力创建自己的框架了。
-
-如果你是第一次接触这个系列，建议从第一篇文章阅读起
-
----
-
-## 单页面应用的主要矛盾
+## 我的第一个单页面应用
 
 我在刚入这行的时候加入的是一家创业公司，它们的产品是 iPad 上给儿童阅读的电子互动图书。而我的工作职责就是负责一款在线单页面应用编辑工具的前端部分，以供公司内的编辑同事制作这些电子图书。编辑同事可以在这个工具内导入素材，比如音频、视频、或者图片。然后摆放这些素材的位置，给它们设置动画效果等等。它类似于一个可以制作动画的 Photoshop，或者平面版本的 Unity3D 编辑器。当然用这两个比喻实在是太抬举它了，但是我想你们大概能想象出它的功能和样子。
 
@@ -79,8 +71,53 @@ historyView.rollbackTo((historyInfo) => {
   infoView02.updateWidth(width);
   ```
 
-如果你想象一下五个 view 之间的调用关系，每一个视图都会和其它四个视图直接沟通，它们之间的关系会类似于一个五角星，你需要维护这 10 层关系。如果再多加入一个 view 将会是一个灾难
+你可以想象一下五个 view 之间的调用关系，如果每一个视图都会和其它四个视图直接沟通的话，它们之间的关系会变的如下图所示。再多加入一个 view 将会是一个灾难
 
 ![](./images/fe_arch_002_mvc_solved/pentastar.jpg)
 
 ## MVC 来拯救
+
+MVC 在不同的上下文中的架构都不一样。从最早的 Smalltalk 里的 MVC，到 .NET 的 MVC，再到 JavaScript 中的 MVC 框架都不尽相同。但我们通常谈论 MVC 是泛指的是服务端架构中的 MVC。以 .NET 的 MVC 为例，我们可以在 [ASP.NET MVC 文档](https://docs.microsoft.com/en-us/aspnet/mvc/overview/older-versions-1/overview/understanding-models-views-and-controllers-cs) 中找到关于 MVC 中三个角色的定义，这里我们重点关注 Model 和 Controller。在之后的内容中会再次强调
+
+[Model](https://docs.microsoft.com/en-us/aspnet/mvc/overview/older-versions-1/overview/understanding-models-views-and-controllers-cs#understanding-models):
+
+> An MVC model contains all of your application logic that is not contained in a view or a controller. The model should contain all of your application business logic, validation logic, and database access logic. 
+
+标注几个重点
+
+- 不与 view 和  controller 的逻辑重叠
+- 包含业务逻辑、校验逻辑、数据库访问逻辑
+
+[Controller](https://docs.microsoft.com/en-us/aspnet/mvc/overview/older-versions-1/overview/understanding-models-views-and-controllers-cs#understanding-controllers):
+
+>A controller is responsible for controlling the way that a user interacts with an MVC application. A controller contains the flow control logic for an ASP.NET MVC application. A controller determines what response to send back to a user when a user makes a browser request.
+
+同样标注几个重点
+
+- 响应用户的交互和请求
+- 控制应用流程
+
+简单来说一个服务端 MVC 的应用流程如下：用户通过 URL 访问应用，controller 负责响应用户的请求，获取数据模型，并将数据渲染在页面模板上之后将页面返回给用户
+
+![](./images/fe_arch_002_mvc_solved/mvc_flow_detail.png)
+
+例如 Node.js 的 MVC 框架 [kraken.js](http://krakenjs.com/) 的 controller 语法如下：
+
+```javascript
+'use strict';
+
+var IndexModel = require('../models/index');
+
+module.exports = function (router) {
+    var model = new IndexModel();
+
+    router.get('/', function (req, res) {
+        res.render('index', model);
+    });
+};
+```
+
+相信你也发现了 MVC 其实是更适用于多页面应用，所以它与前端这种单页面应用场景并非天生契合。前端的 MVC 架构与后端有很大的不同
+
+### Backbone.js
+
