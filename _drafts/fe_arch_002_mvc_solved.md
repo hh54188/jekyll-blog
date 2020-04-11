@@ -75,24 +75,35 @@ historyView.rollbackTo((historyInfo) => {
 
 ![](./images/fe_arch_002_mvc_solved/pentastar.jpg)
 
+## 抽象问题
+
+如果把上面的问题抽象一下的话其实非常简单：把同一份数据**便捷**的**同步**展示在**多个消费者**中。
+
+- **便捷**
+
+就功能而言，上面的代码已经实现了，只不过维护起来非常的困难。所以我们解决的问题还是回到这个系列第一篇所说的，解决非功能需求。针对上面的例子，我们希望添加 View 的成本降到最低。“便捷”这个词或许不太恰当，但我也找不到更好的词，它能形容的是我们开发者能够把维护代码的成本降到最低。
+
+- **同步**
+
+同步不仅仅是同步的“读取”数据，还包括“回写”。假设一份数据被三个视图所用，如果其中一个视图对数据发生了修改，那么修改应该应该也同时反馈到另外两个视图上。
+
+在上面的代码中我没有明确的一个问题，关于这份数据我们应该存一份，还是存在 N 个视图中都保存一份副本。这个我们会在之后讨论
+
+- **多个消费者**
+
+数据的消费方不一定是视图，还有可能是 selector。它不一定被展示，还有可能被用于计算。
+
+
+
 ## MVC 来拯救
 
-MVC 在不同的上下文中的架构都不一样。从最早的 Smalltalk 里的 MVC，到 .NET 的 MVC，再到 JavaScript 中的 MVC 框架都不尽相同。但我们通常谈论 MVC 是泛指的是服务端架构中的 MVC。以 .NET 的 MVC 为例，我们可以在 [ASP.NET MVC 文档](https://docs.microsoft.com/en-us/aspnet/mvc/overview/older-versions-1/overview/understanding-models-views-and-controllers-cs) 中找到关于 MVC 中三个角色的定义，这里我们重点关注 Model 和 Controller。在之后的内容中会再次强调
-
-[Model](https://docs.microsoft.com/en-us/aspnet/mvc/overview/older-versions-1/overview/understanding-models-views-and-controllers-cs#understanding-models):
-
-> An MVC model contains all of your application logic that is not contained in a view or a controller. The model should contain all of your application business logic, validation logic, and database access logic. 
-
-标注几个重点
-
-- 不与 view 和  controller 的逻辑重叠
-- 包含业务逻辑、校验逻辑、数据库访问逻辑
+MVC 在不同的上下文中的架构都不一样。从最早的 Smalltalk 里的 MVC，到 .NET 的 MVC，再到 JavaScript 中的 MVC 框架都不尽相同。但我们通常谈论 MVC 是泛指的是服务端架构中的 MVC。以 .NET 的 MVC 为例，我们可以在 [ASP.NET MVC 文档](https://docs.microsoft.com/en-us/aspnet/mvc/overview/older-versions-1/overview/understanding-models-views-and-controllers-cs) 中找到关于 MVC 中三个角色的定义，这里我们重点关注 Controller。
 
 [Controller](https://docs.microsoft.com/en-us/aspnet/mvc/overview/older-versions-1/overview/understanding-models-views-and-controllers-cs#understanding-controllers):
 
 >A controller is responsible for controlling the way that a user interacts with an MVC application. A controller contains the flow control logic for an ASP.NET MVC application. A controller determines what response to send back to a user when a user makes a browser request.
 
-同样标注几个重点
+标注几个重点
 
 - 响应用户的交互和请求
 - 控制应用流程
@@ -120,4 +131,44 @@ module.exports = function (router) {
 相信你也发现了 MVC 其实是更适用于多页面应用，所以它与前端这种单页面应用场景并非天生契合。前端的 MVC 架构与后端有很大的不同
 
 ### Backbone.js
+
+Backbone 解决的方法很简单：通过事件。
+
+我们以一个[开源](https://github.com/tastejs/todomvc)的[在线 todo 应用](http://todomvc.com/examples/backbone/)为例:
+
+![](./images/fe_arch_002_mvc_solved/todo.png)
+
+它关于处理添加 todo 的代码是这样的，首先绑定输入框的回调
+
+```javascript
+events: {
+    'keypress .new-todo': 'createOnEnter',
+},
+    
+createOnEnter: function (e) {
+    if (e.which === ENTER_KEY && this.$input.val().trim()) {
+        app.todos.create(this.newAttributes());
+        this.$input.val('');
+    }
+},
+```
+
+首先在 app 组件内[监听数据模型的“添加”事件](https://github.com/tastejs/todomvc/blob/41ba86db92336c11e56d425c5151b7ec2932be9a/examples/backbone/js/views/app-view.js#L37)，并且添加回调函数`addOne`
+
+```javascript
+initialize: function () {
+    this.listenTo(app.todos, 'add', this.addOne);
+},
+```
+
+而 `addOne` 的函数实现[是这样的](https://github.com/tastejs/todomvc/blob/41ba86db92336c11e56d425c5151b7ec2932be9a/examples/backbone/js/views/app-view.js#L78)：
+
+```javascript
+// Add a single todo item to the list by creating a view for it, and
+// appending its element to the `<ul>`.
+addOne: function (todo) {
+    var view = new app.TodoView({ model: todo });
+    this.$list.append(view.render().el);
+},
+```
 
