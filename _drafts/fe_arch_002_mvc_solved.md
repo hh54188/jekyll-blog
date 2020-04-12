@@ -101,18 +101,7 @@ historyView.rollbackTo((historyInfo) => {
 
 ## MVC 来拯救
 
-MVC 在不同的上下文中的架构都不一样。从最早的 Smalltalk 里的 MVC，到 .NET 的 MVC，再到 JavaScript 中的 MVC 框架都不尽相同。但我们通常谈论 MVC 是泛指的是服务端架构中的 MVC。以 .NET 的 MVC 为例，我们可以在 [ASP.NET MVC 文档](https://docs.microsoft.com/en-us/aspnet/mvc/overview/older-versions-1/overview/understanding-models-views-and-controllers-cs) 中找到关于 MVC 中三个角色的定义，这里我们重点关注 Controller。
-
-[Controller](https://docs.microsoft.com/en-us/aspnet/mvc/overview/older-versions-1/overview/understanding-models-views-and-controllers-cs#understanding-controllers):
-
->A controller is responsible for controlling the way that a user interacts with an MVC application. A controller contains the flow control logic for an ASP.NET MVC application. A controller determines what response to send back to a user when a user makes a browser request.
-
-标注几个重点
-
-- 响应用户的交互和请求
-- 控制应用流程
-
-简单来说一个服务端 MVC 的应用流程如下：用户通过 URL 访问应用，controller 负责响应用户的请求，获取数据模型，并将数据渲染在页面模板上之后将页面返回给用户
+MVC 在不同的上下文中的架构都不一样。从最早的 Smalltalk 里的 MVC，到 .NET 的 MVC，再到 JavaScript 中的 MVC 框架都不尽相同。但我们通常谈论 MVC 是泛指的是服务端架构中的 MVC。以 .NET 的 MVC 为例，我们可以在 [ASP.NET MVC 文档](https://docs.microsoft.com/en-us/aspnet/mvc/overview/older-versions-1/overview/understanding-models-views-and-controllers-cs) 中找到关于 MVC 中三个角色的定义。简单来说一个服务端 MVC 的应用流程如下：用户通过 URL 访问应用，controller 负责响应用户的请求，获取数据模型；model 封装了业务逻辑，并负责数据进行更改；最后数据渲染在页面模板上之后将页面返回给用户
 
 ![](./images/fe_arch_002_mvc_solved/mvc_flow_detail.png)
 
@@ -132,17 +121,19 @@ module.exports = function (router) {
 };
 ```
 
-相信你也发现了 MVC 其实是更适用于多页面应用，所以它与前端这种单页面应用场景并非天生契合。前端的 MVC 架构与后端有很大的不同
+相信你也发现了 MVC 其实是更适用于多页面应用，所以它与前端这种单页面应用场景并非天生契合。前端的 MVC 架构与后端有很大的不同。
+
+但即使是在后端的 MVC 架构中，我们看到了一种思路，就是**职责分离**。在我们上面的代码中，所谓的 handler，比如 `canvasView.onSelectElement` 几乎包办了所有的事情：负责响应用户的请求，负责更新数据，还负责更新视图。职责分离究竟给我们带来了什么，我们会在后面讨论
 
 ### Backbone.js
 
-Backbone 解决的方法很简单：通过事件。
+Backbone 解决的方法很简单：通过事件——当数据状态发生改变需要被同步时，它不是依次去调用消费方的接口，而是向外广播一个事件。任何需要消费这份数据的地方只需要监听数据的相关事件即可。
 
 我们以一个[开源](https://github.com/tastejs/todomvc)的[在线 todo 应用](http://todomvc.com/examples/backbone/)为例:
 
 ![](./images/fe_arch_002_mvc_solved/todo.png)
 
-它关于处理添加 todo 的代码是这样的，首先绑定输入框的回调
+它关于处理添加 todo 的代码是这样的，首先[绑定输入框的事件处理函数](https://github.com/tastejs/todomvc/blob/41ba86db92336c11e56d425c5151b7ec2932be9a/examples/backbone/js/views/app-view.js#L21)
 
 ```javascript
 events: {
@@ -157,7 +148,9 @@ createOnEnter: function (e) {
 },
 ```
 
-首先在 app 组件内[监听数据模型的“添加”事件](https://github.com/tastejs/todomvc/blob/41ba86db92336c11e56d425c5151b7ec2932be9a/examples/backbone/js/views/app-view.js#L37)，并且添加回调函数`addOne`
+当用户敲击回车之后往数据模型中添加一条数据，注意这里只是修改数据，并不负责更新视图。
+
+接着在 app 组件内[监听数据模型的“添加”事件](https://github.com/tastejs/todomvc/blob/41ba86db92336c11e56d425c5151b7ec2932be9a/examples/backbone/js/views/app-view.js#L37)，并且添加回调函数`addOne`
 
 ```javascript
 initialize: function () {
@@ -174,5 +167,90 @@ addOne: function (todo) {
     var view = new app.TodoView({ model: todo });
     this.$list.append(view.render().el);
 },
+```
+
+这里才是真正更新视图的地方。
+
+看似代码变得冗余了，一份代码被拆分成了三份。但实际上我们不用再为添加额外的视图后，忘记添加某个调用而感到苦恼了。
+
+### AngularJS
+
+AngularJS 指的是 Angular 1.x 的版本，Angular 2.x 之后通常会直接称之为 Angular，这两个版本的架构和设计思路不同
+
+AngularJS 不是通过事件来解决这个问题，而是通过全局变量和依赖注入解决
+
+首先定义一个全局变量用于[存储 todos 以及相关的操作方法](https://github.com/tastejs/todomvc/blob/41ba86db92336c11e56d425c5151b7ec2932be9a/examples/angularjs/js/services/todoStorage.js#L90)：
+
+```javascript
+angular.module('todomvc')
+.factory('localStorage', function ($q) {
+		'use strict';
+
+		var STORAGE_ID = 'todos-angularjs';
+
+		var store = {
+			todos: [],
+			get: function () {
+			},
+			insert: function (todo) {
+            }
+        }
+        return store
+}
+```
+
+这个 store 会被注入到其它的 controller。比如在 `todoCtrl.js ` 中，我们可以直接访问 store 对它进行修改，来实现[添加 todo 的功能](https://github.com/tastejs/todomvc/blob/41ba86db92336c11e56d425c5151b7ec2932be9a/examples/angularjs/js/controllers/todoCtrl.js#L31):
+
+```javascript
+angular.module('todomvc')
+	.controller('TodoCtrl', function TodoCtrl($scope, $routeParams, $filter, store) {
+		var todos = $scope.todos = store.todos;
+    	// ...
+		$scope.addTodo = function () {
+			var newTodo = {
+				title: $scope.newTodo.trim(),
+				completed: false
+			};
+
+			if (!newTodo.title) {
+				return;
+			}
+
+			$scope.saving = true;
+			store.insert(newTodo)
+				.then(function success() {
+					$scope.newTodo = '';
+				})
+				.finally(function () {
+					$scope.saving = false;
+				});
+		};
+}
+
+```
+
+那么在页面上，我们首先完成对[添加事件的绑定](https://github.com/tastejs/todomvc/blob/41ba86db92336c11e56d425c5151b7ec2932be9a/examples/angularjs/index.html#L17)
+
+```html
+<form class="todo-form" ng-submit="addTodo()">
+    <input class="new-todo" placeholder="What needs to be done?" ng-model="newTodo" ng-disabled="saving" autofocus>
+</form>
+```
+
+然后再将 [todo 列表渲染出来](https://github.com/tastejs/todomvc/blob/41ba86db92336c11e56d425c5151b7ec2932be9a/examples/angularjs/index.html#L37):
+
+```html
+<ul class="todo-list">
+    <li ng-repeat="todo in todos | filter:statusFilter track by $index" >
+	</li>
+</ul>
+```
+
+那么如果有其他的视图想使用这份 todo 的话，只需要在这个视图对应的 controller 里访问全局的 store 即可
+
+```javascript
+angular.module('todomvc')
+	.controller('TodoCtrl', function TodoCtrl($scope, $routeParams, $filter, store) {
+		var todos = $scope.todos = store.todos;
 ```
 
