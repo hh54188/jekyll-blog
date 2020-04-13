@@ -171,7 +171,15 @@ addOne: function (todo) {
 
 这里才是真正更新视图的地方。
 
-看似代码变得冗余了，一份代码被拆分成了三份。但实际上我们不用再为添加额外的视图后，忘记添加某个调用而感到苦恼了。
+上面代码的流程图如下：
+
+![](./images/fe_arch_002_mvc_solved/backbone_single_event.jpg)
+
+在有的架构中 DOM 和 View 是分开被定义，有的还有称为 template 的概念。但我们可以再进行一层抽象，相对于 Model 而言，也可以把它们都视为 View，
+
+看似代码变得冗余了，一份代码被拆分成了三份。但实际上我们不用再为添加额外的视图后，忘记添加某个调用而感到苦恼了。当添加多个视图之后
+
+![](./images/fe_arch_002_mvc_solved/backbone_multiple_event.jpg)
 
 ### AngularJS
 
@@ -229,7 +237,7 @@ angular.module('todomvc')
 
 ```
 
-那么在页面上，我们首先完成对[添加事件的绑定](https://github.com/tastejs/todomvc/blob/41ba86db92336c11e56d425c5151b7ec2932be9a/examples/angularjs/index.html#L17)
+那么在页面上，我们首先完成对[添加事件的绑定](https://github.com/tastejs/todomvc/blob/41ba86db92336c11e56d425c5151b7ec2932be9a/examples/angularjs/index.html#L17)，给输入框的 submit 事件绑定上面的  `addTodo` 处理函数
 
 ```html
 <form class="todo-form" ng-submit="addTodo()">
@@ -237,7 +245,7 @@ angular.module('todomvc')
 </form>
 ```
 
-然后再将 [todo 列表渲染出来](https://github.com/tastejs/todomvc/blob/41ba86db92336c11e56d425c5151b7ec2932be9a/examples/angularjs/index.html#L37):
+又同时再将（通过双向绑定的方式） [todo 列表渲染出来](https://github.com/tastejs/todomvc/blob/41ba86db92336c11e56d425c5151b7ec2932be9a/examples/angularjs/index.html#L37):
 
 ```html
 <ul class="todo-list">
@@ -254,3 +262,18 @@ angular.module('todomvc')
 		var todos = $scope.todos = store.todos;
 ```
 
+流程图如下图所示
+
+![](./images/fe_arch_002_mvc_solved/angular_sync_store.jpg)
+
+## 总结
+
+我们暂时告一段落。在这一篇里我引入了一个经典的 SPA 中需要解决的问题，并且介绍了两个 MVC 框架解决这个问题的不同方式。关于这个问题，关于这两个解决方案更进一步的思考会在下一篇里继续
+
+需要注意的，在上述的内容中我只是触及了两个 MVC 框架的冰山一角，千万不要把它们当作框架的全部。例如以 Backbone.js 为例。整个框架结构应该是如下所示的：
+
+![](./images/fe_arch_002_mvc_solved/backbone_mvc.jpg)
+
+而我们只是触及了上图中右下角的部分而已。如果你想要完全的了解它们还需要更彻底的学习
+
+最后我想留给你们的问题是：到现在看来 MVC 是一个不错的解决方案，为什么现在我们不再使用它们了。它们是否会给我们的项目埋下隐患？
