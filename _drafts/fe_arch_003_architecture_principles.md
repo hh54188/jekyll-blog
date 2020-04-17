@@ -57,7 +57,7 @@ initialize: function () {
 - 关注点的“可见度”（在系统内能做的，能访问的数据）有多少——**作用域**
 - 不同关注点之间如何协作？——**通信**
 
-其它的问题并非不重要，而是
+其它的问题同样需要解决，但是在我看来这三个问题是最重要的
 
 ## 单一职责（Single Responsibility Principle）
 
@@ -84,4 +84,15 @@ historyView.rollbackTo((historyInfo) => {
 
 如果你有 React 经验的话，相信你一定知道 Smart Component 和 Dumb Component 的概念（或者又称为 Container Component 和 Presentational Component），前者负责存储状态，加载数据；后者只负责渲染。这种模式就是很好的职责划分的例子。
 
-但很有意思的是
+![](./images/fe_arch_003_architecture_principles/smart_component.png)
+
+值得注意的是，职责和实现并不是绝对统一的。我们通常使用专业的状态管理框架比如 Redux 或者 Mobx 进行状体管理，但在 Container Component 的场景里一个本用于可视化的组件的成了临时的状态管理工具并且它也做的非常不错。事实上目前 React 自身提供的功能已经能实现绝大部分的状态管理功能，比如通过 `useReducer`，通过 `ContenxtAPI` 等等。
+
+我想强调的是：**正确的设计程序、对模块进行职责划分比强行去套入框架重要**。上面的段落里我列举了一个状态从框架 “降级”到组件中的正面例子。类似的，你可以想象一个把组件状态“升级”到全局 store 的反面例子。之所以称之为反面，是因为有些类型的组件状态，比如表现层状态，比如是否高亮，是否折叠，并不适合加入到全局状态中。它们通常是局部的，带有生命周期的，更适合伴随着组件产生和消亡。
+
+如果你现在已经感到疑惑的话，我再提出一个之后我们会谈到的模式：组件的状态既不存在于组件内部中，也不存在于全局 store 中，而是存在于独立的“中等粒度”的文件中
+
+![](./images/fe_arch_003_architecture_principles/component_state.png)
+
+这种模式对组件内的状态再一次进行了分离，你可以提前思考这样的分离又能给我们带来什么样的好处
+
