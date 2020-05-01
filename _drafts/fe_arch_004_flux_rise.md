@@ -33,7 +33,7 @@ AngularJS 更重大的缺陷在于它的双向绑定机制，或者说是双向�
 
 批评不等于否定。事件机制依然是我们许多问题里可选的解决方案之一；Backbone.js 和 AngularJS 放在现在看也依然是优秀的解决框架，但不是最优解而已。
 
-我个人认为问题在于当下我们解决的问题和过去比发生了许多的变化，随着浏览器能力不断增强，前端需要解决的问题也变得越来越复杂，团队规模也逐渐扩大。如果以 React 步入公众视野的 2014 为节点的话。2014 年以前我们的开发主要集中在类似于 widget / plugin 级别的功能上；而在 2014 年之后应用级别的功能慢慢变得普及起来。
+我个人认为问题在于当下我们解决的问题和过去比发生了许多的变化，随着浏览器能力不断增强，前端需要解决的问题也变得越来越复杂，团队规模也逐渐扩大。如果以 React 步入公众视野的 2014 为节点的话（我以）。2014 年以前我们的开发主要集中在类似于 widget / plugin 级别的功能上；而在 2014 年之后应用级别的功能慢慢变得普及起来。
 
 如果你对比 2014 年以后和之后流行或者崛起的那些框架，你就会感受到其中的微妙之处：
 
@@ -45,4 +45,57 @@ AngularJS 更重大的缺陷在于它的双向绑定机制，或者说是双向�
 事件机制和双向绑定更适用于小规模的范围内，随着应用级别不断扩大，副作用的带来负面效用会变得越来越明显。
 
 ## Flux
+
+我把所有与 Flux 相似的框架在这里都称之为 Flux。包括但不限于：Redux，Mobx，Ngrx，Akita，React 等等。在我看来它们都拥有和 Flux 相同的特征：
+
+- 单向数据流
+- 全局状态管理
+- store / selector / service 等概念的抽象
+
+在谈论 Flux 之前我们先给 Flux 定一个性：Flux 是成功的吗？
+
+当然是，如今不计其数的网站也应用在使用 React 和 Flux；并且就像我上面提到的，即使是六年以后，在它之后的框架绝大部分是它的追随者而非颠覆者，都能找到 Flux 的影子。但在它诞生之初，无论是在 [Reddit](https://www.reddit.com/r/programming/comments/25nrb5/facebook_mvc_does_not_scale_use_flux_instead/), [Youtube](https://www.youtube.com/watch?v=nYkdrAPrdcw)，还是 InfoQ 上甚至至今为止都有批评的声音，
+
+但在你的那些使用了 Flux 的项目中，有多少项目在可维护性上是成功的？如何定义可维护性呢，我们用 Uncle Bob 的三个标准来回答这一个问题：
+
+> - It is hard to change because every change affects too many other parts of the system.(Rigidity)
+>
+> - When you make a change, unexpected parts of the system break. (Fragility)
+>
+> - It is hard to reuse in another application because it cannot be disentangled from the current application. (Immobility)
+>
+>   —— [The Principles of OOD](http://butunclebob.com/ArticleS.UncleBob.PrinciplesOfOod)
+
+我相信答案在各位心中已经呼之欲出了。站在工程师的角度上看项目代码的可维护性并不取决于你使用的框架多么的先进，而是取决于使用框架的人和内部的工程师文化
+
+扯远了，说回 Flux。
+
+在这里我不会再聊 Flux 的那些基本入门概念。我们重点说一说 Flux 解决的问题和使用过程中的一些陷阱，帮助你更好的理解 Flux
+
+### 是「提升」并非「创新」
+
+不知道有多少人看过 Flux 走向公众视野的第一个视频 [Hacker Way: Rethinking Web App Development at Facebook](https://www.youtube.com/watch?v=nYkdrAPrdcw) ，这个视频上透露了很多有助于关于我们理解 Flux 的很多信息。这一节的内容不少复述自该视频
+
+首先要强调的是，Flux 并非是为了颠覆和创新而生，而是为了解决我们所说的非功能性需求。
+
+在 Facebook 公司内部工程师需要保证交付软件的质量，但是高质量意味着需要花费更多的时间；但另一方面公司也希望崇尚 move fast 的核心价值，也就是要用更少的时间交付更多的价值，于是这两者间似乎产生了矛盾，如何用更少的时间交付更高质量的软件。
+
+用视频中的原话说，按照顺序他们想达成的目标是
+
+- Produce higher (quality) code
+- Higher quality software
+- Better code by default
+- We want to do it in less time
+
+![](./images/fe_arch_004_flux_rise/less_time_high_quality.png)
+
+其中有意思的是第三点：“Better code by default”。在我看来这就是我在第一篇中强调的 “Falling Into The Pit of Success” 有异曲同工之妙——你要让你的开发人员一开始（容易）就写出对的代码。
+
+而在他们的项目中最大的阻碍竟然是 MVC 架构
+
+## 另一个 "MVC" 而已?
+
+![](./images/fe_arch_004_flux_rise/facebook_mvc.png)
+
+## 单向数据流和副作用
 
