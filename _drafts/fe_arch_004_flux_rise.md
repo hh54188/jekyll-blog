@@ -70,9 +70,7 @@ AngularJS 更重大的缺陷在于它的双向绑定机制，或者说是双向�
 
 扯远了，说回 Flux。
 
-在这里我不会再聊 Flux 的那些基本入门概念。我们重点说一说 Flux 解决的问题和使用过程中的一些陷阱，帮助你更好的理解 Flux
-
-### 是「提升」并非「创新」
+在这里我不会再聊 Flux 的那些基本入门概念。我们重点说一说 Flux 解决的问题，帮助你更好的理解 Flux
 
 不知道有多少人看过 Flux 走向公众视野的第一个视频 [Hacker Way: Rethinking Web App Development at Facebook](https://www.youtube.com/watch?v=nYkdrAPrdcw) ，这个视频上透露了很多有助于关于我们理解 Flux 的很多信息。这一节的内容不少复述自该视频
 
@@ -89,11 +87,9 @@ AngularJS 更重大的缺陷在于它的双向绑定机制，或者说是双向�
 
 ![](./images/fe_arch_004_flux_rise/less_time_high_quality.png)
 
-其中有意思的是第三点：“Better code by default”。在我看来这就是我在第一篇中强调的 “Falling Into The Pit of Success” 有异曲同工之妙（你也可以说我现在眼里只有锤子看什么都是钉子）——你要让你的开发人员一开始（容易）就写出对的代码。
+其中有意思的是第三点：「Better code by default」。在我看来这就是我在第一篇中强调的 「Falling Into The Pit of Success」有异曲同工之妙（你也可以说我现在眼里只有锤子看什么都是钉子）——你要让你的开发人员一开始（容易）就写出对的代码。
 
 而在他们的项目中最大的阻碍竟然是 MVC 架构
-
-### 因为他们把 MVC 搞砸了
 
 整个宣讲 Flux 过程中最令人诟病的就是这一张图，在我上面提到的批评声音中，最共同的声音就是它们以一种错误的方式实施了 MVC，所以才导致了他们的应用无法拓展。时候演讲者 Jing Chen 也[承认演示中的图片确实投机取巧了。它们真正想表达的是这种双向的数据流架构会产生一定的负面效应](https://www.reddit.com/r/programming/comments/25nrb5/facebook_mvc_does_not_scale_use_flux_instead/)。
 
@@ -107,7 +103,7 @@ AngularJS 更重大的缺陷在于它的双向绑定机制，或者说是双向�
 
 ![](./images/fe_arch_004_flux_rise/angularjs_nest_controllers.png)
 
+所以你现在理解了为什么 Flux 会尝试用单向数据流解决这个问题了。我们抽取 store 来保证唯一数据源（single source of truth），所有的业务逻辑也都封装在 store 中，避免了用例和服务层（对应后端 service layer）方法散落在各个 controller 中。注意 store 层工作是不会引起任何的副作用的，在 store 完成上一个 action 的工作之前，不会有其他的 action 再次经过 dispatch 达到 store。同时使用 command 模式来避免事件机制造成的的不可预测性。剩下的具体概念你应该非常熟悉了
 
-
-## 单向数据流和副作用
+现在回过头再看 Flux，它其实是一个非常强约束的框架。假设你需要完成一项工作，比如接住后端传递的用户信息里的新增字段，你会非常明确的知道你需要修改 store, 该 view，而不需要修改 action。到了在 store 中新增字段的这一个环节，无论是你是使用 Redux 还是 Mobx 相信你都能迅速的找到对应的 Model 类在哪。我想这就是 期望中的 「Better code by default」 吧
 
