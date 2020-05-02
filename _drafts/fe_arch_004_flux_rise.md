@@ -89,13 +89,25 @@ AngularJS 更重大的缺陷在于它的双向绑定机制，或者说是双向�
 
 ![](./images/fe_arch_004_flux_rise/less_time_high_quality.png)
 
-其中有意思的是第三点：“Better code by default”。在我看来这就是我在第一篇中强调的 “Falling Into The Pit of Success” 有异曲同工之妙——你要让你的开发人员一开始（容易）就写出对的代码。
+其中有意思的是第三点：“Better code by default”。在我看来这就是我在第一篇中强调的 “Falling Into The Pit of Success” 有异曲同工之妙（你也可以说我现在眼里只有锤子看什么都是钉子）——你要让你的开发人员一开始（容易）就写出对的代码。
 
 而在他们的项目中最大的阻碍竟然是 MVC 架构
 
-## 另一个 "MVC" 而已?
+### 因为他们把 MVC 搞砸了
+
+整个宣讲 Flux 过程中最令人诟病的就是这一张图，在我上面提到的批评声音中，最共同的声音就是它们以一种错误的方式实施了 MVC，所以才导致了他们的应用无法拓展。时候演讲者 Jing Chen 也[承认演示中的图片确实投机取巧了。它们真正想表达的是这种双向的数据流架构会产生一定的负面效应](https://www.reddit.com/r/programming/comments/25nrb5/facebook_mvc_does_not_scale_use_flux_instead/)。
 
 ![](./images/fe_arch_004_flux_rise/facebook_mvc.png)
+
+首先就像我在前几篇中提到的那样，从客户端到后端到前端并没有“标准的 MVC” 一说。即使你只在前端领域内寻找统一的 MVC 概念，你也会发现从 Backbone.js, AngularJS 到 Ember.js 的实现各不相同。
+
+正因为大家对 MVC 的理解各不相同，甚至在同一个框架内也没有推荐的最佳实践，于是你会看到在一个框架内解决一个问题的不同实现。其中有一些方案是存在隐患的，但是在小规模的应用内很难暴露出来。但随着团队的扩充和复用代码的越来越多，代码会变得越来越脆弱，因为不同人看到同一份代码的理解是不同的。上图中的情况是非常有可能发生的，但并非是按照上图一模一样的方式，但后果就是跨职责和意料之外的级联更新。
+
+如果你现在站在开发 React 应用的体验上看 Backbone.js 和 AngularJS 的开发体验，你会感觉框架带来的约束是松散的。以 AngularJS 为例，它赋予了你 controller / view 机制，但至于是在多个 view 之间共享 controller，又或者相对于一个 view 嵌套多层 controller，它完全不做任何的限制。这就极易产生上述后果。在下图中 View C 可以访问和修改多个祖先 controller 中的变量（左侧黄色箭头）同时变量又有可能会被 View B 和 View C 使用（右侧蓝色箭头）。
+
+![](./images/fe_arch_004_flux_rise/angularjs_nest_controllers.png)
+
+
 
 ## 单向数据流和副作用
 
