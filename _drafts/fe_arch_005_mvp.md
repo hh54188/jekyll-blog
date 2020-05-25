@@ -1,7 +1,5 @@
 # MVP 是归宿
 
-在这一篇中，我无法用分段分章节的方式对内容进行描述。因为模式的产生是与它需要解决的问题息息相关的。我将尝试从最原始的问题出发，向各位展示解决方案是如何一步一步演化出现的。
-
 在 Flux 架构中，有两个问题依然没有被提到，一个是表现层模型，另一个是测试
 
 我们从表现层逻辑说起
@@ -45,6 +43,8 @@ function onSubmit() {
 - 最后一个问题是测试，对于相同的逻辑，我们可不希望当逻辑复用时需要编写的测试也要加倍。
 
 再次提醒以上考虑的出发点是我们在第一章讨论的非功能需求，即可维护性和测试。如果你不在乎非功能需求，那么接下来的内容对你的意义并不大。
+
+## 服务层
 
 从上面的三点叙述中，我们不难得出我们需要进一步解决的问题：
 
@@ -131,7 +131,30 @@ export class ListComponent implements OnInit {
 
 同时补全 UI 与服务层的获取数据的流程，我们便得到了最终上图的结果。注意，上图中**数据流依然是单向**的。也就是说上图中的架构设计在 React 或者是 Redux 中是适用的。
 
-截止到现在“服务层”似乎有些偏离它原始的涵义，我更愿意亲切的称之为 Presenter，MVP（Model View Presenter） 中的 Presenter
+截止到现在“服务层”似乎已经有些偏离它原始的涵义，我更愿意亲切的称之为 Presenter，MVP（Model View Presenter） 中的 Presenter
 
+## MVP
 
+MVP 的实现有两类，一类称为 Passive View，另一类称为 Supervising Controller
 
+* Passive View: 顾名思义如 passive（被动）所示，在这个模式中 View 是不包含任何逻辑的，它是被动的被调用方。View 和 Model 完全被Presenter 隔开，Presenter 充当中介的角色分别与两者沟通。Presenter 可以监听的 Model 层上的一些事件。当数据发生修改时，事件就会被触发，接着 Presenter 再通过 View 上暴露的方法对 View 进行数据更新。
+
+  ![](./images/fe_arch_005_mvp/mvp-passiveview.png)
+
+* Supervising Controller: Presenter 会负责响应用户的 UI 操作，但与 Passive View 最大的不同在于 View 会直接与 Model 打交道，并且与 Model 进行数据绑定。在有的实现中 Presenter 的职责还包括就是将 Model 数据传递给 View
+
+  ![](./images/fe_arch_005_mvp/mvp-supervisingcontroller.png)
+
+相对于 MVC，MVP 在桌面端和 web 端的概念更统一一些。
+
+所以很显然，Supervising Controller 模式与我们上面描述的服务层模式，乃至 Redux 都更加契合。总结下来，前端领域 View、Presenter、Model 的分别职责如下：
+
+|           | Responsibility                                               | Data           |
+| --------- | ------------------------------------------------------------ | -------------- |
+| View      | 1. Render; 2. Delegate;                                      | n/a            |
+| Presenter | 1. flow control; 2. user gesture response; 3. state selector | Presenter Data |
+| Model     | Business Logic                                               | Domain Data    |
+
+这样的分配会影响到我们下一个谈论的话题，测试。
+
+## 测试
