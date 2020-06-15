@@ -1,4 +1,4 @@
-# Model-View-Presenter 是归宿
+# 从 Flux 进化到 Model-View-Presenter
 
 在 Flux 架构中，有两个问题依然没有被提到，一个是表现层模型，另一个是测试
 
@@ -155,6 +155,8 @@ MVP 的实现有两类，一类称为 Passive View，另一类称为 Supervising
 | Presenter | 1. flow control; 2. user gesture response; 3. state selector/converter | Presenter Data |
 | Model     | Business Logic                                               | Domain Data    |
 
+至于如何实现，我认为目前的所有框架都支持这一套架构的实现，只不过 Redux 类型的框架可能相对 Object 类型的框架实现起来会别扭一些。
+
 这样的分配会影响到我们下一个谈论的话题，测试。
 
 ## 测试
@@ -181,7 +183,7 @@ MVP 的实现有两类，一类称为 Passive View，另一类称为 Supervising
 
 当然凡事没有绝对，如果你的应用内有非常重要的功能，例如工具类中的一个非常重要的算法，严格的业务模型，那么也可以单独对这些功能做单元测试。
 
-最后还是要提醒，以上的测试策略是建立在两个基础上：
+关于测试，我推荐阅读 Kent 的关于前端测试的一系列的文章：[The Testing Garden of Kent C. Dodds](https://kentcdodds.com/testing/)，我个人是是非常赞同他主张的一些列测试策略，例如：
 
-1. 我已经按照 MVP 架构对模块进行了划分
-2. 我需要在不同的测试粒度间进行取舍
+- Test use cases, not code.
+- Write tests. Not too many. Mostly integration.
