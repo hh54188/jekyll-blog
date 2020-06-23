@@ -1,4 +1,15 @@
-# 整洁（Clean Architecture）架构是归宿
+---
+layout: post
+title: 前端架构 101（六）：整洁（Clean Architecture）架构是归宿
+modified: 2020-06-16
+tags: [javascript]
+image:
+  feature: abstract-3.jpg
+  credit: dargadgetz
+  creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
+comments: true
+share: true
+---
 
 ## 整洁架构
 
@@ -10,11 +21,11 @@
 
 
 
-![](./images/fe_arch_006_clean_architecture/clean_architecture.jpg)
+![](../images/fe_arch_006_clean_architecture/clean_architecture.jpg)
 
 为了便于说明，我也把上次的 MVP 流程也放在这里
 
-![](./images/fe_arch_006_clean_architecture/mvp.png)
+![](../images/fe_arch_006_clean_architecture/mvp.png)
 
 ### 依赖关系
 
