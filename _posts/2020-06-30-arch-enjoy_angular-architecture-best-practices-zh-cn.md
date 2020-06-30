@@ -10,7 +10,6 @@ image:
 comments: true
 share: true
 ---
-# 
 
 本文原文：[Angular Architecture Patterns and Best Practices (that help to scale)](https://angular-academy.com/angular-architecture-best-practices/)
 
