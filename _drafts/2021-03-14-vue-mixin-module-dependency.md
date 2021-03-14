@@ -85,7 +85,7 @@ mixin 机制存在什么样的问题？早在 2016 年的时候 React 官方就�
 
 我们要回答的第一个问题是：这种灵活性真的是我们想要的吗？
 
-Reginald Braithwaite 在13 年写过一篇很有意思的技术文章 [Defactoring](https://raganwald.com/2013/10/08/defactoring.html)，注意不是重构的那个单词 Refctoring。
+[Reginald Braithwaite](https://raganwald.com/) 在13 年写过一篇很有意思的技术文章 [Defactoring](https://raganwald.com/2013/10/08/defactoring.html)，注意不是重构的那个单词 Refctoring。
 
 什么是 defactoring? 简而言之如果我们将把大单体代码拆分为细粒度碎片代码过程称之为 factoring 的话，那么 defactoring 代指的就是相反将代码碎片拼装起来的过程。
 
@@ -95,7 +95,7 @@ Reginald Braithwaite 在13 年写过一篇很有意思的技术文章 [Defactori
 
 所以说恰当的 defactoring 是有必要的。
 
-第二点我们需要考虑到人的因素。我很喜欢 Coding Horror 提出的 Falling Into The Pit of Success 的理论，引用原文中的话说就是：
+第二点我们需要考虑到人的因素。我很喜欢 [Coding Horror](https://blog.codinghorror.com/) 提出的 [Falling Into The Pit of Success](https://blog.codinghorror.com/falling-into-the-pit-of-success/) 的理论，引用原文中的话说就是：
 
 > a well-designed system makes it easy to do the right things and annoying (but not impossible) to do the wrong things.
 
