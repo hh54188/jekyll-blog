@@ -61,3 +61,11 @@ scan 在所有操作中消耗占比达到 91%
 
 ### Logical Reads 很关键
 
+通常 SQL Server 在查询数据时会优先从内存中的缓存（buffer cache）中查找，如果没有找到才会继续前往磁盘中查找，前者我们称之为 logical read，后者称之为 physical read，鉴于从内存读写的效率比磁盘高，我们当然希望尽可能避免任何的 physical read。
+
+而 logical read 具体读写的是什么呢？是 page，page 是数据库中数据组织的最小单位。所以 logical read 数量也理应越小越好。默认情况下你不会看到 logical read 这项指标的输出。
+
+
+
+
+
