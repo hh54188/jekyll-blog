@@ -42,7 +42,7 @@
 
 ![person table query](../images/sql-server-optimize-tutorial/002_person_query.png)
 
-非 scan 类型的 `Clustered Index Seek`（我稍后会解释） 操作的消耗同样是 100% 。
+非 scan 类型的 `Clustered Index Seek`（我稍后会解释，在这里你可以把它理解为优于 scan 的一类操作就好） 操作的消耗同样是 100% 。
 
 但如果我们对 PersonPhone 和 Person 表进行联合查询，查询效率就立分高下了：
 
@@ -63,9 +63,45 @@ scan 在所有操作中消耗占比达到 91%
 
 通常 SQL Server 在查询数据时会优先从内存中的缓存（buffer cache）中查找，如果没有找到才会继续前往磁盘中查找，前者我们称之为 logical read，后者称之为 physical read，鉴于从内存读写的效率比磁盘高，我们当然希望尽可能避免任何的 physical read。
 
-而 logical read 具体读写的是什么呢？是 page，page 是数据库中数据组织的最小单位。所以 logical read 数量也理应越小越好。默认情况下你不会看到 logical read 这项指标的输出。
+而 logical read 具体读写的是什么呢？是 page，page 是数据库中数据组织的最小单位，我们只需要了解到这个深度即可，至于 page 是如何被组织的，page 的数据结构如何不重要。所以 logical read 数量也理应越小越好。默认情况下你不会看到 logical read 这项指标的输出，可以使用 `SET STATISTICS IO ON` 将这项监控打开，例如对于查询一个没有索引的 PersonPhone 表，我们的查询语句如下：
 
+```sql
+SET STATISTICS IO ON
+GO
 
+  SELECT *
+  FROM Person.PersonPhone
+  WHERE PhoneNumber = '156-555-0199';
+
+SET STATISTICS IO OFF
+GO
+```
+
+得到的有关 logical read 信息如下：
+
+> (1 row affected)
+> Table 'PersonPhone'. Scan count 1, **logical reads 158**, physical reads 0, read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob read-ahead reads 0.
+
+一旦我给 PersonPhone 加上了以 PhoneNumber 为 key 的 Clustered Index 之后（如果你对 index 没有任何了解，在这里可以仅仅把它理解为一种优化手段），上面语句的执行结果则变为：
+
+>(1 row affected)
+>Table 'PersonPhone'. Scan count 1, **logical reads 2**, physical reads 0, read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob read-ahead reads 0.
+
+logical reads 过高，可能（并不是一定）在暗示一些问题：
+
+* 缺少索引导致多行被扫描
+* 数值越高可能意味着给磁盘带来的压力也过高
+* 即使是查询操作也可能会给数据上锁（根据事物隔离级别（isolation level）的不同），过长的查询会方案后续的读写操作，造成连锁反应。
+
+之所以选择 logical read 的另一个好处是，作为衡量性能的指标之一，它的波动没有例如 `duration`或者`CPU time` 那么大
+
+但 logical read 的参考价值没有执行计划高，一方面因为它是单向的，也就是说你能够通过 SQL 语句得出得出 logical reads 数值但却无法反向通过数值读出问题，从这点上看执行计划更适合我们排查问题；另一方面它并不是总能准确反馈问题，如果你把上面查询中的 where 语句去掉，你会发现添加 index 前后的 logical reads 并没有太大变化。
+
+无论如何，logical reads 可以作为我们的参考指标之一。
+
+### Clustered Index
+
+终于聊到了 Index
 
 
 
