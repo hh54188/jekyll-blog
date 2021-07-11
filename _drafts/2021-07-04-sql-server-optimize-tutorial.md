@@ -6,13 +6,11 @@
 
 “入门”的另一层意思是我会侧重于原理讲解。我发现无论是前端性能优化还是 SQL 性能优化都没法和所见即所得的编码相提并论，可能是因为工具提供的信息有限，也有可能是因为性能的瓶颈是祖传代码屎山，大部分时候你需要随机应变。有时候你可以通过抽丝剥茧找到病根，有时候你只能大刀阔斧的重写代码才能稍稍缓解。无论什么方法，都需要你对它背后工具原理有所了解才行。**我力求即使你只会简单的 SELECT, UPDATE, DELETE 也能够看懂这篇文章**
 
-本文涵盖两部分内容：**索引（Index）**和**执行计划（Execution Plan）**。虽然索引能够解决我们90%以上的性能问题，但我们还要知道在何时何地添加索引，于是就要通过阅读执行计划找到这方面的提示。两部分内容虽然在章节上独立，但是依然会交叉引用。
+本文涵盖两部分内容：**索引（Index）**和**执行计划（Execution Plan）**。虽然索引能够解决我们90%以上的性能问题，但我们还要知道在何时何地添加索引，于是就要通过阅读执行计划找到这方面的提示。
 
 为了说明问题文章会用到官方提供的范例数据库 [AdventureWorks](https://docs.microsoft.com/en-us/sql/samples/adventureworks-install-configure?view=sql-server-ver15&tabs=ssms) 和其中的 Person.Person、Person.PersonPhone、Person.EmailAddress 三张表。三张表中都存有 BusinessEntityID 字段，我们可以通过 BusinessEntityID 字段将同一个人的信息都关联在一起。
 
-## 索引
-
-### 小心 Scan
+## 小心 Scan
 
 简略的把数据库比作一本书不为过。想象一下如果你需要在一本没有目录的书中查找一行文字你唯一能做的只能逐页查找。数据库也是这么工作的，对于一个没有任何索引的表，它只能通过**扫描（scan）**整张表的数据来找到匹配的数据
 
@@ -28,7 +26,7 @@
 
 ![scan table](../images/sql-server-optimize-tutorial/001_table_scan.png)
 
-鉴于下一节我们才谈到执行计划，目前你姑且可以把执行计划当作 SQL 语句的执行过程。上图中的 `Table Scan` 就是在告诉我们它扫描了整张表。并且在整个执行过程中，这一步操作占用了最多的资源: `Cost: 100%`。这里的 cost 只是一个抽象单位，它不代表 CPU 亦或是 I/O 单个维度的消耗，而是各类资源统计之后的结果。
+鉴于后面我们才谈到执行计划，目前你姑且可以把执行计划当作 SQL 语句的执行过程。上图中的 `Table Scan` 就是在告诉我们它扫描了整张表。并且在整个执行过程中，这一步操作占用了最多的资源: `Cost: 100%`。这里的 cost 只是一个抽象单位，它不代表 CPU 亦或是 I/O 单个维度的消耗，而是各类资源统计之后的结果。
 
 其实上面过程中的 100% 并不能说明 scan 这一种类型的操作是效率低下的，因为这里只涉及到了单个表的查询操作，即使是对带索引的表进行这种简单的查询，你看到的也是 `Cost: 100%`。比如我对带有 `[PK_Person_BusinessEntityID]`索引的 Person 表进行查询：
 
@@ -59,7 +57,7 @@ scan 在所有操作中消耗占比达到 91%
 
 所以 scan 是我们可以识别到的一个优化点，当你发现一个表缺少索引，或者说在执行计划中看到有 scan 操作时，尝试通过添加索引来修复性能问题。
 
-### Logical Reads 很关键
+## 关键的 Logical Reads
 
 通常 SQL Server 在查询数据时会优先从内存中的缓存（buffer cache）中查找，如果没有找到才会继续前往磁盘中查找，前者我们称之为 logical read，后者称之为 physical read，鉴于从内存读写的效率比磁盘高，我们当然希望尽可能避免任何的 physical read。
 
@@ -99,9 +97,126 @@ logical reads 过高，可能（并不是一定）在暗示一些问题：
 
 无论如何，logical reads 可以作为我们的参考指标之一。
 
-### Clustered Index
+## 索引（Index）
 
-终于聊到了 Index
+### Clustered Index & Nonclustered Index
+
+终于能进入正题 index 了。Index 的工作原理很简单，如果我们把数据库比作一本书的话，那么索引就是这本书的目录，它能帮助你快速定位数据。
+
+![person table query](../images/sql-server-optimize-tutorial/004_mysql_no_index.png)
+
+在上面这张表中，如果我们想要找到某个公司的行，那么需要检查表的每一行，看看它是否与那个期望值相匹配。 这是一个全表扫描操作，其效率很低，如果表很大，而且仅有少数几个行与搜索条件相匹配， 那么整个扫描过程的效率将会超级低。
+
+我们可以给这个表添加一个索引：
+
+![person table query](../images/sql-server-optimize-tutorial/005_mysql_index.png)
+
+该索引包含 ad 表里每个行的一个项，而且这些索引项按 company_num 值排了序。现在，不用 为了查找匹配项，一行一行地搜索整个表了，我们可以使用这个索引。假设，我们要找出公 司编号为 13 的所有行。我们开始扫描索引，便会找到 3 个属于该公司的值。然后，我们会到 达公司编号为 14 的索引值，该值比我们正查找的值要大一点。由于索引值已是有序的，因此 当我们读到那条包含 14 的索引行时，我们便知道再也无法找到更多与 13 匹配的内容了，于 是可以退出查找过程。由此可见，一种使用索引提高效率的做法是，我们可以得知匹配行在 什么位置结束，从而跳过其余部分；另一种使用索引提高效率的做法是，利用定位算法，不 用从索引开始位置进行线性扫描，即可直接找到第一个匹配项（例如，二分搜索比扫描要快 很多）。这样，我们便可以快速地定位到第一个匹配值，从而节省大量的搜索时间。
+
+但是在 SQL Server 中，index 被划分为了几类。**Clustered Index 是最常被用的：表中的数据会按照 clustered index 进行物理排序**。因为只可能有一种物理顺序的关系，所以一张表只允许有一个 clustered index.当你在表中添加 primary key 约束时，数据库会为你自动以 primary key 创建一个 clustered index。
+
+我们可以给 PersonPhone 添加一列以 PhoneNumber 为 key 的 index ，然后再次执行上面查询 PhoneNumber 的语句
+
+```sql
+  SELECT *
+  FROM Person.PersonPhone
+  WHERE PhoneNumber = '156-555-0199';
+```
+
+你可以看到了执行计划变成了下图所示的 **Clustered Index Seek**
+
+![person table query](../images/sql-server-optimize-tutorial/006_add_phone_number_clustered_index.png)
+
+**Seek 的效率是最高的，我们应该尽可能的让查询语句执行 seek 操作**，它不再像 scan 一样逐行扫描，而类似于书的目录一样直达目的地将所需要的数据取出。
+
+但 clustered index seek 不会在任何情况下都生效，比如在上面 PhoneNumber 索引的情况下按照 BusinessEntityID 条件查询：
+
+```sql
+  SELECT *
+  FROM Person.PersonPhone
+  WHERE BusinessEntityID = 4511
+```
+
+你会发现执行计划是 Clustered Index Scan
+
+![person table query](../images/sql-server-optimize-tutorial/007_query_entity_id_by_phone_number_index.png)
+
+index scan 意味着数据库通过索引获取所有行后再进行扫描。如果你对比 index scan 和 table scan，两者的 logical reads 差不多。
+
+配置 nonclustered index 和 clustered index 相比并无不同，在使用的时候你也会在执行计划中看到 Non-Clustered Index Seek。明显的不同之处在于不会对原表的顺序产生影响。虽然看似相同，但实际上它们背后有千丝万缕的联系，搞清楚这些联系有助于我们判断在什么时候应该恰当的添加哪一种 index。
+
+### Index 运作原理
+
+想象一下有一组 27 行的单列数据，因为 page 大小有限的缘故，它们被分为了 9 个 page
+
+![person table query](../images/sql-server-optimize-tutorial/008_random_row_pages.png)
+
+你为它们添加的 Clustered Index 之后，索引的数据结构如下所示
+
+![person table query](../images/sql-server-optimize-tutorial/009_b_tree_layout.png)
+
+当你想找值 5 时，搜索会从顶部节点开始，因为5在1到10之间，搜索过程会继续到左侧分支的下一个节点上，又因为5落在4到7之间，搜索会走到下一层以4开头的节点上。最后从叶子节点上找到5
+
+事实上我们忽略了一些细节，clustered index 的结构如下：
+
+![person table query](../images/sql-server-optimize-tutorial/010_clustered_index_arch.gif)
+
+从图中不难看出，每一层节点都是双向列表，叶子节点上存储的是表的真实数据。
+
+但 nonclustered index 的存储结构稍有不同，叶子节点由索引信息（index page）而非数据信息（data page） 组成。**nonclustered index 需要借由 row locator 定位到对应的数据行（你可以理解为指针），对于 heap table（没有 clustered index 的表） 而言，row locator 指向的是每行数据的 RID (row identifier)；对于非 heap table，row locator 指向的是 clustered index**。
+
+篇幅有限，基于以上知识点我们就能总结一下何时应该使用什么样的 index:
+
+* 在创建 nonclustered index 之前你应该优先创建 clustered index
+* 如果你查询的数据总是需要按照某一列排序，可以为那一列添加 clustered index
+* 不要给会被频繁更新的列添加 clustered index，这会导致所有与此相关的 noneclusterd index 的 row locator 也被频繁更新，这可能会引起死锁问题。
+* 相反你可以给频繁更新的列添加 nonclustered index,因为它只会影响到当前的 nonclustered index
+* nonclusterd index 不适合数据量巨大的查询，因为它们可能会带来额外的 lookup 操作，此时你应该将这个索引变成一个 covering index。
+
+### Covering Index
+
+清除 PersonPhone 下所有的索引后将 PhoneNumber 添加为 nonclustered index，再执行最初的查询语句：
+
+```sql
+  SELECT *
+  FROM Person.PersonPhone
+  WHERE PhoneNumber = '156-555-0199';
+```
+
+你会得到如下的执行计划：
+
+![person table query](../images/sql-server-optimize-tutorial/012_lookup.png)
+
+除了 Index Seek 之外，右下方的 lookup 操作占比是最多的。触发 lookup 的原因非常简单：当数据库决定使用 nonclustered index 进行查询，而需要查询的列信息又不在 nonclustered index 中（既不是作为 index 的 key 也不再 includes 列表中）时，就会触发 lookup 操作。**lookup 的意思是它会根据 index 所关联的 row locator （非 heap table 用 clustered index，heap table 用 RID） 找到对应的 row data，再从中读取中想查询的列数据**。整个过程除了除了有消耗在 index page 上的 logical read 上以外，还有额外花费在 data page 上的 logical read 操作。可想而知如果数据库在查询过程中使用了 clustered index 那么它永远也不需要 lookup，因为 clustered index 的叶子节点就是 data page
+
+**如果查询所需要的所有列信息 index 都能提供，那么意味着访问 data page 的操作可以省略，这种类型的 index 就能称之为 covering index**。
+
+我们可以将除了 index key 以外的却又要查询信息的列放入 includes 列表中，这也就能解决上面 lookup 的问题：
+
+![person table query](../images/sql-server-optimize-tutorial/013_add_columns_to_include_list.png)
+
+
+
+## Join 效率
+
+如果你进行多表联合查询的话，在执行计划里你一定会看到 join 信息，就是从下图中从左至右的第二个图标：
+
+![person table query](../images/sql-server-optimize-tutorial/014_join_sample.png)
+
+join 类型一共有四种：Hash，Merge，Nested Loop，和 Adaptive
+
+![person table query](../images/sql-server-optimize-tutorial/015_join_type.png)
+
+### Hash Join
+
+hash join 有两组输入：build 输入和 probe 输入，通常提及较小的数据集会被当作 build input。
+
+hash join 分为两个阶段：build 阶段和 probe 阶段，
+
+- 在 build 阶段中，整个 build 输入都被会扫描，根据 hash 计算结果在内存中构建出一张 hash 表出来
+- 在之后的 probe 阶段中，数据库会逐行扫描 probe input，同样对每一行计算 hash 值，看是否能在之前的 hash 表中找到对应的行。
+
+数据库什么时候会用到 hash join: 当数据库需要处理数据量大，未排序，没有索引的输入时，这通常适合中间状态的查询结果。
 
 
 
