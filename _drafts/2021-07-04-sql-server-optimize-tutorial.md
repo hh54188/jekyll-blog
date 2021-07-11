@@ -197,6 +197,10 @@ index scan 意味着数据库通过索引获取所有行后再进行扫描。如
 
 
 
+## 总结
+
+本来还想写 join 效率的问题（对比 hash join / nested loop / merge join），但想了一下数据库使用什么样的 join 是超出我们控制范围之外的。事实上数据库是否真的会使用我们的 index 也是我们控制之外的，执行计划是由它内部的 optimizer 计算出来的，残酷点说每一次执行计划都可能随着资源、数据、索引状态的不同而不同。但好歹索引的可控性高一些。绝大部分的性能问题都能通过 index 解决
+
 ## Join 效率
 
 如果你进行多表联合查询的话，在执行计划里你一定会看到 join 信息，就是从下图中从左至右的第二个图标：
@@ -209,14 +213,27 @@ join 类型一共有四种：Hash，Merge，Nested Loop，和 Adaptive
 
 ### Hash Join
 
-hash join 有两组输入：build 输入和 probe 输入，通常提及较小的数据集会被当作 build input。
+hash join 有两组输入：build 输入和 probe 输入，通常体积较小的数据集会被当作 build input。
 
 hash join 分为两个阶段：build 阶段和 probe 阶段，
 
 - 在 build 阶段中，整个 build 输入都被会扫描，根据 hash 计算结果在内存中构建出一张 hash 表出来
 - 在之后的 probe 阶段中，数据库会逐行扫描 probe input，同样对每一行计算 hash 值，看是否能在之前的 hash 表中找到对应的行。
 
-数据库什么时候会用到 hash join: 当数据库需要处理数据量大，未排序，没有索引的输入时，这通常适合中间状态的查询结果。
+数据库什么时候会用到 hash join: 当数据库需要处理数**据量大，未排序，没有索引**的输入时，这通常适合中间状态的查询结果。
 
+![person table query](../images/sql-server-optimize-tutorial/016_hash_join.gif)
 
+### Merge Join
 
+merge join 的前提是，**两张表被 join 的列处于已排序的状态**（比如被用于 index）。又或者数据库会帮你排序，因为它认为提前排序的代价很低。
+
+在这个前提下 Merge Join 和我们熟知的插入排序算法无异：数据库从对比两个有序列表的第一行开始，如果匹配就意味着 join 成功；如果不匹配保留一张表的指针不变，移动另一张表的指针直到找到匹配值；接着进行下一轮排序
+
+![person table query](../images/sql-server-optimize-tutorial/017_merge_join.gif)
+
+即使两方输入的数据量不小，**但如果双方都排序得当，merge join 会是最快的**
+
+### Nested Loop
+
+nested loop join 会将输入分为 outer input 和 inner loop，在执行计划中你会看到 outer input 在上方，inner input 在下方，
