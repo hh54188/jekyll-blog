@@ -43,6 +43,8 @@ serverless 中有一个很重要的概念正是这方面的体现：trigger.
 
 但在 serverless 生态中，http 是最不重要的。你不妨回想一下我们最经典的 serverless 用例，离线创建略缩图：
 
+![](../images/careful-with-serverless/triggers.png)
+
 在该流程中需要有 function 响应处理略缩图的消息，在存储之后需要有 function 将数据更新进数据库中。其中的消息服务和储存服务就是 function 的 trigger。
 
 此时不难发现当你开始编写 function 时，你需要确认你的云供应商提供这类服务的具体产品是什么，消息服务在 Azure 中可以是 Azure Service Bus，但是到了 AWS 则变成了Message Queuing Service。不同服务提供的 API 和模型不尽相同，同时代码与服务集成的方式也是量身定做的，这是第一层锁。
@@ -53,7 +55,11 @@ serverless 中有一个很重要的概念正是这方面的体现：trigger.
 
 以 API 架构为例，Azure 提供的服务比如 Azure Serverless 或者是 App Service 可以是相互独立的，哪怕你只购买其中的一项服务，你也可以单独为其配置 API Management, Identity 等属性。服务被允许对外暴露 HTTP 端口。在其[官网](https://docs.microsoft.com/en-us/azure/architecture/serverless-quest/reference-architectures)给出的架构模式中，移动端设备可以直接访问 Azure Serverless 服务
 
+![](../images/careful-with-serverless/mobile-app-backends.png)
+
 而在 AWS 中，服务的职责更为垂直，而非 Azure 般全能。HTTP 端点大多要被托管在 API Gateway 上，它为你提供了丰富的功能，比如权限验证、日志监控、缓存等等。同样在 [AWS 官网](https://aws.amazon.com/lambda/) 给出的后端架构模式中，移动设备的请求必须要经过 API Gateway
+
+![](../images/careful-with-serverless/lambda-mobilebackends.png)
 
 在 Azure Serverless 中每一个 serverless 项目都有属于自己的配置文件 host.json，如果我们想要限制 function 处理的最大请求数，你只需要修改该文件的配置项即可：
 
@@ -93,16 +99,15 @@ import * as SendGrid from "@sendgrid/mail";
 SendGrid.setApiKey(process.env["SENDGRID_API_KEY"] as string);
  
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
- 
-const email = {
- to: 'test@example.com', // Change to your recipient
- from: 'test@example.com', // Change to your verified sender
- subject: 'Sending with SendGrid is Fun',
- text: 'and easy to do anywhere, even with Node.js',
- html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-}
- 
-await SendGrid.send(email);
+    const email = {
+     to: 'test@example.com', // Change to your recipient
+     from: 'test@example.com', // Change to your verified sender
+     subject: 'Sending with SendGrid is Fun',
+     text: 'and easy to do anywhere, even with Node.js',
+     html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+    }
+
+    await SendGrid.send(email);
 }
 ```
 
@@ -139,10 +144,14 @@ await emailClient.send(email);
 
 我们可以把上面的流程扩展一下，再被 trigger 之后首先需要从 KeyVault 中获取用于使用 SendGrid 的 API_KEY，在发送完毕 SendGrid 之后再使用 Application Insights 记录日志，流程如下图所示
 
+![](../images/careful-with-serverless/e2e-test.png)
+
 
 你可能有兴趣对虚线框内整套功能进行E2E（端到端）测试，这并非无法实现，但是难且代价极大。它的难首先体现在E2E本身的测试性质上，如果你对测试金字塔还有印象的话，处于金字塔顶端的 E2E 测试无论是运行成本还是维护成本都是最高的；其次由于 serverless 第三方提供服务的差异性，你很难在每个人的本地搭建出一套线下稳定的测试环境来，由此产生的不确定和对线上环境的依赖有悖于我们对于测试能够快速反馈和重复执行的期望。
 
 所以我建议在 serverless 中从代码中抽象出[服务层（Service Layer）](https://martinfowler.com/eaaCatalog/serviceLayer.html)，优先针对服务层进行测试。服务层是应用的边界和对业务逻辑和用例的封装，即使发生技术栈迁移它也应该是最不被影响的功能，它应该作为测试中的一个风险点。
+
+![](../images/careful-with-serverless/component-test.png)
 
 而服务层打交道的对象不再是具体的供应商服务而是抽象的接口，这也便于我们在针对服务层的测试中对依赖进行 mock，优化测试流程。
 
@@ -164,6 +173,8 @@ await emailClient.send(email);
 
 AWS Lambda 的[官方验证机制](https://docs.aws.amazon.com/zh_cn/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html)亦是如此：
 
+![](../images/careful-with-serverless/custom-auth-workflow.png)
+
 在上图中最左侧的 client 的请求必须经过 API Gateway 的验证之后才可以继续访问后续的 Lambda 或者是 EC2 服务。
 
 在回答了“在哪里验证”这个问题之后，借上面的流程我们要继续回答第二个问题：如何验证。
@@ -174,25 +185,17 @@ AWS Lambda 的[官方验证机制](https://docs.aws.amazon.com/zh_cn/apigateway/
 - 假设客户端使用的是 Auth0 进行登陆，authorizer     则需要将 JWT 交由 Auth0 进行验证
 - 如果验证成功，authorizer 便会返回对应的 policy，API     Gateway 根据 policy 来决定时许允许访问后续资源
 
- 
-
 从上述流程中不难看出验证通过与否决定自 authorizer 的代码实现。但无论你是利用 JWT还是 SAML 进行验证，背后遵循的依然是传统 OAuth 的经典流程。我不想对 OAuth 着过多笔墨，下面的流程图也许能唤起你的不少回忆
+
+![](C:\Users\ligunagyi\Desktop\jekyll-blog\images\careful-with-serverless\oauth-workflow.png)
 
 在上述 AWS 的身份验证流程中，当 client 在向 AWS Lambda 发送请求时，我们首先需要向 Authorization Server 验证身份之后才允许将资源返回给 client。不难看出 authorizer 是流程图中步骤 6 的体现
 
- 
-
 我要对潜在的“错误”做一个解释：你可能会认为 OAuth 并不适用于 AWS API Gateway 这类情况，因为 OAuth 本质上是针对“授权”操作设计的，即决定你能够访问哪些资源；而 API Gateway 的例子像是“认证”场景，即你是否是合法用户。
-
- 
 
 你对于 OAuth 的理解是对的，借此我们不妨继续对 OAuth 进行一次深入说明：OAuth 实质上是一则委托协议，它开放了软件程序以用户的姿态访问第三方资源的一种可能。OAuth 中的 client 不是指拥有这些资源的用户，而是被用户委托的应用程序，比如再网易相册需要访问用户的谷歌网盘里的照片的场景中，client 其实代指的是网易相册。正因为它只关心授权资源，所以它可以不用关心谁以及用什么方式授权的这些资源。残酷点说网易相册只关心它是否能够获取到允许它调用 Google API 拿到文件信息 token 而已。
 
- 
-
 回到 API Gateway 的例子中，API 所代表的资源通常是公用的，自然作为资源拥有方的 AWS 无需关心背后的 client 是谁，也无权限制用户可能授权给多少个应用，它只关心请求里的验证凭据。从这个角度上说，lambda 的验证工作与 OAuth 不谋而合。
-
- 
 
 如果对 OAuth 再做一次抽象的话，我们可以将它称之为“基于 token 的身份验证机制（token-based authentication）”。和传统的用户名密码授权验证方式相比会带来以下优势：
 
@@ -202,7 +205,9 @@ AWS Lambda 的[官方验证机制](https://docs.aws.amazon.com/zh_cn/apigateway/
 
  
 
-例如 Azure Serverless 就支持存粹基于 token 的验证方式，在你将 HttpTrigger 的 authLevel 参数设置为 function 之后，需要从 UI 上获取 Function Key 值并将其放入名为 x-function-key 的 http header 中才得以让请求抵达 function，否则你将得到 401 返回结果 
+例如 Azure Serverless 就支持存粹基于 token 的验证方式，在你将 HttpTrigger 的 authLevel 参数设置为 function 之后，需要从 UI 上获取 Function Key 值并将其放入名为 x-function-key 的 http header 中才得以让请求抵达 function，否则
+
+![](../images/careful-with-serverless/azure-function-keys.png) 
 
 可以看出在解决 serverless 场景下的身份验证问题时，我们仰仗的依然是前人留下的宝贵财富。
 
