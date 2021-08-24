@@ -187,7 +187,7 @@ AWS Lambda 的[官方验证机制](https://docs.aws.amazon.com/zh_cn/apigateway/
 
 从上述流程中不难看出验证通过与否决定自 authorizer 的代码实现。但无论你是利用 JWT还是 SAML 进行验证，背后遵循的依然是传统 OAuth 的经典流程。我不想对 OAuth 着过多笔墨，下面的流程图也许能唤起你的不少回忆
 
-![](../imagesc/areful-with-serverless/oauth-workflow.png)
+![](../images/careful-with-serverless/oauth-workflow.png)
 
 在上述 AWS 的身份验证流程中，当 client 在向 AWS Lambda 发送请求时，我们首先需要向 Authorization Server 验证身份之后才允许将资源返回给 client。不难看出 authorizer 是流程图中步骤 6 的体现
 
