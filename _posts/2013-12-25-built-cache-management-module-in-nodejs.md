@@ -433,5 +433,5 @@ exports.get = function (key) {
 
 - [Redis configuration](http://redis.io/topics/config)
 
-
+[一键搜藏所有参考文献](https://www.site2share.com/folder/20020512)
 

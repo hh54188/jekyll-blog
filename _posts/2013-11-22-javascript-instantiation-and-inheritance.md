@@ -613,3 +613,5 @@ s.area();
 * [What is the reason to use the 'new' keyword here?](http://stackoverflow.com/questions/12592913/what-is-the-reason-to-use-the-new-keyword-here)
 * [JavaScript inheritance: Object.create vs new](http://stackoverflow.com/questions/13040684/javascript-inheritance-object-create-vs-new)
 * [Is JavaScript 's “new” Keyword Considered Harmful?](http://stackoverflow.com/questions/383402/is-javascript-s-new-keyword-considered-harmful)
+
+[一键搜藏所有参考文献](https://www.site2share.com/folder/20020510)

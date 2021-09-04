@@ -416,3 +416,5 @@ window.addEvent('load', function(){
 - [DOMContentLoaded](https://developer.mozilla.org/en-US/docs/Web/Reference/Events/DOMContentLoaded)
 - [Stylesheet loads block script execution](http://molily.de/weblog/domcontentloaded)
 - [主流框架中DOMContentLoaded事件的实现](http://varnow.org/?p=77)
+
+[一键搜藏所有参考文献](https://www.site2share.com/folder/20020508)
