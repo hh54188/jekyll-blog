@@ -411,27 +411,5 @@ exports.get = function (key) {
 
 完整的代码已经放在github上了，包括文章中完整的代码片段与提及的性能测试：[https://github.com/hh54188/Node-Simple-Cache](https://github.com/hh54188/Node-Simple-Cache)
 
-参考文献：
-
-- [Javascript Style Tip: Use “in” and “delete”](http://foohack.com/2007/06/javascript-style-tip-use-in-and-delete/)
-
-- [Deleting Objects in JavaScript](http://stackoverflow.com/questions/742623/deleting-objects-in-javascript)
-
-- [delete](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/delete?redirectlocale=en-US&redirectslug=JavaScript%2FReference%2FOperators%2Fdelete)
-
-- [Understanding delete](http://perfectionkills.com/understanding-delete/)
-
-- [delete vs undefined vs null](http://jsperf.com/delete-vs-undefined-vs-null/3)
-
-- [What is the performance of Objects/Arrays in JavaScript? (specifically for Google V8)](http://stackoverflow.com/questions/8423493/what-is-the-performance-of-objects-arrays-in-javascript-specifically-for-googl)
-
-- [Garbage Collection](http://docstore.mik.ua/orelly/webprog/jscript/ch11_03.htm)
-
-- [Redis ignores maxmemory setting](http://stackoverflow.com/questions/7588843/redis-ignores-maxmemory-setting)
-
-- [Redis as an LRU cache Friday](http://oldblog.antirez.com/post/redis-as-LRU-cache.html)
-
-- [Redis configuration](http://redis.io/topics/config)
-
-[一键搜藏所有参考文献](https://www.site2share.com/folder/20020512)
+[参考文献集合](https://www.site2share.com/folder/20020512)
 

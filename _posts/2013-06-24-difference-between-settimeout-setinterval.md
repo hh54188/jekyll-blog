@@ -327,12 +327,4 @@ chunk()函数的用途就是将一个数组分成小块处理，它接受三个�
 
 参考资料:
 
-- [Understanding timers: setTimeout and setInterval](http://javascript.info/tutorial/settimeout-setinterval)
-- [Events and timing in-depth](http://javascript.info/tutorial/events-and-timing-depth)
-- [How JavaScript Timers Work](http://ejohn.org/blog/how-javascript-timers-work/)
-- [如何防止由于脚本引起的浏览器假死](http://www.dewen.org/q/2164)
-- [window.setTimeout](https://developer.mozilla.org/en-US/docs/Web/API/window.setTimeout#Minimum.2F_maximum_delay_and_timeout_nesting)
-- [js线程机制](http://hi.baidu.com/isabella_qi/item/766061fd5ac1a0d7a835a2b4)
-- [Confuse about using javascript setInterval to do animate job](http://stackoverflow.com/questions/17143007/confuse-about-using-javascript-setinterval-to-do-animate-job)
-
-[一键搜藏所有参考文献](https://www.site2share.com/folder/20020509)
+[参考文献集合](https://www.site2share.com/folder/20020509)

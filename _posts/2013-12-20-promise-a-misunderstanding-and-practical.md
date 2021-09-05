@@ -705,15 +705,7 @@ Fourth successHandler recevied:  Error {}
 
 参考文献
 
-- [Promises/A+ - understanding the spec through implementation](http://modernjavascript.blogspot.com/2013/08/promisesa-understanding-by-doing.html)
-- [Promise patterns](http://modernjavascript.blogspot.hk/2013/09/promise-patterns.html)
-- [You're Missing the Point of Promises](https://gist.github.com/domenic/3889970)
-- [Creating Responsive Applications Using jQuery Deferred and Promises](http://msdn.microsoft.com/en-us/magazine/gg723713.aspx)
-- [Asynchronous Programming in JavaScript with “Promises”](http://blogs.msdn.com/b/ie/archive/2011/09/11/asynchronous-programming-in-javascript-with-promises.aspx)
-- [Promise & Deferred objects in JavaScript Pt.1: Theory and Semantics.](http://blog.mediumequalsmessage.com/promise-deferred-objects-in-javascript-pt1-theory-and-semantics)
-- [tiny Promise.js](https://gist.github.com/unscriptable/814052)
-
-[一键搜藏所有参考文献](https://www.site2share.com/folder/20020511)
+[参考文献集合](https://www.site2share.com/folder/20020511)
 
 
 

@@ -604,14 +604,4 @@ s.area();
 
 引用资料
 
-* [Why Prototypal Inheritance Matters](http://aaditmshah.github.io/why-prototypal-inheritance-matters/)
-* [Object.create](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create)
-* [Object.create() Improves Constructor-Based Inheritance In Javascript - It Doesn't Replace It](http://www.bennadel.com/blog/2184-Object-create-Improves-Constructor-Based-Inheritance-In-Javascript-It-Doesn-t-Replace-It.htm)
-* [JS101: Object.create](http://dailyjs.com/2012/06/04/js101-object-create/)
-* [Simple “Class” Instantiation](http://ejohn.org/blog/simple-class-instantiation/)
-* [Understanding the difference between Object.create() and new SomeFunction() in JavaScript](http://stackoverflow.com/questions/4166616/understanding-the-difference-between-object-create-and-new-somefunction-in-j)
-* [What is the reason to use the 'new' keyword here?](http://stackoverflow.com/questions/12592913/what-is-the-reason-to-use-the-new-keyword-here)
-* [JavaScript inheritance: Object.create vs new](http://stackoverflow.com/questions/13040684/javascript-inheritance-object-create-vs-new)
-* [Is JavaScript 's “new” Keyword Considered Harmful?](http://stackoverflow.com/questions/383402/is-javascript-s-new-keyword-considered-harmful)
-
-[一键搜藏所有参考文献](https://www.site2share.com/folder/20020510)
+[参考文献集合](https://www.site2share.com/folder/20020510)
