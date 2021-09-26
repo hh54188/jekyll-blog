@@ -53,7 +53,7 @@ module.exports = function (server) {
             {
                 products: prods
             };
-
+    
             res.render('index', model);
         });
     });
@@ -243,15 +243,9 @@ var View = React.createClass({
 });
 {% endhighlight %}
 
-参考文章：
+参考文章合集：
 
-- [ReactJS For Stupid People](http://blog.andrewray.me/reactjs-for-stupid-people/)
-- [Flux For Stupid People](http://blog.andrewray.me/flux-for-stupid-people/)
-- [What the Flux? (On Flux, DDD, and CQRS)](http://jaysoo.ca/2015/02/06/what-the-flux/)
-- [Facebook: MVC Does Not Scale, Use Flux Instead [Updated]](https://www.infoq.com/news/2014/05/facebook-mvc-flux)
-- [What is Flux?](http://fluxxor.com/what-is-flux.html)
-- [Flux vs. MVC (Design Patterns)](https://medium.com/hacking-and-gonzo/flux-vs-mvc-design-patterns-57b28c0f71b7#.2uqupqv13)
-
+[https://www.site2share.com/folder/20020513](https://www.site2share.com/folder/20020513)
 
 
 
