@@ -213,10 +213,8 @@ componentDidUpdate(prevProps, prevState) {
 
 最后再次强调，本文是开源图书[React In-depth: An exploration of UI development](https://www.gitbook.com/book/developmentarc/react-indepth/details)的归纳。基本上想了解生命周期看这一本书就够了，看完也无敌了。希望这篇中文简约版也会对你有帮助。
 
-## 参考
+## 参考文章集合
 
-- [do not extend React.Component](https://stackoverflow.com/questions/36296658/do-not-extend-react-component)
-- [React Elements vs React Components vs Component Backing Instances](https://medium.com/@fay_jai/react-elements-vs-react-components-vs-component-backing-instances-14d42729f62)
-- [React.createClass versus extends React.Component](https://toddmotto.com/react-create-class-versus-component/)
-- [(A => B) !=> (B => A)](https://reactjs.org/blog/2016/01/08/A-implies-B-does-not-imply-B-implies-A.html)
-- [Beware: React setState is asynchronous!](https://medium.com/@wereHamster/beware-react-setstate-is-asynchronous-ce87ef1a9cf3)
+[https://www.site2share.com/folder/20020526](https://www.site2share.com/folder/20020526)
+
+​	

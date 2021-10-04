@@ -271,11 +271,4 @@ render() {
 
 ## 参考资料
 
-- [In a web project, what is the difference between a dist and build directory (traditionally)?](https://stackoverflow.com/questions/16303525/in-a-web-project-what-is-the-difference-between-a-dist-and-build-directory-tra)
-- [Why npm Scripts?](https://css-tricks.com/why-npm-scripts/)
-- [npm-build-boilerplate](https://github.com/damonbauer/npm-build-boilerplate/blob/master/package.json)
-- [Why we should stop using Grunt & Gulp](https://www.keithcirkel.co.uk/why-we-should-stop-using-grunt/)
-- [How to Use npm as a Build Tool](https://www.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/)
-- [kentcdodds/nps](https://github.com/kentcdodds/nps)
-- [Running scripts with npm](https://blog.jayway.com/2014/03/28/running-scripts-with-npm/)
-- [npm-scripts](https://docs.npmjs.com/misc/scripts)
+[https://www.site2share.com/folder/20020524](https://www.site2share.com/folder/20020524)

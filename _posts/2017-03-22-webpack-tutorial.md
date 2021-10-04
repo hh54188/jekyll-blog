@@ -341,13 +341,7 @@ ReactDOM.render(
 这篇文章的源代码地址是 https://github.com/hh54188/webpack-tutorial
 
 
-参考文章：
-- https://github.com/AriaFallah/WebpackTutorial
-- https://scotch.io/tutorials/getting-started-with-webpack-module-bundling-magic
-- https://scotch.io/tutorials/setup-a-react-environment-using-webpack-and-babel
-- https://www.codementor.io/tamizhvendan/beginner-guide-setup-reactjs-environment-npm-babel-6-webpack-du107r9zr
-- https://www.twilio.com/blog/2015/08/setting-up-react-for-es6-with-webpack-and-babel-2.html
-- https://webpack.github.io/docs/tutorials/getting-started/
-- https://stanko.github.io/setting-up-webpack-babel-and-react-from-scratch/
-- https://scotch.io/tutorials/setup-a-react-environment-using-webpack-and-babel
+参考文章合集
+
+[https://www.site2share.com/folder/20020517](https://www.site2share.com/folder/20020517)
 

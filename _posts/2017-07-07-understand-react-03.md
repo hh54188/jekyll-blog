@@ -164,7 +164,7 @@ output: {
 
 >Ever tried. Ever failed. No matter. Try again. Fail again. Fail better. ——Samuel Beckett
 
-- [Vuex](https://vuex.vuejs.org/zh-cn/)
-- [Vue.js双向绑定的实现原理](http://www.cnblogs.com/kidney/p/6052935.html)
-- [剖析Vue实现原理 - 如何实现双向绑定mvvm](https://github.com/DMQ/mvvm)
+参考文章
+
+[https://www.site2share.com/folder/20020522](https://www.site2share.com/folder/20020522)
 

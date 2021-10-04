@@ -228,10 +228,6 @@ export default class Chart extends React.Component {
 ```
 因为能够访问原生DOM的缘故，你可能会在`componentDidMount`函数中重新对元素的样式进行计算，调整然后生效。因此立即需要对DOM进行重新渲染，此时会使用到`forceUpdate`方法
 
-## 参考
+## 参考文章集合
 
-- [do not extend React.Component](https://stackoverflow.com/questions/36296658/do-not-extend-react-component)
-- [React Elements vs React Components vs Component Backing Instances](https://medium.com/@fay_jai/react-elements-vs-react-components-vs-component-backing-instances-14d42729f62)
-- [React.createClass versus extends React.Component](https://toddmotto.com/react-create-class-versus-component/)
-- [(A => B) !=> (B => A)](https://reactjs.org/blog/2016/01/08/A-implies-B-does-not-imply-B-implies-A.html)
-- [Beware: React setState is asynchronous!](https://medium.com/@wereHamster/beware-react-setstate-is-asynchronous-ce87ef1a9cf3)
+[https://www.site2share.com/folder/20020525](https://www.site2share.com/folder/20020525)

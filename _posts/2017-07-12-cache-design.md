@@ -239,16 +239,4 @@ Jake Archibald有一篇很有意思的文章[HTTP/2 push is tougher than I thoug
 
 参考文章：
 
-- [HTTP Caching](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching)
-- [Caching best practices & max-age gotchas](https://jakearchibald.com/2016/caching-best-practices/)
-- [HTTP conditional requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests)
-- [Caching Tutorial](https://www.mnot.net/cache_docs/)
-- [Expires vs. max-age](https://www.mnot.net/blog/2007/05/15/expires_max-age)
-- [What takes precedence: the ETag or Last-Modified HTTP header?](https://stackoverflow.com/questions/824152/what-takes-precedence-the-etag-or-last-modified-http-header)
-- [What's the difference between Cache-Control: max-age=0 and no-cache?](https://stackoverflow.com/questions/1046966/whats-the-difference-between-cache-control-max-age-0-and-no-cache)
-- [serviceworke.rs](serviceworke.rs)
-- [HTTP/2 push is tougher than I thought](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)
-- [A Tale of Four Caches](https://calendar.perfplanet.com/2016/a-tale-of-four-caches/)
-- [service-workers](https://developers.google.com/web/fundamentals/getting-started/primers/service-workers)
-- [Preload, Prefetch And Priorities in Chrome](https://medium.com/reloading/preload-prefetch-and-priorities-in-chrome-776165961bbf)
-- [GoogleChrome/sw-precache](https://github.com/GoogleChrome/sw-precache)
+[https://www.site2share.com/folder/20020523](https://www.site2share.com/folder/20020523)

@@ -152,9 +152,6 @@ Domain-Driven Design，这个名字已经告诉你它的重点，即Domain Drive
 关于设计思想这一专题，这里就告于段落。这两篇只是对很多概念做了简短和入门的介绍。这一专题的目的不在于教大家如何掌握和运用这些技术，而是做一次科普，或者说是分享。相信对大家理解Flux和Redux有不少的帮助。同时也为大家今后解决技术上的问题增添一些思路。
 
 
-- [What's the difference between data model and object model?](http://stackoverflow.com/questions/2446002/whats-the-difference-between-data-model-and-object-model)
-- [What is an ORM and where can I learn more about it?](http://stackoverflow.com/questions/1279613/what-is-an-orm-and-where-can-i-learn-more-about-it)
-- [What is an Object-Relational Mapping Framework?](http://stackoverflow.com/questions/1152299/what-is-an-object-relational-mapping-framework)
-- [Reference 3: Introducing Event Sourcing](https://msdn.microsoft.com/en-us/library/jj591559.aspx)
-- [Domain Driven Design Quickly](https://www.infoq.com/minibooks/domain-driven-design-quickly)
-- [DDD/CQRS/ES/Architecture videos](https://gist.github.com/SzymonPobiega/5220595)
+参考文章合集
+
+[https://www.site2share.com/folder/20020515](https://www.site2share.com/folder/20020515)

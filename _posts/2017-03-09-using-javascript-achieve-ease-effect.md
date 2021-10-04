@@ -119,14 +119,9 @@ transition-timing-function: cubic-bezier(P1.x, P1.y, P2.x, P2.y);
 
 你能通过[贝塞尔曲线编辑器](http://greweb.me/bezier-easing-editor/example/)来编辑曲线
 
-参考文章：
+参考文章合集
 
-- [Understanding Easing](http://upshots.org/actionscript/jsas-understanding-easing)
-- [Easing Equations](http://gizma.com/easing/)
-- [easings.net](http://easings.net/zh-cn)
-- [Interpolation Tricks](http://sol.gfxile.net/interpolation/)
-- [easing.js](https://gist.github.com/gre/1650294)
-
+[https://www.site2share.com/folder/20020516](https://www.site2share.com/folder/20020516)
 
 
 

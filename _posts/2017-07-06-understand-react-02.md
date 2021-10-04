@@ -175,11 +175,8 @@ function CustomForm ({ addFriend }) {
 var componentInstance = ReactDOM.render(<CustomForm />, document.getElementById("root"));
 ```
 
-- [Flux in Depth. Overview and Components](http://blog.mgechev.com/2015/05/15/flux-in-depth-overview-components/)
-- [Interactivity and Dynamic UIs](https://shripadk.github.io/react/docs/interactivity-and-dynamic-uis.html)
-- [Components and Props](https://facebook.github.io/react/docs/components-and-props.html)
-- [Pure function](https://en.wikipedia.org/wiki/Pure_function)
-- [Reconciliation](https://facebook.github.io/react/docs/reconciliation.html)
-- [React Elements vs React Components vs Component Backing Instances](https://medium.com/@fay_jai/react-elements-vs-react-components-vs-component-backing-instances-14d42729f62)
+参考文章
+
+[https://www.site2share.com/folder/20020521](https://www.site2share.com/folder/20020521)
 
 

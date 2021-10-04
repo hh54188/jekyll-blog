@@ -208,10 +208,7 @@ $.ajax({
 
 本文的测试代码，包括前端和服务端，都放在这个项目中：[https://github.com/hh54188/fetch_post_test](https://github.com/hh54188/fetch_post_test)。使用前记得`npm install`和`bower install`
 
-- [https://github.com/expressjs/body-parser/issues/247](https://github.com/expressjs/body-parser/issues/247)
-- [https://stackoverflow.com/questions/5710358/how-to-retrieve-post-query-parameters](https://stackoverflow.com/questions/5710358/how-to-retrieve-post-query-parameters)
-- [https://github.com/expressjs/body-parser](https://stackoverflow.com/questions/5710358/how-to-retrieve-post-query-parameters)
-- [https://nodejs.org/en/docs/guides/anatomy-of-an-http-transaction/](https://nodejs.org/en/docs/guides/anatomy-of-an-http-transaction/)
-- [https://stackoverflow.com/questions/38306569/what-does-body-parser-do-with-express-in-nodejs](https://stackoverflow.com/questions/38306569/what-does-body-parser-do-with-express-in-nodejs)
-- [https://www.safaribooksonline.com/blog/2014/03/10/express-js-middleware-demystified/](https://www.safaribooksonline.com/blog/2014/03/10/express-js-middleware-demystified/)
+参考文章集合
+
+[https://www.site2share.com/folder/20020518](https://www.site2share.com/folder/20020518)
 

@@ -269,14 +269,6 @@ React组件中存在两类DOM，一类是众所周知的Virtual DOM，相信大�
 认识了以上所有的生命周期之后，请不假思索的回答，有哪些生命周期是允许设置`state`的？
 
 
-- [Hollywood Principle](http://wiki.c2.com/?HollywoodPrinciple)
-- [Higher-Order Components in React](https://spin.atomicobject.com/2017/03/02/higher-order-components-in-react/)
-- [Higher-Order Components](https://facebook.github.io/react/docs/higher-order-components.html)
-- [Container Components](https://medium.com/@learnreact/container-components-c0e67432e005)
-- [Leveling Up With React: Container Components](https://css-tricks.com/learning-react-container-components/)
-- [ReactJS - Does render get called any time “setState” is called?](https://stackoverflow.com/questions/24718709/reactjs-does-render-get-called-any-time-setstate-is-called)
-- [How does React decide to re-render a component?](http://lucybain.com/blog/2017/react-js-when-to-rerender/)
-- [Virtual DOM in ReactJS](https://hackernoon.com/virtual-dom-in-reactjs-43a3fdb1d130)
-- [Reconciliation](https://facebook.github.io/react/docs/reconciliation.html)
-- [React.Component](https://facebook.github.io/react/docs/react-component.html)
-- [Understanding the React Component Lifecycle](http://busypeoples.github.io/post/react-component-lifecycle/)
+参考文章
+
+[https://www.site2share.com/folder/20020520](https://www.site2share.com/folder/20020520)

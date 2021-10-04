@@ -225,14 +225,6 @@ function maxWithoutRecursion(arr) {
 
 关于算法面试我要分享的就这么多了。下次聊关于React面试中需要注意的地方。也欢迎留言补充。
 
+参考文章
 
-- [教你彻底学会动态规划——入门篇](http://blog.csdn.net/baidu_28312631/article/details/47418773)
-- [动态规划之背包问题（一）](http://www.hawstein.com/posts/dp-knapsack.html)
-- [P01: 01背包问题](http://love-oriented.com/pack/P01.html)
-- [Array data structure](http://www.geeksforgeeks.org/array-data-structure/)
-- [Binary tree data structure](http://www.geeksforgeeks.org/binary-tree-data-structure/)
-- [Computer science in JavaScript: Quicksort](https://www.nczonline.net/blog/2012/11/27/computer-science-in-javascript-quicksort/)
-- [Friday Algorithms: JavaScript Merge Sort](http://www.stoimen.com/blog/2010/07/02/friday-algorithms-javascript-merge-sort/)
-- [Computer science in JavaScript: Merge sort](https://www.nczonline.net/blog/2012/10/02/computer-science-and-javascript-merge-sort/)
-- [Problem Solving with Algorithms and Data Structures using Python](http://interactivepython.org/runestone/static/pythonds/index.html)
-- [How to find time complexity of an algorithm](http://stackoverflow.com/questions/11032015/how-to-find-time-complexity-of-an-algorithm)
+[https://www.site2share.com/folder/20020519](https://www.site2share.com/folder/20020519)
