@@ -15,7 +15,7 @@ share: true
 
 在成为 Tech Leader 之后，有一件事困恼我相当长一段时间：我应该多大程度上干涉团队成员的工作？
 
-某些公司的 leader 可能会有两条路径供选择：技术或管理。但是在 ThoughtWoks，你既需要运营团队，也要对团队内产出的技术方案负责。看上去我理所应当在更多方面有所把控，也意味着有更多正当理由插手团队成员的手头工作。
+某些公司的 leader 可能会有两条路径供选择：技术或管理。但是在 ThoughtWorks，你既需要运营团队，也要对团队内产出的技术方案负责。看上去我理所应当在更多方面有所把控，也意味着有更多正当理由插手团队成员的手头工作。
 
 然而无论从管理还是从执行的视角看，这类过多干涉团队成员工作的 micromanagement 都不认为是好的实践。站在管理者的角度上看，在颇具规模的团队内精准把控每个人的工作是不现实的，你有限的精力应该放在更有价值的事情上，delegate、leverage 而非 control 才是应该追求的效果，让团队做到自组织，让每个成员做的自我管理才是终极目标。早在《人月神话》一书中，作者就引用 IBM 负责人 Earl Wheeler 的观点来支持权力的下放：The key thrust [of recent years] was delegating power down. It was like magic! Improved quality, productivity, morale. 
 
