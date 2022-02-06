@@ -359,7 +359,9 @@ plugins: [
 如果你的觉得手动配置 dll 仍然觉得繁琐，那么可以尝试使用 [AutoDllPlugin](https://github.com/asfktz/autodll-webpack-plugin)
 
 
-## 参考资料
+## 参考资料集合
+
+[https://www.site2share.com/folder/20020533](https://www.site2share.com/folder/20020533)
 
 ### Bundle VS Chunk
 

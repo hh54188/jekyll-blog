@@ -268,8 +268,11 @@ const DEFAULT_OPTIONS = []
 
 下一篇我们学习如何借助第三方类库，比如`immutablejs`和`reselect`对项目进行优化
 
-## 参考资料
+## 参考资料集合
+
+[https://www.site2share.com/folder/20020527](https://www.site2share.com/folder/20020527)
 
 * [High Performance React: 3 New Tools to Speed Up Your Apps](https://medium.freecodecamp.org/make-react-fast-again-tools-and-techniques-for-speeding-up-your-react-app-7ad39d3c1b82)
 * [Debugging React performance with React 16 and Chrome Devtools.](https://building.calibreapp.com/debugging-react-performance-with-react-16-and-chrome-devtools-c90698a522ad)
 * [React.js pure render performance anti-pattern](https://medium.com/@esamatti/react-js-pure-render-performance-anti-pattern-fb88c101332f)
+

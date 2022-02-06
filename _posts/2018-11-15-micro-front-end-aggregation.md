@@ -128,7 +128,9 @@ share: true
 
 我相信本文中有很多我对原文理解不正确的地方，如果有本身在美团做这项业务的朋友，或者认识原文的作者，可以互相转告，期待进一步的指正和交流
 
-## 参考资料
+## 参考资料集合
+
+[https://www.site2share.com/folder/20020531](https://www.site2share.com/folder/20020531)
 
 - [用微前端的方式搭建类单页应用](https://tech.meituan.com/fe_tiny_spa.html)
 - [Micro frontends—a microservice approach to front-end web development](https://medium.com/@tomsoderlund/micro-frontends-a-microservice-approach-to-front-end-web-development-f325ebdadc16)

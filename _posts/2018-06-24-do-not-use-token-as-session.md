@@ -255,7 +255,9 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZ
 
 然而 JWT 真的能取代 session 机制吗？这么做有哪些好处和坏处？这些问题我们留在下一篇再讨论
 
-## 参考资料
+## 参考资料集合
+
+[https://www.site2share.com/folder/20020530](https://www.site2share.com/folder/20020530)
 
 ### Google API
 

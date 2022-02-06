@@ -322,7 +322,9 @@ const profileView = observer(props => {
 
 就像开头说的，这篇文章只是想起一个抛砖引玉的作用，只是对性能比较的惊鸿一瞥。另外我对在文中所描述的项目场景中采用 Mobx 的技术仍然采取保留意见，直觉这样的效率仍然不高，将继续探索更有效的方式
 
-## 参考资料
+## 参考资料集合
+
+[https://www.site2share.com/folder/20020532](https://www.site2share.com/folder/20020532)
 
 - [Seven Rules of Thumb for Web Site Experimenters](https://www.exp-platform.com/Documents/2014%20experimentersRulesOfThumb.pdf)
 - [Becoming fully reactive: an in-depth explanation of MobX](https://hackernoon.com/becoming-fully-reactive-an-in-depth-explanation-of-mobservable-55995262a254)

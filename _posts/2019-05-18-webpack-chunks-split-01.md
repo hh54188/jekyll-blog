@@ -322,7 +322,9 @@ vendors: {
 - 再决定使用什么样的方案（通过将修改频率低、重复的代码分离出来，并配上恰当的缓存策略）；
 - 最后决定实施的方案是什么（通过配置 Webpack 来实现代码的分离）
 
-## 参考资料
+## 参考资料集合
+
+[https://www.site2share.com/folder/20020533](https://www.site2share.com/folder/20020533)
 
 ### Bundle VS Chunk
 

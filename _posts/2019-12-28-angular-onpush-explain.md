@@ -321,7 +321,9 @@ export class MessageBoxService extends MessageBox {
 
 搞定
 
-## 参考资料：
+## 参考资料集合：
+
+[https://www.site2share.com/folder/20020534](https://www.site2share.com/folder/20020534)
 
 * [Angular Change Detection - How Does It Really Work?](https://blog.angular-university.io/how-does-angular-2-change-detection-really-work/)
 * [what is the use of Zone.js in Angular 2](https://stackoverflow.com/a/40903120/508236)

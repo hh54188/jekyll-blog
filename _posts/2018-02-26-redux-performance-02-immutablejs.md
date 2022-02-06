@@ -321,7 +321,9 @@ console.log(performance.now() - startTime);
 其实关于 Immutablejs 还有很多的话题可以聊，比如最佳实践注意事项什么的。鉴于篇幅有限就先聊到这里。有机会再继续
 
 
-## 参考文章
+## 参考文章集合
+
+[https://www.site2share.com/folder/20020529](https://www.site2share.com/folder/20020529)
 
 * [Immutable Data](https://redux.js.org/faq/immutable-data)
 * [React.PureComponent](https://reactjs.org/docs/react-api.html#reactpurecomponent)
