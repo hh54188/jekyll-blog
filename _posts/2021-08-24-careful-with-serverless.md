@@ -232,3 +232,13 @@ AWS Lambda 的[官方验证机制](https://docs.aws.amazon.com/zh_cn/apigateway/
 ## 尾声
 
 因为篇幅的关系我们只能谈论到这里，希望你能从上述的文字中勾勒出一个有关 serverless 更清晰的轮廓。我们很难说服自己 serverless 是一类纯粹的革新，它更多的包含了前人智慧结晶。但无需沮丧，这是技术创新的常态，创新不是空中楼阁，它只有继承自经典，才有可能超越经典。
+
+你可能会喜欢
+
+- [做一个能对标阿里云的前端APM工具（上）](https://www.v2think.com/apm-tool-1)
+- [小心 Serverless](https://www.v2think.com/careful-with-serverless)
+- [SQL Server 查询语句优化入门](https://www.v2think.com/sql-server-optimize-tutorial)
+- [利用Node.js+express框实现图片上传](https://www.v2think.com/nodejs-express-upload-image)
+- [一篇来自前端同学对后端接口的吐槽](https://www.v2think.com/toast-about-backend-API)
+- [关于Node.js后端架构的一点后知后觉](https://www.v2think.com/something-about-nodejs-architecture)
+- [在Node.js中搭建缓存管理模块](https://www.v2think.com/built-cache-management-module-in-nodejs)

@@ -211,3 +211,14 @@ index scan 意味着数据库通过索引获取所有行后再进行扫描。如
 ## 总结
 
 本来还想写 join 效率的问题（对比 hash join / nested loop / merge join），但想了一下数据库使用什么样的 join 是超出我们控制范围之外的。事实上数据库是否真的会使用我们的 index 也是我们控制之外的，执行计划是由它内部的 optimizer 计算出来的，残酷点说每一次执行计划都可能随着资源、数据、索引状态的不同而不同。但好歹索引的可控性高一些。绝大部分的性能问题都能通过 index 解决
+
+你可能会喜欢
+
+- [性能指标的信仰危机](https://www.v2think.com/performance-metric-crisis)
+- [React + Redux 性能优化（一）：理论篇](https://www.v2think.com/redux-performance-01-basic)
+- [React + Redux 性能优化（二）工具篇： Immutablejs](https://www.v2think.com/redux-performance-02-immutablejs)
+- [Mobx 与 Redux 的性能对比](https://www.v2think.com/mobx-redux-performance)
+- [用 100 行代码提升 10 倍的性能](https://www.v2think.com/trie)
+- [仪表盘场景前端优化经验谈](https://www.v2think.com/dashboard-optimize)
+- [让我们再聊聊浏览器资源加载优化](https://www.v2think.com/let-us-talk-about-resource-load)
+- [Javascript高性能动画与页面渲染](https://www.v2think.com/javascript-high-performance-animation-and-page-rendering)

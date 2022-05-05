@@ -122,3 +122,13 @@ share: true
 ### 总结
 
 实话实说，这篇文章里没有干货，全都是舶来品。但舶来品不是一个贬义词，它是我们学习知识和解决问题的第一手材料。我还是想重申一遍，在后端领域来说Node.js是一个新人，我们应该学习前辈的经验。借用许多年前奔驰广告的一句话：经典是对经典的继承，经典是对经典的背叛。只有站在前人的肩膀上，我们才有可能创新，看的更远。
+
+你可能会喜欢
+
+- [做一个能对标阿里云的前端APM工具（上）](https://www.v2think.com/apm-tool-1)
+- [小心 Serverless](https://www.v2think.com/careful-with-serverless)
+- [SQL Server 查询语句优化入门](https://www.v2think.com/sql-server-optimize-tutorial)
+- [利用Node.js+express框实现图片上传](https://www.v2think.com/nodejs-express-upload-image)
+- [一篇来自前端同学对后端接口的吐槽](https://www.v2think.com/toast-about-backend-API)
+- [关于Node.js后端架构的一点后知后觉](https://www.v2think.com/something-about-nodejs-architecture)
+- [在Node.js中搭建缓存管理模块](https://www.v2think.com/built-cache-management-module-in-nodejs)

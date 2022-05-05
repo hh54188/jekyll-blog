@@ -92,3 +92,13 @@ share: true
 而等到一年之后再来审视《玩具总动员2》的进展时，却发现整部动画惨不忍睹。于是他们不得不做出换掉导演团队的艰难决定。并把修改剧本的工作交由一只由富有经验人员组成的“智囊团”进行处理。
 
 但冒险也是皮克斯不可以扔掉的一个特质，这就意味着他们必须把钥匙交到那些不太符合传统导演标准的新人手中。那么如何避免上上面的情况再次出现？这是我再下一篇中再谈
+
+你可能会喜欢
+
+- [开源社区的暗面](https://www.v2think.com/darkside-of-the-opensource)
+- [帮助团队成长是唯一的出路](https://www.v2think.com/what-is-leadership)
+- [去年做 Tech Leader 犯过最大的错](https://www.v2think.com/tech-leader-mistake)
+- [技术写作的困境](https://www.v2think.com/stuck-in-technical-writing)
+- [拥抱原则与面对现实](https://www.v2think.com/principles-and-facts)
+- [代码与质量的思考与随笔](https://www.v2think.com/think-about-good-code)
+- [从对 Vue 中 mixin 的批评，到对模块间依赖关系的探讨](https://www.v2think.com/vue-mixin-module-dependency)

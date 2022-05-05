@@ -223,5 +223,12 @@ X-RateLimit-Reset: 1372700873
 * Designing Web APIs
 * APIs A Strategy Guide
 
-## 
+你可能会喜欢
 
+- [开源社区的暗面](https://www.v2think.com/darkside-of-the-opensource)
+- [帮助团队成长是唯一的出路](https://www.v2think.com/what-is-leadership)
+- [去年做 Tech Leader 犯过最大的错](https://www.v2think.com/tech-leader-mistake)
+- [技术写作的困境](https://www.v2think.com/stuck-in-technical-writing)
+- [拥抱原则与面对现实](https://www.v2think.com/principles-and-facts)
+- [代码与质量的思考与随笔](https://www.v2think.com/think-about-good-code)
+- [从对 Vue 中 mixin 的批评，到对模块间依赖关系的探讨](https://www.v2think.com/vue-mixin-module-dependency)

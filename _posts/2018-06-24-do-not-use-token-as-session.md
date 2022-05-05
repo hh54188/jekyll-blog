@@ -300,3 +300,14 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZ
 * https://www.ubisecure.com/uncategorized/difference-between-saml-and-oauth/
 * https://www.mutuallyhuman.com/blog/2013/05/09/choosing-an-sso-strategy-saml-vs-oauth2/
 * https://spin.atomicobject.com/2016/05/30/openid-oauth-saml/
+
+
+你可能会喜欢
+
+- [不要用JWT替代session管理（上）：全面了解Token,JWT,OAuth,SAML,SSO](https://www.v2think.com/do-not-use-token-as-session)
+- [无懈可击的浏览器缓存方案：关于思路，细节，ServiceWorker，以及HTTP/2](https://www.v2think.com/cache-design)
+- [深入理解 Webpack 打包分块（上）](https://www.v2think.com/webpack-chunks-split-01)
+- [深入理解 Webpack 打包分块（下）](https://www.v2think.com/webpack-chunks-split-02)
+- [面试系列之二：你真的了解React吗（上）如何设计组件以及重要的生命周期](https://www.v2think.com/understand-react-01)
+- [面试系列之三：你真的了解React吗（中）组件间的通信以及React优化](https://www.v2think.com/understand-react-02)
+- [面试系列之四：你真的了解React吗（下）Flux与Vuex的差异以及Webpack](https://www.v2think.com/understand-react-03)

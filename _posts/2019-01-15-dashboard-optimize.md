@@ -339,3 +339,14 @@ observer.observe({ entryTypes: ["paint"] });
 所以在优化方案中，因为网络请求始终在发生，所以 TTI 测量结果异常糟糕
 
 在实施到真实产品中之后它的确是有效的。但是在文章的最后，我无法用一个恰当的工具测量出的恰当的指标以宣告它，或许这个时候我们可以考虑使用更具针对性的业务指标来验证优化的结果，例如用户的页面的停留时间，浏览器标签的切换次数以及操作频率等等，但这些埋点和指标设计都超出本文范围之外了。
+
+你可能会喜欢
+
+- [性能指标的信仰危机](https://www.v2think.com/performance-metric-crisis)
+- [React + Redux 性能优化（一）：理论篇](https://www.v2think.com/redux-performance-01-basic)
+- [React + Redux 性能优化（二）工具篇： Immutablejs](https://www.v2think.com/redux-performance-02-immutablejs)
+- [Mobx 与 Redux 的性能对比](https://www.v2think.com/mobx-redux-performance)
+- [用 100 行代码提升 10 倍的性能](https://www.v2think.com/trie)
+- [仪表盘场景前端优化经验谈](https://www.v2think.com/dashboard-optimize)
+- [让我们再聊聊浏览器资源加载优化](https://www.v2think.com/let-us-talk-about-resource-load)
+- [Javascript高性能动画与页面渲染](https://www.v2think.com/javascript-high-performance-animation-and-page-rendering)

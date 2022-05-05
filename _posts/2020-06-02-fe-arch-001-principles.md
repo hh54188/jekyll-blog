@@ -112,3 +112,22 @@ code review 的功能之一也是在消除这种变异性。一个好的团队�
 越简洁的代码维护起来就越轻松这一点是毋庸置疑的，你是在一个一千行的面向过程有三层循环的函数内调试 bug 容易还是在一个同样一千行但是拆分为五个每个文件不超过200行的组建代码内调试 bug 容易？这里的简洁是全方位的，小到变量的命名，函数的封装；大到框架的复杂程度，学习曲线。
 
 简洁也并不可耻。如果你读过老马的《企业应用架构模式》（Patterns of Enterprise Application Architecture）的话，你会发现极其简单的 transaction scripts 模式也未尝不可。
+
+你可能会喜欢
+
+- [CSS 里的整洁架构](https://www.v2think.com/css-clean-arch)
+- [前端架构 101（一）：在谈论它们之前我们需要达成的共识](https://www.v2think.com/fe-arch-001-principles)
+- [前端架构 101（二）： MVC 初探](https://www.v2think.com/fe-arch-002-mvc-solved)
+- [前端架构 101（三）：MVC 启示录：模块的职责，作用域和通信](https://www.v2think.com/fe-arch-003-architecture-principles)
+- [前端架构 101（四）：MVC的不足与Flux的崛起](https://www.v2think.com/fe-arch-004-flux-rise)
+- [前端架构 101（五）：从 Flux 进化到 Model-View-Presenter](https://www.v2think.com/fe_arch_005_mvp)
+- [前端架构 101（六）：整洁（Clean Architecture）架构是归宿](https://www.v2think.com/fe_arch_006_clean_architecture)
+- [【译文】【前端架构鉴赏 01】：Angular 架构模式与最佳实践](https://www.v2think.com/arch-enjoy_angular-architecture-best-practices-zh-cn)
+- [【译文】【前端架构鉴赏 02】：可拓展 Angular 2 架构](https://www.v2think.com/arch_enjoy_a-scalable-angular2-architecture-zh-cn)
+- [【译文】【前端架构鉴赏 03】：Angular 与 MVP 模式](https://www.v2think.com/arch_enjoy_model-view-presenter-with-angular)
+- [微前端说明书](https://www.v2think.com/micro-front-end-specification)
+- [从美团这篇文章聊聊微前端的聚合问题](https://www.v2think.com/micro-front-end-aggregation)
+- [写给前端看的架构文章(1)：MVC VS Flux](https://www.v2think.com/mvc-vs-flux)
+- [从MVC模式在前端开发中的局限性谈起](https://www.v2think.com/starting-from-limitations-of-mvc-in-front-end-development)
+- [Flux与Redux背后的设计思想(二)：CQRS, Event Sourcing, DDD](https://www.v2think.com/design-philosophy-behind-flux-and-redux-CQRS-ES-DDD)
+- [Flux与Redux背后的设计思想(一)：Command Bus, Event Bus, Service Bus](https://www.v2think.com/design-philosophy-behind-flux-and-redux-CB-EB-ESB)

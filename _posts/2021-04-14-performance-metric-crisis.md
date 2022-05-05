@@ -288,6 +288,19 @@ function App() {
 
 我观察到对于大部分前端工程师而言，又或者曾经的自己而言，在做性能监控时是一个被“喂”的过程，即会惯性的不假思索的收集已有指标和利用已有工具。又因为性能优化工作过程前置结果后置的关系，等到我们有需求发生时才会发现当下的结果并非是我们想要的。多一些思考才会让我们的工作少一分浪费。
 
+## 性能
+
+你可能会喜欢
+
+- [性能指标的信仰危机](https://www.v2think.com/performance-metric-crisis)
+- [React + Redux 性能优化（一）：理论篇](https://www.v2think.com/redux-performance-01-basic)
+- [React + Redux 性能优化（二）工具篇： Immutablejs](https://www.v2think.com/redux-performance-02-immutablejs)
+- [Mobx 与 Redux 的性能对比](https://www.v2think.com/mobx-redux-performance)
+- [用 100 行代码提升 10 倍的性能](https://www.v2think.com/trie)
+- [仪表盘场景前端优化经验谈](https://www.v2think.com/dashboard-optimize)
+- [让我们再聊聊浏览器资源加载优化](https://www.v2think.com/let-us-talk-about-resource-load)
+- [Javascript高性能动画与页面渲染](https://www.v2think.com/javascript-high-performance-animation-and-page-rendering)
+
  
 
  

@@ -212,3 +212,21 @@ class Person extends React.Component {
 ## 结尾
 
 当然还有很多关于开发 Mobx 应用的经验可以分享，但以上三条是我个人感触最深的，也是我个人认为最重要的。 希望对大家有所帮助
+
+你可能会喜欢
+
+- [面试系列之二：你真的了解React吗（上）如何设计组件以及重要的生命周期](https://www.v2think.com/understand-react-01)
+- [面试系列之三：你真的了解React吗（中）组件间的通信以及React优化](https://www.v2think.com/understand-react-02)
+- [面试系列之四：你真的了解React吗（下）Flux与Vuex的差异以及Webpack](https://www.v2think.com/understand-react-03)
+- [从React脚手架工具学习React项目的最佳实践（上）：前端基础配置](https://www.v2think.com/create-app-user-guide)
+- [深入React的生命周期(上)：出生(Mount)](https://www.v2think.com/dig-into-react-lifecircle-01)
+- [深入React的生命周期(下)：更新(Update)](https://www.v2think.com/dig-into-react-lifecircle-02)
+- [深入理解 Webpack 打包分块（上）](https://www.v2think.com/webpack-chunks-split-01)
+- [深入理解 Webpack 打包分块（下）](https://www.v2think.com/webpack-chunks-split-02)
+- [Webpack 速成](https://www.v2think.com/webpack-tutorial)
+- [构建大型 Mobx 应用的几个建议](https://www.v2think.com/tips-for-building-mobx-app)
+- [【译文】给构建大型 redux 应用的五个建议](https://www.v2think.com/five-tips-for-redux-large-applications)
+- [React + Redux 性能优化（一）：理论篇](https://www.v2think.com/redux-performance-01-basic)
+- [React + Redux 性能优化（二）工具篇： Immutablejs](https://www.v2think.com/redux-performance-02-immutablejs)
+- [Flux与Redux背后的设计思想(二)：CQRS, Event Sourcing, DDD](https://www.v2think.com/design-philosophy-behind-flux-and-redux-CQRS-ES-DDD)
+- [Flux与Redux背后的设计思想(一)：Command Bus, Event Bus, Service Bus](https://www.v2think.com/design-philosophy-behind-flux-and-redux-CB-EB-ESB)

@@ -143,3 +143,13 @@ share: true
 > You have something like a house on fire, except that the house is the size of several mountains and it's all on fire all the time. You need to figure out which part of the "mountain" or "house " that you actually need right now, and get that into good shape so that it can be "used", on a series of small steps
 >
 > Your first goal is to get the system into a place where it's getting better overtime, instead of getting worse.
+
+你可能会喜欢
+
+- [开源社区的暗面](https://www.v2think.com/darkside-of-the-opensource)
+- [帮助团队成长是唯一的出路](https://www.v2think.com/what-is-leadership)
+- [去年做 Tech Leader 犯过最大的错](https://www.v2think.com/tech-leader-mistake)
+- [技术写作的困境](https://www.v2think.com/stuck-in-technical-writing)
+- [拥抱原则与面对现实](https://www.v2think.com/principles-and-facts)
+- [代码与质量的思考与随笔](https://www.v2think.com/think-about-good-code)
+- [从对 Vue 中 mixin 的批评，到对模块间依赖关系的探讨](https://www.v2think.com/vue-mixin-module-dependency)

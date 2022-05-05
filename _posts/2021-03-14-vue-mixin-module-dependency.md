@@ -231,3 +231,13 @@ myClass.MyMethod();
 ## 结束语
 
 我当然同意 mixin 是中性的，所有事故的背后本质上都是人的问题。但如果我们承认“人”是我们在软件活动中永远也无法消除的不稳定因素的话，那就要面对 mixin 会比其他机制更让我们的软件岌岌可危的这个风险。这个时候我们没有理由视而不见了。
+
+你可能会喜欢
+
+- [开源社区的暗面](https://www.v2think.com/darkside-of-the-opensource)
+- [帮助团队成长是唯一的出路](https://www.v2think.com/what-is-leadership)
+- [去年做 Tech Leader 犯过最大的错](https://www.v2think.com/tech-leader-mistake)
+- [技术写作的困境](https://www.v2think.com/stuck-in-technical-writing)
+- [拥抱原则与面对现实](https://www.v2think.com/principles-and-facts)
+- [代码与质量的思考与随笔](https://www.v2think.com/think-about-good-code)
+- [从对 Vue 中 mixin 的批评，到对模块间依赖关系的探讨](https://www.v2think.com/vue-mixin-module-dependency)

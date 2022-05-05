@@ -60,3 +60,13 @@ share: true
 我依然支持创作者尽可能多争取多的关注者，毕竟让有价值的内容传播的更远只会是双赢的结果。但要功利，同时也要超越功利，这是理想状态而非常态。对于精力有限的创作者而言，决定优先投入资源的渠道是个必须要做出的抉择。无论你此后的运营技巧多么娴熟高超，这里都会是你的起点。
 
 本文开头的问题最适合用存在主义哲学来回答：存在先于本质，即我的本性要通过我的选择来塑造，我总是先我自己一步，边前行，边构筑自己——你的文章风格或者你的受众并非是你能够提前设定的，而是需要由你创造的作品去创造。
+
+你可能会喜欢
+
+- [开源社区的暗面](https://www.v2think.com/darkside-of-the-opensource)
+- [帮助团队成长是唯一的出路](https://www.v2think.com/what-is-leadership)
+- [去年做 Tech Leader 犯过最大的错](https://www.v2think.com/tech-leader-mistake)
+- [技术写作的困境](https://www.v2think.com/stuck-in-technical-writing)
+- [拥抱原则与面对现实](https://www.v2think.com/principles-and-facts)
+- [代码与质量的思考与随笔](https://www.v2think.com/think-about-good-code)
+- [从对 Vue 中 mixin 的批评，到对模块间依赖关系的探讨](https://www.v2think.com/vue-mixin-module-dependency)

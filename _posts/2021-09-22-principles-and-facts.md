@@ -104,3 +104,13 @@ DRY——Don't repeat yourself. 别忘了这可是我们自己说的。
 在我看来本书的魅力正是摆脱了高高在上的姿态且在“说人话”，作者并非只是凭空扔给你一组金句之后让你慢慢参悟。对于一些概念，甚至是常见的概念，作者会进行澄清和定义。如果他提出的是一条建议，那么他还会解释这条建议的来龙去脉和它所适用的范围。对于在实施过程中可能遭遇的阻碍，他也做出了适当的预测和解决办法。
 
 我不敢苟同他在书中提出的每一个观点，最终是否适合与你还需要你自行判断，毕竟在这个领域内没有银弹。但相信这些内容能够给你带来启发。自经典，才有可能超越经典。
+
+你可能会喜欢
+
+- [开源社区的暗面](https://www.v2think.com/darkside-of-the-opensource)
+- [帮助团队成长是唯一的出路](https://www.v2think.com/what-is-leadership)
+- [去年做 Tech Leader 犯过最大的错](https://www.v2think.com/tech-leader-mistake)
+- [技术写作的困境](https://www.v2think.com/stuck-in-technical-writing)
+- [拥抱原则与面对现实](https://www.v2think.com/principles-and-facts)
+- [代码与质量的思考与随笔](https://www.v2think.com/think-about-good-code)
+- [从对 Vue 中 mixin 的批评，到对模块间依赖关系的探讨](https://www.v2think.com/vue-mixin-module-dependency)
