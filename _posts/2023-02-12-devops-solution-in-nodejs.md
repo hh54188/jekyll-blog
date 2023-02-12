@@ -118,3 +118,20 @@ DevOps 话题很大我们这里暂且只看技术层面。我这里不是对 Dev
 在这里我们可以想象没有它们运维工作会比现在难上不知道多少倍——不能因为美中不足就否认它们给我们带来的帮助。
 
 我们要接纳这样的一个现实：并不是所有的问题都可以用工具完美解决，“手工”暂且无法被彻底消灭。承认不完美的存在，尽所能把风险降到最小就好。
+
+---
+
+你可能也会喜欢：
+
+- [NodeJS 实战系列：DevOps 尚未解决的问题](https://www.v2think.com/devops-solution-in-nodejs)
+- [NodeJS 实战系列：如何设计 try catch](https://www.v2think.com/nodejs-try-catch-best-practice)
+- [做一个能对标阿里云的前端APM工具（下）](https://www.v2think.com/apm-tool-2)
+- [做一个能对标阿里云的前端APM工具（上）](https://www.v2think.com/apm-tool-1)
+- [性能指标的信仰危机](https://www.v2think.com/performance-metric-crisis)
+- [React + Redux 性能优化（一）：理论篇](https://www.v2think.com/redux-performance-01-basic)
+- [React + Redux 性能优化（二）工具篇： Immutablejs](https://www.v2think.com/redux-performance-02-immutablejs)
+- [Mobx 与 Redux 的性能对比](https://www.v2think.com/mobx-redux-performance)
+- [用 100 行代码提升 10 倍的性能](https://www.v2think.com/trie)
+- [仪表盘场景前端优化经验谈](https://www.v2think.com/dashboard-optimize)
+- [让我们再聊聊浏览器资源加载优化](https://www.v2think.com/let-us-talk-about-resource-load)
+- [Javascript高性能动画与页面渲染](https://www.v2think.com/javascript-high-performance-animation-and-page-rendering)

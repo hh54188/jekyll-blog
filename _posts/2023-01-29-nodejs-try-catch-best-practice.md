@@ -96,3 +96,20 @@ try {
 ![程序中的错误处理流](../images/013_nodejs-try-catch-best-practice/error-catch-diagram.png)
 
 .NET Core 里的 middleware 和 NodeJS 里的 [error handler](https://expressjs.com/en/guide/error-handling.html) 都能可以达到这个效果
+
+---
+
+你可能也会喜欢：
+
+- [NodeJS 实战系列：DevOps 尚未解决的问题](https://www.v2think.com/devops-solution-in-nodejs)
+- [NodeJS 实战系列：如何设计 try catch](https://www.v2think.com/nodejs-try-catch-best-practice)
+- [做一个能对标阿里云的前端APM工具（下）](https://www.v2think.com/apm-tool-2)
+- [做一个能对标阿里云的前端APM工具（上）](https://www.v2think.com/apm-tool-1)
+- [性能指标的信仰危机](https://www.v2think.com/performance-metric-crisis)
+- [React + Redux 性能优化（一）：理论篇](https://www.v2think.com/redux-performance-01-basic)
+- [React + Redux 性能优化（二）工具篇： Immutablejs](https://www.v2think.com/redux-performance-02-immutablejs)
+- [Mobx 与 Redux 的性能对比](https://www.v2think.com/mobx-redux-performance)
+- [用 100 行代码提升 10 倍的性能](https://www.v2think.com/trie)
+- [仪表盘场景前端优化经验谈](https://www.v2think.com/dashboard-optimize)
+- [让我们再聊聊浏览器资源加载优化](https://www.v2think.com/let-us-talk-about-resource-load)
+- [Javascript高性能动画与页面渲染](https://www.v2think.com/javascript-high-performance-animation-and-page-rendering)
