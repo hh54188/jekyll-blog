@@ -3,7 +3,7 @@ title:            前端技术漫游指南
 description:      A responsive Jekyll theme with modern tendencies from designer Michael Rose.
 disqus_shortname: qingbob
 #Comment out url when working locally to resolve base urls correctly
-url:              http://qingbob.com
+url:              https://qingbob.com
 gems: [jekyll-paginate] #
 paginate: 10 #
 paginate_path: "page:num" #
